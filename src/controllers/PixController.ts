@@ -19,12 +19,16 @@ export class PixController {
     async webhook(req: Request, res: Response) {
         const { data } = req.body;
         if (data && data.id) {
-            const id = String(data.id);
-            console.log(`🔔 Webhook ID: ${id}`);
+            // Forçamos virar texto para não ter erro
+            const id = String(data.id); 
+            console.log(`Webhook ID: ${id}`);
+            
             try {
+                // Agora o service aceita 'any', então não vai dar erro aqui
                 const status = await pixService.checkStatus(id);
+                
                 if (status === 'approved') {
-                    console.log("💰 Pago! Devolvendo...");
+                    console.log("Pago! Devolvendo...");
                     await pixService.refund(id);
                 }
             } catch (e) { console.log(e); }
@@ -32,7 +36,7 @@ export class PixController {
         res.status(200).send();
     }
 
-    // A FUNÇÃO QUE A RENDER ESTÁ RECLAMANDO QUE FALTA:
+    // Check Status Manual
     async checkStatus(req: Request, res: Response) {
         const { id } = req.params;
         try {

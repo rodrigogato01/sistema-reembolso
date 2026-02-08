@@ -9,7 +9,8 @@ const payment = new Payment(client);
 const refundClient = new PaymentRefund(client);
 
 export class PixService {
-    // 1. Criar
+    
+    // 1. Criar PIX
     async createCharge(amount: number, name: string, cpf: string) {
         const cleanCpf = cpf.replace(/\D/g, '');
         try {
@@ -30,26 +31,28 @@ export class PixService {
         }
     }
 
-    // 2. Checar Status (Aceita texto e número)
-    async checkStatus(id: string | number) {
+    // 2. Verificar Status (AGORA ACEITA TUDO: any)
+    async checkStatus(id: any) {
         try {
-            const response = await payment.get({ id: String(id) });
+            // AQUI ESTÁ A MÁGICA: Convertemos qualquer coisa para string na marra
+            const idString = String(id);
+            const response = await payment.get({ id: idString });
             return response.status; 
         } catch (error) {
             return 'error';
         }
     }
 
-    // 3. Reembolsar (Aceita texto e número)
-    async refund(id: string | number) {
+    // 3. Estornar (AGORA ACEITA TUDO: any)
+    async refund(id: any) {
         try {
-            console.log(`Estornando ID: ${id}`);
+            const idString = String(id);
+            console.log(`Estornando ID: ${idString}`);
             await refundClient.create({
-                body: { payment_id: String(id) }
+                body: { payment_id: idString }
             } as any);
             return true;
         } catch (error) {
-            console.error("Erro estorno", error);
             return false;
         }
     }
