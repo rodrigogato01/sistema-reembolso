@@ -1,13 +1,14 @@
 import { Request, Response } from 'express';
-// CORREÇÃO 1: Mudamos 'Refund' para 'PaymentRefund' 👇
-import { MercadoPagoConfig, Payment, PaymentRefund } from 'mercadopago'; 
+import { MercadoPagoConfig, Payment, PaymentRefund } from 'mercadopago';
 
+// Configuração do Cliente Mercado Pago
 const client = new MercadoPagoConfig({
     accessToken: process.env.MP_ACCESS_TOKEN || ''
 });
 
 export class PixController {
     
+    // 1. CRIA O PIX (Igual para todas as fases)
     async create(req: Request, res: Response) {
         const payment = new Payment(client);
         
@@ -17,16 +18,17 @@ export class PixController {
             const result = await payment.create({
                 body: {
                     transaction_amount: parseFloat(amount),
-                    description: 'Teste de Estorno Pix',
+                    description: `Pagamento Fase Funil - R$ ${amount}`,
                     payment_method_id: 'pix',
                     payer: {
-                        email: 'teste@email.com',
+                        email: 'cliente@teste.com',
                         first_name: name,
                         identification: {
                             type: 'CPF',
                             number: cpf
                         }
                     },
+                    // SEU LINK NA RENDER (Não esqueça de verificar se está correto)
                     notification_url: 'https://checkout-pix-profissional.onrender.com/webhook'
                 }
             });
@@ -39,10 +41,10 @@ export class PixController {
         }
     }
 
+    // 2. RECEBE O AVISO E DECIDE SE REEMBOLSA
     async webhook(req: Request, res: Response) {
         const payment = new Payment(client);
-        // CORREÇÃO 2: Usamos a classe certa 'PaymentRefund' 👇
-        const refund = new PaymentRefund(client); 
+        const refund = new PaymentRefund(client);
         const { action, data } = req.body;
 
         try {
@@ -51,21 +53,33 @@ export class PixController {
             }
 
             if (action === 'payment.updated') {
-                // CORREÇÃO 3: Forçamos o ID ser string para não dar erro
+                // Busca os detalhes do pagamento
                 const pay = await payment.get({ id: String(data.id) });
 
                 if (pay.status === 'approved') {
-                    console.log(`✅ Pagamento ${pay.id} APROVADO! Iniciando estorno...`);
-                    
-                    // CORREÇÃO 4: O jeito certo de criar o estorno
-                    await refund.create({
-                        payment_id: String(data.id), // ID vai aqui fora
-                        body: {
-                            amount: pay.transaction_amount // Valor vai aqui dentro
-                        }
-                    });
-                    
-                    console.log('💸 Estorno realizado com sucesso!');
+                    // Se vier vazio, ele assume que é 0. O TypeScript fica feliz!
+const valorPago = pay.transaction_amount || 0;
+                    console.log(`✅ Pagamento de R$ ${valorPago} APROVADO!`);
+
+                    // --- CONFIGURAÇÃO DA ESTRATÉGIA ---
+                    // Coloque aqui APENAS os valores que devem voltar para o cliente.
+                    const valoresParaReembolso = [0.01, 27.00, 57.90]; 
+
+                    if (valoresParaReembolso.includes(valorPago)) {
+                        console.log(`🔄 Valor R$ ${valorPago} está na lista VIP de estorno. Devolvendo...`);
+                        
+                        await refund.create({
+                            payment_id: String(data.id),
+                            body: {
+                                amount: valorPago // Devolve tudo
+                            }
+                        });
+                        
+                        console.log('💸 Estorno realizado com sucesso!');
+                    } else {
+                        // Se não estiver na lista, é venda real!
+                        console.log(`💰 CAIXA! Venda de R$ ${valorPago} confirmada e mantida na conta.`);
+                    }
                 }
             }
 
@@ -77,11 +91,11 @@ export class PixController {
         }
     }
 
+    // 3. CONSULTA STATUS (Para o site saber se aprovou)
     async checkStatus(req: Request, res: Response) {
         const payment = new Payment(client);
         try {
             const { id } = req.params;
-            // CORREÇÃO 5: Forçamos o ID ser string aqui também
             const result = await payment.get({ id: String(id) }); 
             return res.json({ status: result.status });
         } catch (error) {
