@@ -52,20 +52,27 @@ export class PixController {
                     console.log(`✅ Pagamento de R$ ${valorPago} APROVADO!`);
 
                     // --- AUTOMAÇÃO DE REEMBOLSO ---
-                    // Adicione aqui TODOS os valores que devem ser estornados no funil
                     const valoresDoFunil = [37.90, 47.90]; 
 
                     if (valoresDoFunil.includes(valorPago)) {
-                        console.log(`🔄 Fase do Funil detectada (R$ ${valorPago}). Iniciando estorno...`);
+                        console.log(`⏳ Fase do Funil (R$ ${valorPago}). Aguardando 5s para liberar estorno...`);
                         
-                        await refund.create({
-                            payment_id: String(data.id),
-                            body: {
-                                amount: valorPago
+                        // O SEGREDO ESTÁ AQUI 👇
+                        // Esperamos 5 segundos (5000ms) para o MP liberar o reembolso
+                        setTimeout(async () => {
+                            try {
+                                await refund.create({
+                                    payment_id: String(data.id),
+                                    body: {
+                                        amount: valorPago
+                                    }
+                                });
+                                console.log('💸 Estorno realizado com sucesso!');
+                            } catch (error) {
+                                console.error('❌ Erro ao tentar estornar (Tentativa atrasada):', error);
                             }
-                        });
+                        }, 5000); // 5 segundos de espera
                         
-                        console.log('💸 Estorno realizado com sucesso!');
                     } else {
                         console.log(`💰 Venda Real (R$ ${valorPago}). Dinheiro mantido.`);
                     }
