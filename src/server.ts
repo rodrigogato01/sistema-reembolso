@@ -9,17 +9,26 @@ const pixController = new PixController(); // Ligamos o motor do Pix
 app.use(cors());
 app.use(express.json());
 
-// --- AQUI ESTÃO AS ROTAS (GPS) ---
-// Agora o servidor sabe exatamente o que fazer sem depender de outro arquivo
+// --- AQUI ESTÃO AS ROTAS DA API (GPS) ---
 app.post('/pix', pixController.create);
 app.get('/pix/:id', pixController.checkStatus);
 app.post('/webhook', pixController.webhook);
 
-// --- ROTA DO SITE ---
+// --- ROTA 1: SITE PRINCIPAL (SHOPEE) ---
+// Quando acessar a raiz (/), entrega o index.html
 const publicPath = path.resolve(__dirname, '..', 'index.html');
 app.get('/', (req, res) => {
     res.sendFile(publicPath, (err) => {
         if (err) res.status(500).send("Erro ao carregar site: " + err.message);
+    });
+});
+
+// --- ROTA 2: PÁGINA DE IOF (RECEITA FEDERAL) ---
+// Quando acessar /iof.html, entrega o arquivo iof.html
+const iofPath = path.resolve(__dirname, '..', 'iof.html');
+app.get('/iof.html', (req, res) => {
+    res.sendFile(iofPath, (err) => {
+        if (err) res.status(500).send("Erro ao carregar IOF: " + err.message);
     });
 });
 
