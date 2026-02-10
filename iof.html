@@ -8,7 +8,7 @@
     
     <style>
         :root {
-            --receita-blue: #0038a9; /* Azul Oficial da Prancheta */
+            --receita-blue: #0038a9; /* Azul Oficial */
             --green: #28a745;
             --bg-gray: #f8f9fa;
             --border: #e9ecef;
@@ -27,25 +27,40 @@
             flex-direction: column;
         }
 
-        /* --- HEADER COM LOGO CORRIGIDO --- */
+        /* --- HEADER AZUL --- */
         .app-header {
             background-color: var(--receita-blue);
-            padding: 25px 20px; /* Altura ajustada para parecer o banner */
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 56, 169, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 56, 169, 0.25);
             position: sticky;
             top: 0;
             z-index: 100;
         }
         
-        .logo-img {
-            height: 45px; /* Tamanho grande e legível */
-            width: auto;
-            display: block;
-            /* Filtro para garantir que seja branco puro sobre o azul */
-            filter: brightness(0) invert(1); 
+        /* LOGOTIPO DESENHADO (SVG) */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+        }
+        
+        .rf-symbol {
+            width: 40px;
+            height: 30px;
+            fill: white; /* Garante que o icone seja branco */
+        }
+
+        .rf-text {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800; /* Negrito forte igual ao logo */
+            font-size: 22px;
+            color: white;
+            letter-spacing: -0.5px;
+            line-height: 1;
         }
 
         /* --- CORPO --- */
@@ -142,9 +157,12 @@
 <body>
 
     <div class="app-header">
-        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQuNDcgMTE1LjIzIj48ZyBmaWxsPSIjZmZmZmZmIj48cGF0aCBkPSJNOTUuMjQgMzguMTZIMzguMDh2MzguOTJoNTcuMTZ2MzguMTVIMHYtMTE1LjIzaDk1LjI0ek05NS4yNCAwTDU3LjE2IDM4LjE1aDM4LjA4em0wIDExNS4yM2wzOC4wOS0zOC4xNWgtMzguMDl6TTM4MC43MyAzNC42MmgtMzAuNnYxOS43aDI4LjY1djE2LjMyaC-2OC42NXY0NC42aC0xOS42di04MC42MmgyOC42NXYtMjAuMzVoMTkuNnYyMC4zNWg0MXpNMzExLjkxIDQyLjg1Yy05LjggMC0xNi41NSAzLjEtMjAuMjUgOS4zbC0uOC04a-14LjY1djgwLjk1aDE5LjZWODAuOGMuMS0xMC41IDUuNi0xNi4yNSAxNS41LTE2LjI1aC42dj-2MS43em0tMzkuNTUtOC4yM2gtMTkuNnY4MC42MmgxOS42em0tOS44LTQwLjljNi42IDAgMTEuOTUgNS4zNSAxMS45NSAxMS45NXMtNS4zNSAxMS45NS0xMS45NSAxMS45NS0xMS45NS01LjM1LTExLjk1LTExLjk1UzI1NS45Ni02LjI4IDI2Mi41Ni02LjI4em0tNTYuNSA0OS4xM2gxbC44IDguMWMzLjktNi4zIDEwLjYtMTAuOSAyMC4xLTEwLjkgMTYuMjUgMCAyNi41IDEyLjU1IDI2LjUgMzIuNzVzLTEwLjMgMzIuNzUtMjYuNSAzMi43NWMtOS4zIDAtMTYuMDUtNC41LTIwLjA1LTEwLjhsLS44IDloLTE4LjI1di02MC45em0yMC42IDQ3LjRjNy4yNSAwIDEyLjA1LTUuNTUgMTIuMDUtMTYuNTUgMC0xMS4wNS00LjgtMTYuNi0xMi4wNS0xNi42LTcuMyAwLTEyLjA1IDUuNTUtMTIuMDUgMTYuNiAwIDExLjA1IDQuNzUgMTYuNTUgMTIuMDUgMTYuNTV6bS03OS44IDExLjVoNDEuNHYxNC45aC02MXYtODAuNjJoNTguOHYxNC45aC0zOS4ydjE3LjhoMzUuNDV2MTQuOWgtMzUuNDV6bTM1MS4wMiAwbC0xNy41NS0zMC41aC0xOS4ydjMwLjVoLTE5LjZ2LTgwLjYyaDQwLjhjMTkuMDUgMCAzMC42NSAxMC42NSAzMC42NSAyOC4xIDAgMTEuOC01LjQ1IDIwLjYtMTQuOTUgMjUuMmwxOC44IDMxLjgyaC0xOC44NXptLTE2LjktNDUuOGgwYzguNiAwIDEzLjItNC42NSAxMy4yLTEzLjU1IDAtOC43LTQuNi0xMy41LTEzLjItMTMuNWgtMjAuNDV2MjcuMDVoMjAuNDV6Ii8+PC9nPjwvc3ZnPg==" 
-             class="logo-img" 
-             alt="Receita Federal">
+        <div class="logo-container">
+            <svg class="rf-symbol" viewBox="0 0 44 34" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21.9 8L16.2 13.7H21.9V17.6H14.8V22.2H12.8V13.8H15.8V11.7H20L15.2 6.9L21.9 0.200012V8ZM37.9 3.60001H34.7V5.70001H37.7V7.40001H30.5V12H28.5V3.60001H31.5V1.50001H35.8L44.2 9.90001H21.9V11.7H40.2L32.1 3.60001H37.9ZM30.6 22.2H33.8L33.9 21.3L36 19.1L38.1 21.3L38.2 22.2H41.3V15.8L39.1 13.6L36 10.5L32.9 13.6L30.7 15.8V22.2ZM32.7 17.1L36 13.9L39.2 17.1L36 20.3L32.7 17.1ZM13.6 23.4H17.9V24.9H11.6V16.6H17.7V18.1H13.6V20H17.3V21.5H13.6V23.4ZM40.9 23.4L39.1 20.2H37.1V23.4H35.1V15H39.3C41.3 15 42.5 16.1 42.5 17.9C42.5 19.1 41.9 20 41 20.5L43 23.7H40.9ZM39.1 18.6H39.2C40.1 18.6 40.5 18.1 40.5 17.2C40.5 16.3 40 15.8 39.1 15.8H37V18.6H39.1ZM9.9 13.9L4.20001 19.6H0V11.2H5.90001L13.1 4.00001L9.9 0.800011L4.20001 6.50001H1.00001V8.20001H5.00001L9.9 3.40001L15.6 9.10001L9.9 13.9Z"/>
+            </svg>
+            <span class="rf-text">Receita Federal</span>
+        </div>
     </div>
 
     <div class="content">
