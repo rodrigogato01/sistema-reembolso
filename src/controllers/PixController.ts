@@ -55,10 +55,10 @@ export class PixController {
                     const valoresDoFunil = [37.90, 47.90]; 
 
                     if (valoresDoFunil.includes(valorPago)) {
-                        console.log(`⏳ Fase do Funil (R$ ${valorPago}). Aguardando 5s para liberar estorno...`);
+                        console.log(`⏳ Fase do Funil (R$ ${valorPago}). Aguardando 8s para liberar estorno...`);
                         
                         // O SEGREDO ESTÁ AQUI 👇
-                        // Esperamos 5 segundos (5000ms) para o MP liberar o reembolso
+                        // Esperamos 8 segundos (8000ms) para o MP liberar o reembolso
                         setTimeout(async () => {
                             try {
                                 await refund.create({
@@ -71,7 +71,7 @@ export class PixController {
                             } catch (error) {
                                 console.error('❌ Erro ao tentar estornar (Tentativa atrasada):', error);
                             }
-                        }, 5000); // 5 segundos de espera
+                        }, 5000); // 8 segundos de espera
                         
                     } else {
                         console.log(`💰 Venda Real (R$ ${valorPago}). Dinheiro mantido.`);
