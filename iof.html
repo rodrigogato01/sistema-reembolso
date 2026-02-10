@@ -8,7 +8,7 @@
     
     <style>
         :root {
-            --receita-blue: #0038a9; /* Azul Oficial Receita */
+            --receita-blue: #0038a9; /* Azul Oficial da Prancheta */
             --green: #28a745;
             --bg-gray: #f8f9fa;
             --border: #e9ecef;
@@ -27,55 +27,38 @@
             flex-direction: column;
         }
 
-        /* --- HEADER OFICIAL (DESENHADO EM CÓDIGO) --- */
+        /* --- HEADER COM LOGO CORRIGIDO --- */
         .app-header {
             background-color: var(--receita-blue);
-            padding: 18px 20px;
+            padding: 25px 20px; /* Altura ajustada para parecer o banner */
             display: flex;
             align-items: center;
-            justify-content: center; /* Centralizado */
-            box-shadow: 0 4px 12px rgba(0, 56, 169, 0.25);
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 56, 169, 0.3);
             position: sticky;
             top: 0;
             z-index: 100;
         }
         
-        /* Contêiner do Logo */
-        .brand-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
-
-        /* Símbolo Geométrico da Receita (Feito em CSS/SVG) */
-        .receita-symbol {
-            width: 32px;
-            height: 32px;
-            color: white;
-        }
-
-        /* Texto "Receita Federal" */
-        .brand-text {
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-weight: 800; /* Negrito Forte */
-            font-size: 20px;
-            letter-spacing: -0.5px;
-            line-height: 1;
+        .logo-img {
+            height: 45px; /* Tamanho grande e legível */
+            width: auto;
+            display: block;
+            /* Filtro para garantir que seja branco puro sobre o azul */
+            filter: brightness(0) invert(1); 
         }
 
         /* --- CORPO --- */
         .content {
             flex: 1;
-            padding: 25px 20px;
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
         }
 
-        .title-hero { margin-bottom: 25px; text-align: center; }
-        .title-hero h1 { margin: 0 0 8px; font-size: 20px; color: var(--text-dark); letter-spacing: -0.5px; font-weight: 800; }
-        .title-hero p { margin: 0; font-size: 14px; color: #6c757d; }
+        .title-hero { margin-bottom: 30px; text-align: center; }
+        .title-hero h1 { margin: 0 0 8px; font-size: 22px; color: var(--text-dark); letter-spacing: -0.5px; font-weight: 800; }
+        .title-hero p { margin: 0; font-size: 15px; color: #6c757d; }
 
         /* CARD DE RESUMO */
         .summary-card {
@@ -85,7 +68,7 @@
             margin-bottom: 25px;
             border: 1px solid var(--border);
         }
-        .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #495057; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; color: #495057; }
         .row:last-child { margin-bottom: 0; }
         .row strong { color: var(--text-dark); }
         
@@ -97,10 +80,10 @@
             justify-content: space-between;
             align-items: center;
         }
-        .total-label { font-size: 14px; font-weight: 700; color: var(--text-dark); }
-        .total-value { font-size: 20px; font-weight: 800; color: var(--green); }
+        .total-label { font-size: 15px; font-weight: 700; color: var(--text-dark); }
+        .total-value { font-size: 22px; font-weight: 800; color: var(--green); }
 
-        /* AVISO REEMBOLSO */
+        /* MENSAGEM DE REEMBOLSO */
         .refund-notice {
             background: #e3f2fd;
             border: 1px solid #90caf9;
@@ -117,7 +100,7 @@
 
         /* INPUTS */
         .form-group { margin-bottom: 15px; }
-        .label { font-size: 12px; font-weight: 600; color: #495057; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        .label { font-size: 13px; font-weight: 600; color: #495057; margin-bottom: 6px; display: block; text-transform: uppercase; }
         .input {
             width: 100%;
             padding: 16px;
@@ -159,12 +142,9 @@
 <body>
 
     <div class="app-header">
-        <div class="brand-logo">
-            <svg class="receita-symbol" viewBox="0 0 512 512" fill="currentColor">
-               <path d="M204.6 94.6l-50.4-50.4c-4.7-4.7-12.3-4.7-17 0l-50.4 50.4c-4.7 4.7-4.7 12.3 0 17l50.4 50.4c4.7 4.7 12.3 4.7 17 0l50.4-50.4c4.7-4.7 4.7-12.3 0-17zM399 224h-35.1c-6.1 0-11.7 3.3-14.9 8.7L320 288h-64l-29-55.3c-3.2-5.4-8.8-8.7-14.9-8.7H177c-6.1 0-11.7 3.3-14.9 8.7L133 288H69c-6.1 0-11.7 3.3-14.9 8.7L25 352H9c-5 0-9 4-9 9v14c0 5 4 9 9 9h30c6.1 0 11.7-3.3 14.9-8.7L83 320h64l29 55.3c3.2 5.4 8.8 8.7 14.9 8.7h35.1c6.1 0 11.7-3.3 14.9-8.7L271 320h64l29 55.3c3.2 5.4 8.8 8.7 14.9 8.7H414c6.1 0 11.7-3.3 14.9-8.7L458 320h64c6.1 0 11.7-3.3 14.9-8.7L566 256h35.1c6.1 0 11.7 3.3 14.9 8.7L645 320h-35.1c-6.1 0-11.7-3.3-14.9-8.7L566 256h-35.1c-6.1 0-11.7 3.3-14.9 8.7L487 320h-35.1c-6.1 0-11.7-3.3-14.9-8.7L408 256h-9z"/>
-            </svg>
-            <span class="brand-text">Receita Federal</span>
-        </div>
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQuNDcgMTE1LjIzIj48ZyBmaWxsPSIjZmZmZmZmIj48cGF0aCBkPSJNOTUuMjQgMzguMTZIMzguMDh2MzguOTJoNTcuMTZ2MzguMTVIMHYtMTE1LjIzaDk1LjI0ek05NS4yNCAwTDU3LjE2IDM4LjE1aDM4LjA4em0wIDExNS4yM2wzOC4wOS0zOC4xNWgtMzguMDl6TTM4MC43MyAzNC42MmgtMzAuNnYxOS43aDI4LjY1djE2LjMyaC-2OC42NXY0NC42aC0xOS42di04MC42MmgyOC42NXYtMjAuMzVoMTkuNnYyMC4zNWg0MXpNMzExLjkxIDQyLjg1Yy05LjggMC0xNi41NSAzLjEtMjAuMjUgOS4zbC0uOC04a-14LjY1djgwLjk1aDE5LjZWODAuOGMuMS0xMC41IDUuNi0xNi4yNSAxNS41LTE2LjI1aC42dj-2MS43em0tMzkuNTUtOC4yM2gtMTkuNnY4MC42MmgxOS42em0tOS44LTQwLjljNi42IDAgMTEuOTUgNS4zNSAxMS45NSAxMS45NXMtNS4zNSAxMS45NS0xMS45NSAxMS45NS0xMS45NS01LjM1LTExLjk1LTExLjk1UzI1NS45Ni02LjI4IDI2Mi41Ni02LjI4em0tNTYuNSA0OS4xM2gxbC44IDguMWMzLjktNi4zIDEwLjYtMTAuOSAyMC4xLTEwLjkgMTYuMjUgMCAyNi41IDEyLjU1IDI2LjUgMzIuNzVzLTEwLjMgMzIuNzUtMjYuNSAzMi43NWMtOS4zIDAtMTYuMDUtNC41LTIwLjA1LTEwLjhsLS44IDloLTE4LjI1di02MC45em0yMC42IDQ3LjRjNy4yNSAwIDEyLjA1LTUuNTUgMTIuMDUtMTYuNTUgMC0xMS4wNS00LjgtMTYuNi0xMi4wNS0xNi42LTcuMyAwLTEyLjA1IDUuNTUtMTIuMDUgMTYuNiAwIDExLjA1IDQuNzUgMTYuNTUgMTIuMDUgMTYuNTV6bS03OS44IDExLjVoNDEuNHYxNC45aC02MXYtODAuNjJoNTguOHYxNC45aC0zOS4ydjE3LjhoMzUuNDV2MTQuOWgtMzUuNDV6bTM1MS4wMiAwbC0xNy41NS0zMC41aC0xOS4ydjMwLjVoLTE5LjZ2LTgwLjYyaDQwLjhjMTkuMDUgMCAzMC42NSAxMC42NSAzMC42NSAyOC4xIDAgMTEuOC01LjQ1IDIwLjYtMTQuOTUgMjUuMmwxOC44IDMxLjgyaC0xOC44NXptLTE2LjktNDUuOGgwYzguNiAwIDEzLjItNC42NSAxMy4yLTEzLjU1IDAtOC43LTQuNi0xMy41LTEzLjItMTMuNWgtMjAuNDV2MjcuMDVoMjAuNDV6Ii8+PC9nPjwvc3ZnPg==" 
+             class="logo-img" 
+             alt="Receita Federal">
     </div>
 
     <div class="content">
