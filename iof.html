@@ -11,25 +11,25 @@
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background-color: #fff; margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* HEADER SEM MARGEM */
+        /* HEADER CORRIGIDO */
         .app-header {
             width: 100%;
-            display: flex;
-            justify-content: center;
-            background-color: #0038a9; /* Fundo azul de segurança */
-            box-shadow: 0 4px 15px rgba(0, 56, 169, 0.3);
+            background-color: #003399; /* Azul da Receita Federal */
             position: sticky;
             top: 0;
             z-index: 100;
+            overflow: hidden; /* Evita scroll horizontal */
         }
         
-        /* A IMAGEM LOCAL */
+        /* IMAGEM CORRIGIDA */
         .banner-img {
             width: 100%;
             height: auto;
-            max-height: 100px; /* Limita a altura para não ficar gigante */
-            object-fit: contain; /* Ajusta a imagem sem distorcer */
+            max-height: 80px; /* Altura reduzida para não ocupar muito espaço */
+            object-fit: contain;
+            object-position: center;
             display: block;
+            background-color: #003399; /* Mesmo azul da imagem para seamless */
         }
 
         .content { flex: 1; padding: 25px 20px; display: flex; flex-direction: column; }
@@ -57,7 +57,8 @@
 </head>
 <body>
     <div class="app-header">
-        <img src="/banner.jpg" class="banner-img" alt="Receita Federal">
+        <!-- CORREÇÃO: Use o nome correto do arquivo ou converta para base64 -->
+        <img src="logo-azul_prancheta-1.jpg" class="banner-img" alt="Receita Federal">
     </div>
 
     <div class="content">
