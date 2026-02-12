@@ -37,16 +37,32 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            overflow: hidden; /* Para a moeda não vazar */
         }
-        .header-content { flex: 1; }
+        .header-content { flex: 1; z-index: 2; }
         .label-saldo { font-size: 16px; font-weight: 500; margin-bottom: 5px; }
         .valor-grande { font-size: 42px; font-weight: 900; line-height: 1; }
         .pontos-text { font-size: 14px; margin-top: 5px; opacity: 0.9; }
         
-        .coin-icon-large { 
-            width: 80px; height: 80px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+        /* Moeda corrigida e sem deformação */
+        .coin-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #FFC107;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid #FF9800;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1;
         }
+        /* Ícone de cifrão dourado */
+        .coin-svg {
+            width: 40px;
+            height: 40px;
+        }
+
 
         .bonus-bar {
             background: #e85d30;
@@ -71,10 +87,19 @@
 
         /* --- OPÇÕES DE SAQUE --- */
         .transfer-info {
-            display: flex; align-items: center; gap: 8px;
+            display: flex; align-items: center; gap: 10px;
             font-size: 14px; color: #777; margin-bottom: 20px;
         }
-        .pix-logo { height: 18px; }
+        
+        /* Logo Pix corrigido com texto */
+        .pix-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .pix-logo { height: 24px; width: auto; }
+        .pix-text { font-weight: 700; color: #32BCAD; font-size: 16px; }
+
 
         .options-grid { display: flex; gap: 10px; margin-bottom: 10px; }
         .option-btn { 
@@ -88,6 +113,7 @@
             font-size: 16px;
             border: 2px solid transparent;
             cursor: pointer; 
+            transition: all 0.2s;
         }
         
         .big-option { 
@@ -102,6 +128,7 @@
             border: 2px solid transparent;
             cursor: pointer; 
             margin-bottom: 20px;
+            transition: all 0.2s;
         }
 
         /* ESTADO SELECIONADO */
@@ -123,11 +150,13 @@
             font-weight: 700; 
             cursor: not-allowed; 
             text-align: center;
+            transition: all 0.3s;
         }
         .btn-sacar.active { 
             background: #2ecc71; /* Verde Pix */
             cursor: pointer; 
         }
+        .btn-sacar.active:hover { background: #27ae60; }
         .legal-text { font-size: 11px; color: #999; text-align: center; margin-top: 15px; line-height: 1.4; }
 
         /* --- CARTÃO DE ACESSO EXCLUSIVO --- */
@@ -139,7 +168,8 @@
         /* --- MODAIS (Mantidos do anterior) --- */
         .hidden { display: none !important; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: flex-end; }
-        .modal-sheet { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 35px 25px; }
+        .modal-sheet { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 35px 25px; animation: slideUp 0.3s; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         input { width: 100%; padding: 16px; border: 1px solid #eee; background: #f9f9f9; border-radius: 10px; font-size: 16px; margin-top: 8px; margin-bottom: 15px; outline: none; }
         label { font-size: 13px; font-weight: 700; color: #555; }
     </style>
@@ -151,14 +181,17 @@
     <div class="header-section">
         <div class="header-content">
             <div class="label-saldo">Seu saldo</div>
-            <div class="valor-grande">R$ <span id="counter">1.489,38</span></div> 
-            <div class="pontos-text">= 42.583,05 pontos (s)</div>
+            <div class="valor-grande">R$ <span id="counter">0,00</span></div> 
+            <div class="pontos-text">= <span id="points-counter">0</span> pontos (s)</div>
         </div>
-        <svg class="coin-icon-large" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" fill="#FFC107" stroke="#FF9800" stroke-width="1.5"/>
-            <path d="M12 7V17M9 10H15M9 14H15" stroke="#F57F17" stroke-width="2" stroke-linecap="round"/>
-            <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="14" font-weight="bold" fill="#F57F17">$</text>
-        </svg>
+        
+        <div class="coin-container">
+            <svg class="coin-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 7V17M9 10H15M9 14H15" stroke="#F57F17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 7V17" stroke="#F57F17" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="9" stroke="#F57F17" stroke-width="2.5"/>
+            </svg>
+        </div>
     </div>
 
     <div class="bonus-bar">
@@ -171,16 +204,20 @@
         <div class="transfer-info">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             Transferência via / 
-            <svg class="pix-logo" viewBox="0 0 62 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13.576 11.8495L6.82222 5.07239C6.67854 4.9285 6.44544 4.9285 6.30176 5.07239L4.50732 6.8707C4.36364 7.01459 4.36364 7.24849 4.50732 7.39238L11.2611 14.1695C11.4048 14.3134 11.6379 14.3134 11.7816 14.1695L13.576 12.3712C13.7197 12.2273 13.7197 11.9934 13.576 11.8495Z" fill="#32BCAD"/>
-                <path d="M16.0046 7.45022L17.9563 5.49262C18.1002 5.34828 18.3338 5.34828 18.4776 5.49262L25.2552 12.2909C25.3991 12.4353 25.3991 12.6695 25.2552 12.8139L23.3035 14.7715C23.1596 14.9158 22.926 14.9158 22.7822 14.7715L16.0046 7.97316C15.8607 7.82882 15.8607 7.59456 16.0046 7.45022Z" fill="#32BCAD"/>
-                <path d="M16.0325 12.3137L22.7863 19.0908C22.93 19.2347 23.1631 19.2347 23.3068 19.0908L25.1012 17.2925C25.2449 17.1486 25.2449 16.9147 25.1012 16.7708L18.3474 9.99367C18.2037 9.84978 17.9706 9.84978 17.8269 9.99367L16.0325 11.792C15.8888 11.9359 15.8888 12.1698 16.0325 12.3137Z" fill="#32BCAD"/>
-                <path d="M13.5482 16.7129L11.5965 18.6705C11.4526 18.8149 11.2191 18.8149 11.0752 18.6705L4.29763 11.8723C4.15379 11.7279 4.15379 11.4937 4.29763 11.3493L6.24931 9.39171C6.39315 9.24737 6.62677 9.24737 6.77061 9.39171L13.5482 16.19C13.692 16.3344 13.692 16.5686 13.5482 16.7129Z" fill="#32BCAD"/>
-                <path d="M11.5317 7.66533L8.63846 4.76339C8.11698 4.24034 7.27334 4.24034 6.75187 4.76339L1.64626 9.88425C1.12479 10.4073 1.12479 11.2534 1.64626 11.7764L4.53948 14.6784L11.5317 7.66533Z" fill="#32BCAD"/>
-                <path d="M18.0513 16.4979L20.9445 19.3998C21.466 19.9229 22.3096 19.9229 22.8311 19.3998L27.9367 14.279C28.4582 13.7559 28.4582 12.9098 27.9367 12.3868L25.0434 9.48481L18.0513 16.4979Z" fill="#32BCAD"/>
-                <path d="M17.9953 9.42741L20.8885 6.52547C21.41 6.00242 22.2536 6.00242 22.7751 6.52547L27.8807 11.6463C28.4022 12.1694 28.4022 13.0155 27.8807 13.5385L24.9875 16.4405L17.9953 9.42741Z" fill="#32BCAD"/>
-                <path d="M11.5877 14.7358L8.69449 17.6377C8.17301 18.1608 7.32938 18.1608 6.8079 17.6377L1.7023 12.5168C1.18082 11.9938 1.18082 11.1477 1.7023 10.6246L4.59552 7.7227L11.5877 14.7358Z" fill="#32BCAD"/>
-            </svg>
+            
+            <div class="pix-container">
+                <svg class="pix-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.51029 8.09341L4.90858 3.50853C4.81068 3.41114 4.65191 3.41114 4.55401 3.50853L3.33122 4.7251C3.23331 4.82248 3.23331 4.98077 3.33122 5.07816L7.93293 9.66304C8.03084 9.76042 8.1896 9.76042 8.28751 9.66304L9.51029 8.44647C9.6082 8.34908 9.6082 8.1908 9.51029 8.09341Z" fill="#32BCAD"/>
+                    <path d="M11.1652 5.11731L12.4952 3.79266C12.5931 3.69498 12.7522 3.69498 12.8501 3.79266L17.4677 8.39258C17.5657 8.49025 17.5657 8.64873 17.4677 8.7464L16.1377 10.071C16.0397 10.1687 15.8806 10.1687 15.7827 10.071L11.1652 5.47113C11.0672 5.37345 11.0672 5.21498 11.1652 5.11731Z" fill="#32BCAD"/>
+                    <path d="M11.1841 8.40759L15.7859 12.9925C15.8838 13.0899 16.0425 13.0899 16.1404 12.9925L17.3632 11.7759C17.4611 11.6785 17.4611 11.5202 17.3632 11.4228L12.7615 6.83796C12.6636 6.74057 12.5049 6.74057 12.4069 6.83796L11.1841 8.05453C11.0862 8.15191 11.0862 8.3102 11.1841 8.40759Z" fill="#32BCAD"/>
+                    <path d="M9.49136 11.3842L8.16142 12.7088C8.06343 12.8065 7.90436 12.8065 7.80636 12.7088L3.18877 8.10893C3.09078 8.01125 3.09078 7.85277 3.18877 7.7551L4.51871 6.43045C4.6167 6.33277 4.77577 6.33277 4.87377 6.43045L9.49136 11.0303C9.58936 11.128 9.58936 11.2865 9.49136 11.3842Z" fill="#32BCAD"/>
+                    <path d="M8.11838 5.26287L6.14665 3.29931C5.79127 2.94536 5.21632 2.94536 4.86095 3.29931L1.38151 6.76427C1.02613 7.11821 1.02613 7.69073 1.38151 8.04468L3.35323 10.0082L8.11838 5.26287Z" fill="#32BCAD"/>
+                    <path d="M12.5618 11.2387L14.5335 13.2023C14.8889 13.5562 15.4638 13.5562 15.8192 13.2023L19.2987 9.73731C19.654 9.38337 19.654 8.81085 19.2987 8.4569L17.327 6.49334L12.5618 11.2387Z" fill="#32BCAD"/>
+                    <path d="M12.5236 6.45512L14.4954 4.49157C14.8507 4.13762 15.4257 4.13762 15.781 4.49157L19.2605 7.95653C19.6159 8.31048 19.6159 8.88299 19.2605 9.23695L17.2887 11.2005L12.5236 6.45512Z" fill="#32BCAD"/>
+                    <path d="M8.1565 10.0469L6.14665 12.0105C5.8294 12.3644 5.25445 12.3644 4.89907 12.0105L1.41963 8.54551C1.06426 8.19156 1.06426 7.61905 1.41963 7.26509L3.39136 5.30154L8.1565 10.0469Z" fill="#32BCAD"/>
+                </svg>
+                <span class="pix-text">pix</span>
+            </div>
         </div>
 
         <div class="options-grid">
@@ -226,7 +263,44 @@
     </div>
 
     <script>
-        // --- LÓGICA DE SELEÇÃO (MANTIDA) ---
+        // --- 1. FUNÇÃO DE ANIMAÇÃO DO CONTADOR (CORRIGIDA E OTIMIZADA) ---
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            // Proteção: se o elemento não existir, cancela
+            if (!obj) return;
+
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                
+                // Calcula o valor atual baseado no progresso
+                let currentVal = progress * (end - start) + start;
+                
+                // Formata para moeda brasileira (BRL) se o ID for o do dinheiro
+                if (id === "counter") {
+                    obj.innerHTML = currentVal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                } else {
+                    // Formata para número inteiro se for pontos
+                    obj.innerHTML = Math.floor(currentVal).toLocaleString('pt-BR');
+                }
+                
+                // Continua a animação se não tiver terminado
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    // Garante que o valor final seja o exato
+                    if (id === "counter") {
+                        obj.innerHTML = end.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    } else {
+                        obj.innerHTML = end.toLocaleString('pt-BR');
+                    }
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- 2. LÓGICA DE SELEÇÃO (MANTIDA) ---
         let valorSelecionado = 0;
 
         function selectItem(element, valor) {
@@ -242,7 +316,7 @@
             document.getElementById('modal-dados').classList.remove('hidden');
         }
 
-        // --- MÁSCARA CPF ---
+        // --- 3. MÁSCARA CPF ---
         function maskCPF(i) {
             let v = i.value.replace(/\D/g, "");
             v = v.replace(/(\d{3})(\d)/, "$1.$2");
@@ -251,7 +325,7 @@
             i.value = v;
         }
 
-        // --- FUNÇÃO DE CHECKOUT (Simulação) ---
+        // --- 4. FUNÇÃO DE CHECKOUT (Simulação) ---
         function goToCheckout() {
             const nome = document.getElementById('input-nome').value;
             const cpf = document.getElementById('input-cpf').value.replace(/\D/g, '');
@@ -259,6 +333,15 @@
             alert("Redirecionando para o pagamento da taxa...");
             // Aqui você colocaria a lógica real de integração com seu backend
         }
+
+        // --- 5. INICIALIZAÇÃO SEGURA (DOMContentLoaded) ---
+        // Garante que o script só rode depois que o HTML carregou
+        document.addEventListener("DOMContentLoaded", () => {
+            // Inicia a contagem de 0 até os valores finais em 2 segundos (2000ms)
+            animateValue("counter", 0, 1489.38, 2000);
+            animateValue("points-counter", 0, 42583, 2000);
+        });
+
     </script>
 </body>
 </html>
