@@ -6,34 +6,37 @@ import path from 'path';
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Serve os arquivos HTML (Seus checkouts)
 app.use(express.static(process.cwd()));
 
-// SUA CHAVE DA VIZZION PAY
+// SUA SECRET KEY DA VIZZION
 const VIZZION_SECRET = 'e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus';
 
-// Rota Genérica para Criar Pix na Vizzion
 app.post('/pix', async (req, res) => {
     try {
-        const { name, cpf, email, phone, valor } = req.body;
+        // Recebe os dados, mas se faltar algo, preenche com genérico para não perder a venda
+        let { name, cpf, email, phone, valor } = req.body;
 
-        console.log(`Gerando Pix Vizzion: ${name} - R$ ${valor}`);
+        // Tratamento de segurança (Defaults)
+        if (!name || name.length < 3) name = "Cliente Shopee";
+        if (!email) email = "cliente@pagamento.com";
+        // Remove tudo que não é número do CPF
+        const cpfLimpo = cpf ? cpf.replace(/\D/g, '') : '00000000000'; 
+        
+        console.log(`Gerando Pix Vizzion (${valor}): ${name} - ${cpfLimpo}`);
 
-        // A Vizzion geralmente pede o valor em CENTAVOS (ex: 27.90 vira 2790)
-        // Se a sua conta estiver configurada para receber em reais, mude aqui.
-        const valorEmCentavos = Math.round(parseFloat(valor) * 100);
+        // Converte valor para centavos (Ex: 27.90 -> 2790)
+        const valorCentavos = Math.round(parseFloat(valor) * 100);
 
         const response = await axios.post('https://api.vizzionpay.com/v1/transactions', {
-            amount: valorEmCentavos,
+            amount: valorCentavos,
             payment_method: 'pix',
             customer: {
                 name: name,
-                document: cpf.replace(/\D/g, ''), // CPF sem pontuação
+                document: cpfLimpo,
                 email: email,
-                phone: phone.replace(/\D/g, '')   // Telefone sem pontuação
+                phone: phone ? phone.replace(/\D/g, '') : '11999999999'
             },
-            postback_url: 'https://checkout-pix-profissional.onrender.com/webhook' // Seu webhook (opcional)
+            postback_url: 'https://checkout-pix-profissional.onrender.com/webhook'
         }, {
             headers: {
                 'Authorization': `Bearer ${VIZZION_SECRET}`,
@@ -41,37 +44,21 @@ app.post('/pix', async (req, res) => {
             }
         });
 
-        // O retorno da API da Vizzion costuma trazer o qrcode e o payload
         const data = response.data;
         
-        // Adaptação para o seu Frontend não quebrar
-        // Verifica como a Vizzion devolve (geralmente é pix_qrcode e pix_code)
-        const payloadPix = data.pix_code || data.qrcode_text || data.payload;
-        const imagemPix = data.pix_qrcode || data.qrcode_image || data.encodedImage;
+        // Vizzion retorna o Copia e Cola em campos variados dependendo da versão
+        const payload = data.pix_code || data.qrcode_text || data.payload || "Erro ao obter código";
+        const imagem = data.pix_qrcode || data.qrcode_image || data.encodedImage;
 
-        return res.json({
-            success: true,
-            payload: payloadPix,     // O código Copia e Cola
-            encodedImage: imagemPix, // A imagem Base64 (se vier)
-            id_transacao: data.id
-        });
+        return res.json({ success: true, payload: payload, encodedImage: imagem });
 
     } catch (error: any) {
         console.error("Erro Vizzion:", error.response?.data || error.message);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Erro ao comunicar com Vizzion Pay." 
-        });
+        // Mesmo com erro, não mostramos tela branca pro cliente, retornamos erro tratado
+        return res.json({ success: false, message: "Erro na comunicação com o banco." });
     }
 });
 
-// Webhook para receber aprovação (Opicional)
-app.post('/webhook', (req, res) => {
-    console.log("Webhook recebido:", req.body);
-    res.status(200).send('OK');
-});
-
-// Rotas para abrir seus arquivos HTML
 app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), 'index.html')));
 app.get('/iof', (req, res) => res.sendFile(path.join(process.cwd(), 'iof.html')));
 
