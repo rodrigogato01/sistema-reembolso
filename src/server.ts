@@ -3,13 +3,18 @@ import cors from 'cors';
 import { PixController } from './controllers/PixController';
 
 const app = express();
-app.use(cors()); // Libera o acesso para o Elementor
+app.use(cors()); 
 app.use(express.json());
 
-// Instancia o seu controlador da Efí
+// Instancia o controlador da Efí
 const pixController = new PixController();
 
-// ROTAS CERTAS (Conectando ao PixController)
+// --- ROTA DE BOAS-VINDAS (Resolve o erro "Cannot GET /") ---
+app.get('/', (req, res) => {
+    res.send('Servidor do Pix está Online e Pronto! 🚀');
+});
+
+// --- ROTAS DO PIX (Conectadas ao PixController da Efí) ---
 app.post('/pix', pixController.create);
 app.get('/pix/status/:id', pixController.checkStatus);
 app.post('/webhook', pixController.webhook);
