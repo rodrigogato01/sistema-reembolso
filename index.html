@@ -3,203 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Verificação de Segurança</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>Resgatar Recompensas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        /* --- ESTILOS GERAIS (PREMIUM) --- */
+        /* --- RESET E BASE --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Roboto', sans-serif; background: #f4f7fa; margin: 0; padding: 0; color: #2d3436; }
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background: #f0f2f5; /* Fundo cinza claro fiel à imagem */
+            margin: 0; 
+            padding: 20px; 
+            color: #333; 
+        }
+        h1, h3, p { margin: 0; }
         .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- TELA 1: DASHBOARD PREMIUM --- */
+        /* --- CABEÇALHO LARANJA (IDÊNTICO À IMAGEM) --- */
         .header-section { 
-            background: linear-gradient(145deg, #ff6b4a 0%, #ff472e 100%);
-            padding: 35px 25px 50px 25px; color: white; border-radius: 0 0 30px 30px; 
-            box-shadow: 0 15px 30px rgba(255, 71, 46, 0.25); position: relative; overflow: hidden;
+            background: #F15A29; /* Cor sólida laranja */
+            padding: 25px;
+            color: white; 
+            border-radius: 15px; /* Cantos arredondados */
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .header-section::before {
-            content: ''; position: absolute; top: -50%; left: -20%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none;
-        }
-        .label-saldo { font-size: 15px; opacity: 0.9; letter-spacing: 0.5px; }
-        .valor-grande-container { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
-        .valor-grande { font-size: 46px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+        .label-saldo { font-size: 14px; font-weight: 500; margin-bottom: 5px; }
+        .valor-grande-container { display: flex; align-items: center; }
+        .valor-grande { font-size: 36px; font-weight: 900; line-height: 1; }
+        .pontos-text { font-size: 12px; margin-top: 5px; opacity: 0.9; }
         
-        .premium-coin {
-            width: 54px; height: 54px; background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
-            border-radius: 50%; box-shadow: inset 0 2px 3px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(0,0,0,0.1), 0 8px 20px rgba(255, 140, 0, 0.3);
-            display: flex; align-items: center; justify-content: center; position: relative;
+        /* Moeda Dourada Simples */
+        .coin-icon { 
+            width: 60px; height: 60px;
+            background: #FFC107;
+            border: 3px solid #FF9800;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; font-weight: 900; color: #F57F17;
         }
-        .coin-symbol { font-size: 28px; font-weight: 900; color: #FFF; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .premium-coin::after {
-            content: ''; position: absolute; top: 5px; left: 5px; width: 20px; height: 20px;
-            background: rgba(255,255,255,0.6); border-radius: 50%; filter: blur(4px); opacity: 0.7;
-        }
-        .pontos-text { font-size: 13px; margin-top: 10px; opacity: 0.85; font-weight: 500; }
 
-        .container { padding: 0 24px 40px 24px; max-width: 500px; margin: 0 auto; margin-top: -35px; position: relative; z-index: 10; }
-        .status-bar {
-            background: white; padding: 15px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); 
-            margin-bottom: 25px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #555; font-weight: 500;
+        /* --- CARTÃO BRANCO ÚNICO --- */
+        .card-white { 
+            background: white; 
+            border-radius: 15px; 
+            padding: 25px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            margin-bottom: 20px; 
         }
-        .status-icon { width: 24px; height: 24px; background: #e3fcef; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #00b894; flex-shrink: 0; }
-        .card-white { background: white; border-radius: 24px; padding: 25px; box-shadow: 0 12px 40px rgba(0,0,0,0.04); margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.03); }
-        
-        .options-grid { display: flex; gap: 10px; margin-bottom: 12px; }
-        .option-btn { flex: 1; padding: 15px 0; background: white; border: 2px solid #edf2f7; border-radius: 14px; text-align: center; font-weight: 700; color: #2d3436; cursor: pointer; transition: 0.2s; }
-        .big-option { width: 100%; padding: 20px 0; background: white; border: 2px solid #edf2f7; border-radius: 14px; text-align: center; cursor: pointer; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; }
-        .selected { border-color: #ff472e !important; background: #fff5f3 !important; color: #ff472e !important; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,71,46,0.15); }
-        .btn-main { width: 100%; background: #dfe6e9; color: #b2bec3; border: none; padding: 18px; border-radius: 14px; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; cursor: not-allowed; transition: 0.3s; }
-        .btn-main.active { background: linear-gradient(to right, #ff6b4a, #ff472e); color: white; cursor: pointer; box-shadow: 0 8px 25px rgba(255,71,46,0.3); }
-        
-        /* --- TELA 2: MODAL --- */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: flex-end; }
-        .modal-sheet { background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 30px 25px 45px 25px; animation: slideUp 0.3s ease-out; }
+        h3.card-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #000; }
+
+        /* --- MÉTODOS DE SAQUE --- */
+        .transfer-label { font-size: 14px; color: #666; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .pix-icon { width: 20px; height: auto; }
+
+        .options-grid { display: flex; gap: 10px; margin-bottom: 10px; }
+        .option-btn { 
+            flex: 1; padding: 12px 0; background: #f5f5f5; border-radius: 8px; 
+            text-align: center; font-weight: 700; color: #333; font-size: 14px;
+            border: 2px solid transparent; cursor: pointer; transition: all 0.2s;
+        }
+        .big-option { 
+            width: 100%; padding: 15px 0; background: #f5f5f5; border-radius: 8px; 
+            text-align: center; font-weight: 900; font-size: 20px; color: #333;
+            border: 2px solid transparent; cursor: pointer; margin-bottom: 20px; transition: all 0.2s;
+        }
+        .selected { border-color: #F15A29 !important; background: #fff0e9 !important; color: #F15A29 !important; }
+
+        /* --- BOTÃO DE AÇÃO (ESTADOS) --- */
+        .btn-main { 
+            width: 100%; padding: 15px; border-radius: 8px; border: none;
+            font-size: 16px; font-weight: 800; text-transform: uppercase; 
+            cursor: not-allowed; transition: 0.3s;
+        }
+        .btn-disabled { background: #ccc; color: #888; } /* Estado inicial (bloqueado) */
+        .btn-active { background: #F15A29; color: white; cursor: pointer; } /* Estado ativo */
+
+        .legal-text { font-size: 11px; color: #aaa; text-align: center; margin: 15px 0 25px 0; line-height: 1.4; }
+
+        /* --- SEÇÃO DE ACESSO EXCLUSIVO (AGORA DENTRO DO CARD) --- */
+        .access-section { 
+            border-top: 1px solid #eee; 
+            padding-top: 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+        }
+        .access-content { flex: 1; padding-right: 20px; }
+        .access-text { font-size: 11px; color: #666; line-height: 1.5; margin-top: 10px; }
+        .shopee-bag-icon { width: 60px; height: auto; fill: #F15A29; }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; display: flex; align-items: flex-end; }
+        .modal-sheet { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 30px 25px; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .pix-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0 20px 0; }
-        .pix-type-btn { background: #f1f2f6; border: 1px solid transparent; padding: 10px 0; border-radius: 8px; font-size: 11px; font-weight: 700; color: #636e72; cursor: pointer; }
-        .pix-type-btn.active-type { background: #fff5f3; color: #ff472e; border-color: #ff472e; }
-        input { width: 100%; padding: 16px; border: 2px solid #edf2f7; border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s; color: #2d3436; margin-top: 5px; }
-        input:focus { border-color: #ff472e; background: white; }
-        label { font-size: 12px; font-weight: 700; color: #636e72; text-transform: uppercase; letter-spacing: 0.5px; }
-        .input-group { margin-bottom: 15px; }
-
-        /* --- TELA 3: CONFIRMAÇÃO --- */
-        .confirm-header { background: white; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border-left: 5px solid #ff472e; }
-        .confirm-title { font-size: 14px; font-weight: 800; color: #555; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
-        .confirm-value { font-size: 36px; font-weight: 900; color: #ff472e; display: flex; align-items: center; gap: 10px; }
-        .badge-reembolso { background: #e3fcef; color: #00b894; font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 800; vertical-align: middle; letter-spacing: 0.5px; text-transform: uppercase; }
-        .confirm-desc { font-size: 13px; color: #666; line-height: 1.5; margin-top: 10px; }
-        .data-box { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .data-header { background: #f8f9fa; padding: 15px 20px; font-size: 13px; font-weight: 800; color: #555; border-bottom: 1px solid #eee; text-transform: uppercase; }
-        .data-row { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #f5f5f5; font-size: 14px; }
-        .data-row:last-child { border-bottom: none; background: #fffbfb; }
-        .data-label { color: #999; font-weight: 500; }
-        .data-val { color: #333; font-weight: 700; text-align: right; }
-        .val-total { color: #2d3436; font-size: 16px; font-weight: 900; }
-        .process-box { background: white; border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .step-item { display: flex; gap: 15px; margin-bottom: 20px; position: relative; }
-        .step-item:last-child { margin-bottom: 0; }
-        .step-item:not(:last-child)::after { content: ''; position: absolute; top: 30px; left: 14px; width: 2px; height: calc(100% - 10px); background: #eee; }
-        .step-icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; z-index: 2; flex-shrink: 0; }
-        .icon-orange { background: #fff5f3; color: #ff472e; border: 2px solid #ff472e; }
-        .icon-green { background: #e3fcef; color: #00b894; border: 2px solid #00b894; }
-        .icon-gray { background: #f1f2f6; color: #b2bec3; border: 2px solid #dfe6e9; }
-        .step-content h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: 800; color: #333; }
-        .step-content p { margin: 0; font-size: 12px; color: #888; }
-        .timer-tag { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; color: #00b894; font-weight: 700; margin-top: 15px; }
-        .footer-badges { display: flex; justify-content: center; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
-        .badge-item { display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.7; }
-        .badge-icon { width: 35px; height: 35px; background: #e0e0e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #555; }
-        .badge-text { font-size: 10px; color: #888; text-transform: uppercase; font-weight: 700; }
+        input { width: 100%; padding: 16px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; margin-top: 8px; margin-bottom: 15px; outline: none; }
+        input:focus { border-color: #F15A29; }
+        label { font-size: 13px; font-weight: 700; color: #555; }
     </style>
 </head>
 <body>
 
-    <div id="screen-dashboard">
-        <div class="header-section">
-            <div class="label-saldo">Saldo Total Disponível</div>
+    <div class="header-section">
+        <div>
+            <div class="label-saldo">Seu saldo</div>
             <div class="valor-grande-container">
                 <div class="valor-grande">R$ <span id="counter">0,00</span></div>
-                <div class="premium-coin"><span class="coin-symbol">$</span></div>
             </div>
-            <div class="pontos-text">+<span id="points-counter">0</span> pontos acumulados hoje</div>
+            <div class="pontos-text">= <span id="points-counter">0</span> pontos (s)</div>
         </div>
-        <div class="container">
-            <div class="status-bar">
-                <div class="status-icon">✓</div>
-                <span>Sua última bonificação de R$ 845,24 foi processada.</span>
+        <div class="coin-icon">$</div>
+    </div>
+
+    <div class="card-white">
+        <h3 class="card-title">Sacar dinheiro</h3>
+        
+        <div class="transfer-label">
+            Transferência via / 
+            <svg class="pix-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#32BCAD"/><path d="M7.5 12L10.5 15L16.5 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <div class="options-grid">
+            <div class="option-btn" onclick="selectItem(this, 1.5)">R$ 1,5</div>
+            <div class="option-btn" onclick="selectItem(this, 5.0)">R$ 5</div>
+            <div class="option-btn" onclick="selectItem(this, 10.0)">R$ 10</div>
+        </div>
+
+        <div class="big-option" onclick="selectItem(this, 1489.38)">
+            R$ 1.489,38
+        </div>
+
+        <button id="btn-action" class="btn-main btn-disabled" onclick="openModal()">SACAR DINHEIRO</button>
+        
+        <p class="legal-text">
+            Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5. Os limites de saque podem variar conforme a região.
+        </p>
+
+        <div class="access-section">
+            <div class="access-content">
+                <h3 class="card-title" style="margin-bottom: 10px;">Obtenha seu acesso exclusivo</h3>
+                <p class="access-text">Descubra todos os benefícios liberados especialmente para você. Ao concluir o acesso, você poderá aproveitar as vantagens disponíveis de forma rápida, segura e sem complicações.</p>
             </div>
-            <div class="card-white">
-                <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #2d3436;">Solicitar Retirada</h3>
-                <p style="font-size: 14px; color: #888; margin-bottom: 15px;">Selecione o valor para transferência:</p>
-                <div class="options-grid">
-                    <div class="option-btn" onclick="selectItem(this, 1.5)">R$ 1,50</div>
-                    <div class="option-btn" onclick="selectItem(this, 5.0)">R$ 5,00</div>
-                    <div class="option-btn" onclick="selectItem(this, 10.0)">R$ 10,00</div>
-                </div>
-                <div class="big-option" onclick="selectItem(this, 1489.38)">
-                    <span style="font-size: 26px; font-weight: 900; color: #2d3436;">R$ 1.489,38</span>
-                    <span style="font-size: 12px; color: #00b894; font-weight: 700; text-transform: uppercase; margin-top: 5px;">Saldo Remanescente</span>
-                </div>
-                <button id="btn-dashboard" class="btn-main" onclick="openModal()">SELECIONE UM VALOR</button>
-            </div>
-            <div class="footer-badges">
-                <div class="badge-item"><div class="badge-icon">🔒</div><span class="badge-text">Site Seguro</span></div>
-                <div class="badge-item"><div class="badge-icon">🛡️</div><span class="badge-text">Blindado</span></div>
-            </div>
+            <svg class="shopee-bag-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3H9c0 1.66 1.34 3 3 3s3-1.34 3-3h-2c0 1.66-1.34 3-3 3z"/></svg>
         </div>
     </div>
 
     <div id="modal-dados" class="modal-overlay hidden">
         <div class="modal-sheet">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="margin: 0; font-size: 18px; font-weight: 800; color: #2d3436;">Dados de Recebimento</h2>
-                <span onclick="closeModal()" style="font-size: 28px; color: #999; cursor: pointer;">&times;</span>
-            </div>
-            <div class="input-group">
-                <label>Nome do Titular</label>
-                <input type="text" id="input-nome" placeholder="Nome completo">
-            </div>
-            <div class="input-group">
-                <label>Tipo de Chave:</label>
-                <div class="pix-selector">
-                    <div class="pix-type-btn active-type" onclick="setPixType('cpf', this)">CPF</div>
-                    <div class="pix-type-btn" onclick="setPixType('telefone', this)">CELULAR</div>
-                    <div class="pix-type-btn" onclick="setPixType('email', this)">E-MAIL</div>
-                    <div class="pix-type-btn" onclick="setPixType('aleatoria', this)">CHAVE</div>
-                </div>
-                <input type="tel" id="input-chave" placeholder="000.000.000-00" oninput="maskInput(this)">
-            </div>
-            <button class="btn-main active" onclick="goToConfirmation()">CONFIRMAR DADOS</button>
+            <h2 style="text-align: center; margin-bottom: 25px; font-size: 18px;">Dados de Recebimento</h2>
+            <label>Nome do Titular</label>
+            <input type="text" id="input-nome" placeholder="Ex: João da Silva">
+            <label>Chave CPF</label>
+            <input type="tel" id="input-cpf" placeholder="000.000.000-00" oninput="maskCPF(this)">
+            <button class="btn-main btn-active" style="margin-top: 10px;" onclick="goToNextStep()">CONFIRMAR TRANSFERÊNCIA</button>
         </div>
-    </div>
-
-    <div id="screen-confirmation" class="hidden fade-in" style="padding: 20px; max-width: 500px; margin: 0 auto;">
-        <div class="confirm-header">
-            <div class="confirm-title">VERIFICAÇÃO DE IDENTIDADE</div>
-            <div class="confirm-value">R$ 37,90 <span class="badge-reembolso">VALOR REEMBOLSÁVEL</span></div>
-            <p class="confirm-desc">Taxa de verificação. O valor de <strong>R$ 37,90</strong> será reembolsado integralmente para você em 1 minuto junto com seu saque.</p>
-        </div>
-
-        <div class="data-box">
-            <div class="data-header">DADOS PARA ESTORNO</div>
-            <div class="data-row"><span class="data-label">Nome</span><span class="data-val" id="resumo-nome">...</span></div>
-            <div class="data-row"><span class="data-label">Data</span><span class="data-val" id="resumo-data">...</span></div>
-            <div class="data-row"><span class="data-label">Chave PIX</span><span class="data-val" id="resumo-chave">...</span></div>
-            <div class="data-row"><span class="data-label">Valor a receber</span><span class="val-total">R$ 1.489,38</span></div>
-        </div>
-
-        <div class="process-box">
-            <div class="process-title">PROCESSO DE LIBERAÇÃO</div>
-            <div class="step-item"><div class="step-icon icon-orange">1</div><div class="step-content"><h4>Verificação de Identidade</h4><p>Confirmação rápida</p></div></div>
-            <div class="step-item"><div class="step-icon icon-green">✓</div><div class="step-content"><h4 style="color: #00b894;">Estorno automático</h4><p>Valor devolvido em 1 min</p></div></div>
-            <div class="step-item"><div class="step-icon icon-gray">3</div><div class="step-content"><h4>Saldo liberado</h4><p>R$ 1.489,38 na conta</p></div></div>
-            
-            <button class="btn-main active" style="margin-top: 25px; background: #ff472e; box-shadow: 0 10px 30px rgba(255, 71, 46, 0.4);" onclick="redirectToVSL()">
-                CONCLUIR VERIFICAÇÃO
-            </button>
-            <div class="timer-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Estorno automático em 1 minuto</div>
-        </div>
-
-        <div class="footer-badges">
-            <div class="badge-item"><div class="badge-icon" style="color: #00b894; background: #e3fcef;">🛡️</div><span class="badge-text">Garantia de<br>Estorno</span></div>
-            <div class="badge-item"><div class="badge-icon" style="color: #0984e3; background: #e3f2fd;">🔒</div><span class="badge-text">Ambiente<br>Seguro</span></div>
-        </div>
-        <p style="text-align: center; font-size: 10px; color: #aaa; margin-top: 20px; line-height: 1.5;">Seus dados estão protegidos por criptografia de ponta a ponta.</p>
     </div>
 
     <script>
-        const LINK_DA_VSL = "https://recuperabonushopp.com/elementor-1623";
-        let currentPixType = 'cpf';
         let valorSelecionado = 0;
 
-        // ANIMACAO E LOGICA TELA 1
+        // ANIMAÇÃO DOS NÚMEROS
         function animateValue(id, start, end, duration) {
             const obj = document.getElementById(id);
-            if(!obj) return;
             let startTimestamp = null;
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
@@ -215,59 +182,32 @@
             };
             window.requestAnimationFrame(step);
         }
-        function selectItem(el, val) {
-            document.querySelectorAll('.option-btn, .big-option').forEach(b => b.classList.remove('selected'));
-            el.classList.add('selected');
-            valorSelecionado = val;
-            const btn = document.getElementById('btn-dashboard');
-            btn.classList.add('active');
-            btn.innerText = "SACAR R$ " + val.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+
+        // SELEÇÃO E ATIVAÇÃO DO BOTÃO
+        function selectItem(element, valor) {
+            document.querySelectorAll('.option-btn, .big-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            valorSelecionado = valor;
+            
+            // ATIVA O BOTÃO (Muda de cinza para laranja)
+            const btn = document.getElementById('btn-action');
+            btn.classList.remove('btn-disabled');
+            btn.classList.add('btn-active');
         }
+
         function openModal() {
-            if(valorSelecionado === 0) return alert("Selecione um valor primeiro.");
+            if (valorSelecionado === 0) return; // Não abre se estiver bloqueado
             document.getElementById('modal-dados').classList.remove('hidden');
         }
-        function closeModal() { document.getElementById('modal-dados').classList.add('hidden'); }
 
-        // LOGICA TELA 2 (MODAL)
-        function setPixType(type, btn) {
-            currentPixType = type;
-            document.querySelectorAll('.pix-type-btn').forEach(b => b.classList.remove('active-type'));
-            btn.classList.add('active-type');
-            const input = document.getElementById('input-chave');
-            input.value = ""; input.focus();
-            if(type === 'cpf') input.placeholder = "000.000.000-00";
-            else if(type === 'telefone') input.placeholder = "(00) 00000-0000";
-            else if(type === 'email') input.placeholder = "seu@email.com";
-            else input.placeholder = "Cole sua chave";
-        }
-        function maskInput(i) {
-            let v = i.value;
-            if(currentPixType === 'cpf') v = v.replace(/\D/g, "").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-            else if(currentPixType === 'telefone') v = v.replace(/\D/g, "").replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d)(\d{4})$/, "$1-$2");
+        function maskCPF(i) {
+            let v = i.value.replace(/\D/g, "").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
             i.value = v;
         }
-        function goToConfirmation() {
-            const nome = document.getElementById('input-nome').value.trim();
-            const chave = document.getElementById('input-chave').value.trim();
-            if(nome.length < 3 || chave.length < 5) return alert("Preencha os dados corretamente.");
-            document.getElementById('resumo-nome').innerText = nome;
-            document.getElementById('resumo-chave').innerText = chave;
-            document.getElementById('resumo-data').innerText = new Date().toLocaleDateString('pt-BR');
-            document.getElementById('modal-dados').classList.add('hidden');
-            document.getElementById('screen-dashboard').classList.add('hidden');
-            document.getElementById('screen-confirmation').classList.remove('hidden');
-            window.scrollTo(0,0);
-        }
 
-        // TELA 3 - REDIRECIONAR PARA VSL
-        function redirectToVSL() {
-            const btn = document.querySelector('#screen-confirmation button');
-            btn.innerText = "CARREGANDO...";
-            const nome = document.getElementById('resumo-nome').innerText;
-            const chave = document.getElementById('resumo-chave').innerText;
-            // Manda para a VSL
-            window.location.href = `${LINK_DA_VSL}?nome=${encodeURIComponent(nome)}&chave=${encodeURIComponent(chave)}&tipo=${currentPixType}`;
+        function goToNextStep() {
+            // Lógica para a próxima tela (será implementada depois)
+            alert("Indo para a próxima etapa...");
         }
 
         document.addEventListener("DOMContentLoaded", () => {
