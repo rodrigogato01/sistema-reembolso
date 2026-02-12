@@ -10,26 +10,24 @@
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         body { 
             font-family: 'Roboto', sans-serif; 
-            background: #f4f7fa; /* Cinza azulado mais moderno */
+            background: #f4f7fa; 
             margin: 0; 
             padding: 0; 
             color: #2d3436; 
         }
         h1, h3, p { margin: 0; }
-        .container { padding: 20px 24px; max-width: 500px; margin: 0 auto; }
+        .container { padding: 20px 24px; max-width: 500px; margin: 0 auto; padding-bottom: 50px; }
 
         /* --- CABEÇALHO PREMIUM --- */
         .header-section { 
-            /* Degradê mais sofisticado e profundo */
             background: linear-gradient(145deg, #ff6b4a 0%, #ff472e 100%);
             padding: 35px 25px;
             color: white; 
-            border-radius: 0 0 30px 30px; /* Arredondado apenas embaixo */
+            border-radius: 0 0 30px 30px; 
             box-shadow: 0 15px 30px rgba(255, 71, 46, 0.25);
             position: relative;
             overflow: hidden;
         }
-        /* Efeito de luz sutil no fundo */
         .header-section::before {
             content: ''; position: absolute; top: -50%; left: -20%; width: 200%; height: 200%;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
@@ -39,25 +37,19 @@
         .header-top-row { display: flex; justify-content: space-between; align-items: center; }
         .label-saldo { font-size: 15px; font-weight: 400; opacity: 0.9; letter-spacing: 0.5px; }
         
-        /* Valor Principal com Fonte de Impacto */
         .valor-grande-container { display: flex; align-items: center; gap: 15px; margin-top: 10px; }
         .valor-grande { font-size: 46px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
-        .valor-grande span { font-variant-numeric: tabular-nums; } /* Evita pulos na animação */
-
-        /* --- MOEDA SOFISTICADA (CSS PURO - NÃO DEFORMA) --- */
+        
+        /* MOEDA SOFISTICADA */
         .premium-coin {
             width: 54px; height: 54px;
-            /* Degradê Dourado Rico */
             background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
             border-radius: 50%;
-            /* Efeito de borda brilhante e sombra */
             box-shadow: inset 0 2px 3px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(0,0,0,0.1), 0 8px 20px rgba(255, 140, 0, 0.3);
             display: flex; align-items: center; justify-content: center;
             position: relative;
         }
-        /* Símbolo $ Dourado */
         .coin-symbol { font-size: 28px; font-weight: 900; color: #FFF; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        /* Brilho especular na moeda */
         .premium-coin::after {
             content: ''; position: absolute; top: 5px; left: 5px; width: 20px; height: 20px;
             background: rgba(255,255,255,0.6); border-radius: 50%; filter: blur(4px); opacity: 0.7;
@@ -68,7 +60,7 @@
         /* --- BARRA DE STATUS --- */
         .status-bar {
             background: white;
-            margin: -20px 24px 25px 24px; /* Sobe para cima do header */
+            margin: -20px 24px 25px 24px;
             padding: 15px;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.06);
@@ -78,101 +70,105 @@
         }
         .status-icon { width: 24px; height: 24px; background: #e3fcef; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #00b894; }
 
-        /* --- CARTÕES PROFISSIONAIS --- */
+        /* --- CARTÕES E LAYOUT --- */
         .card-white { 
             background: white; 
             border-radius: 24px; 
             padding: 30px; 
-            /* Sombra suave e difusa (High-end) */
             box-shadow: 0 12px 40px rgba(0,0,0,0.04); 
             margin-bottom: 25px;
             border: 1px solid rgba(0,0,0,0.03);
         }
         h3.card-title { font-size: 18px; font-weight: 800; margin-bottom: 22px; color: #2d3436; display: flex; align-items: center; gap: 10px; }
-
-        /* --- OPÇÕES DE SAQUE (CLEAN) --- */
         .method-label { font-size: 14px; color: #888; margin-bottom: 18px; font-weight: 500; display: block; }
 
+        /* OPÇÕES DE SAQUE */
         .options-grid { display: flex; gap: 12px; margin-bottom: 12px; }
         .option-btn { 
-            flex: 1; 
-            padding: 18px 0; 
-            background: white; 
-            border: 2px solid #edf2f7;
-            border-radius: 16px; 
-            text-align: center; 
-            font-weight: 700; 
-            color: #2d3436;
-            font-size: 16px;
-            cursor: pointer; 
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            flex: 1; padding: 18px 0; background: white; border: 2px solid #edf2f7;
+            border-radius: 16px; text-align: center; font-weight: 700; color: #2d3436; font-size: 16px;
+            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
         
         .big-option { 
-            width: 100%; 
-            padding: 22px 0; 
-            background: white;
-            border: 2px solid #edf2f7;
-            border-radius: 16px; 
-            text-align: center; 
-            cursor: pointer; 
-            margin-bottom: 25px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            width: 100%; padding: 22px 0; background: white; border: 2px solid #edf2f7;
+            border-radius: 16px; text-align: center; cursor: pointer; margin-bottom: 25px;
+            transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.02);
             display: flex; flex-direction: column; align-items: center;
         }
         .big-opt-val { font-size: 26px; font-weight: 900; color: #2d3436; }
         .big-opt-sub { font-size: 12px; color: #00b894; font-weight: 700; text-transform: uppercase; margin-top: 5px; letter-spacing: 1px; }
 
-        /* ESTADO SELECIONADO (Elegante) */
+        /* ESTADO SELECIONADO */
         .selected { 
-            border-color: #ff472e !important;
-            background: #fff5f3 !important;
-            color: #ff472e !important;
-            box-shadow: 0 8px 20px rgba(255, 71, 46, 0.15) !important;
-            transform: translateY(-2px);
+            border-color: #ff472e !important; background: #fff5f3 !important; color: #ff472e !important;
+            box-shadow: 0 8px 20px rgba(255, 71, 46, 0.15) !important; transform: translateY(-2px);
         }
         .big-option.selected .big-opt-val { color: #ff472e !important; }
 
-        /* --- BOTÃO DE AÇÃO --- */
         .btn-main { 
-            width: 100%; 
-            background: #dfe6e9; 
-            color: #b2bec3; 
-            border: none; 
-            padding: 20px; 
-            border-radius: 16px; 
-            font-size: 16px; 
-            font-weight: 800; 
-            cursor: not-allowed; 
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            letter-spacing: 0.5px;
+            width: 100%; background: #dfe6e9; color: #b2bec3; border: none; padding: 20px;
+            border-radius: 16px; font-size: 16px; font-weight: 800; cursor: not-allowed;
+            text-align: center; transition: all 0.3s; letter-spacing: 0.5px;
         }
         .btn-main.active { 
-            /* Degradê no botão */
-            background: linear-gradient(to right, #ff6b4a, #ff472e); 
-            color: white;
-            cursor: pointer; 
-            box-shadow: 0 10px 30px rgba(255, 71, 46, 0.3);
+            background: linear-gradient(to right, #ff6b4a, #ff472e); color: white;
+            cursor: pointer; box-shadow: 0 10px 30px rgba(255, 71, 46, 0.3);
         }
         .btn-main.active:active { transform: scale(0.98); }
 
-        /* --- RODAPÉ DE SEGURANÇA --- */
-        .security-footer { text-align: center; margin-top: 30px; padding-bottom: 30px; }
-        .secure-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #00b894; font-weight: 700; background: rgba(0, 184, 148, 0.1); padding: 6px 12px; border-radius: 20px; margin-bottom: 12px; }
-        .legal-text { font-size: 11px; color: #999; line-height: 1.6; max-width: 90%; margin: 0 auto; }
-
-        /* --- MODAIS --- */
+        /* --- MODAL DE DADOS (NOVO) --- */
         .hidden { display: none !important; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 100; display: flex; align-items: flex-end; }
-        .modal-sheet { background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 40px 30px; animation: slideUp 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
+        .modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); 
+            z-index: 100; display: flex; align-items: flex-end; 
+        }
+        .modal-sheet { 
+            background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 35px 25px 45px 25px; 
+            animation: slideUp 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1); 
+        }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
         .input-group { margin-bottom: 20px; text-align: left; }
-        input { width: 100%; padding: 18px; border: 2px solid #edf2f7; background: #f9fbfc; border-radius: 14px; font-size: 16px; margin-top: 8px; outline: none; transition: 0.3s; font-weight: 500; color: #2d3436; }
+        input { 
+            width: 100%; padding: 18px; border: 2px solid #edf2f7; background: #f9fbfc; 
+            border-radius: 14px; font-size: 16px; margin-top: 8px; outline: none; 
+            transition: 0.3s; font-weight: 500; color: #2d3436; 
+        }
         input:focus { border-color: #ff472e; background: white; }
         label { font-size: 13px; font-weight: 700; color: #636e72; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* SELETOR DE TIPO DE CHAVE (NOVO) */
+        .pix-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .pix-type-btn {
+            background: #f1f2f6;
+            border: 1px solid transparent;
+            padding: 12px 0;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #636e72;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        /* Botão de tipo ativo */
+        .pix-type-btn.active-type {
+            background: #fff5f3;
+            color: #ff472e;
+            border-color: #ff472e;
+            box-shadow: 0 4px 10px rgba(255, 71, 46, 0.1);
+        }
+
+        /* Rodapé */
+        .security-footer { text-align: center; margin-top: 30px; }
+        .secure-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #00b894; font-weight: 700; background: rgba(0, 184, 148, 0.1); padding: 6px 12px; border-radius: 20px; margin-bottom: 12px; }
+        .legal-text { font-size: 11px; color: #999; line-height: 1.6; max-width: 90%; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -183,9 +179,7 @@
                 <div class="label-saldo">Saldo Total Disponível</div>
                 <div class="valor-grande-container">
                     <div class="valor-grande">R$ <span id="counter">0,00</span></div>
-                    <div class="premium-coin">
-                        <span class="coin-symbol">$</span>
-                    </div>
+                    <div class="premium-coin"><span class="coin-symbol">$</span></div>
                 </div>
                 <div class="pontos-text">+<span id="points-counter">0</span> pontos acumulados hoje</div>
             </div>
@@ -193,18 +187,14 @@
     </div>
 
     <div class="status-bar">
-        <div class="status-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+        <div class="status-icon">✓</div>
         <span>Sua última bonificação de R$ 845,24 foi processada.</span>
     </div>
 
     <div class="container">
         <div class="card-white">
-            <h3 class="card-title">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff472e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                Solicitar Retirada
-            </h3>
-            
-            <span class="method-label">Selecione o valor para transferência imediata:</span>
+            <h3 class="card-title">Solicitar Retirada</h3>
+            <span class="method-label">Selecione o valor para transferência:</span>
 
             <div class="options-grid">
                 <div class="option-btn" onclick="selectItem(this, 1.5)">R$ 1,50</div>
@@ -221,29 +211,39 @@
         </div>
 
         <div class="security-footer">
-            <div class="secure-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                Ambiente Criptografado (SSL)
-            </div>
+            <div class="secure-badge">Ambiente Seguro (SSL)</div>
             <p class="legal-text">
-                Transações processadas com segurança bancária. Os limites e prazos de compensação podem variar de acordo com a instituição financeira de destino.
-                <br><br>© 2026 Programa de Recompensas.
+                Transações processadas com segurança bancária. Os limites e prazos podem variar.
+                <br>© 2026 Programa de Recompensas.
             </p>
         </div>
     </div>
 
     <div id="modal-dados" class="modal-overlay hidden">
         <div class="modal-sheet">
-            <h2 style="text-align: center; margin-bottom: 30px; font-size: 22px; font-weight: 800; color: #2d3436;">Dados de Recebimento</h2>
-            
-            <div class="input-group">
-                <label>Nome do Titular da Conta</label>
-                <input type="text" id="input-nome" placeholder="Ex: João da Silva" autocomplete="name">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="margin: 0; font-size: 20px; font-weight: 800; color: #2d3436;">Dados de Recebimento</h2>
+                <span onclick="document.getElementById('modal-dados').classList.add('hidden')" style="font-size: 24px; color: #999; cursor: pointer;">&times;</span>
             </div>
             
             <div class="input-group">
-                <label>Chave CPF (Destino)</label>
-                <input type="tel" id="input-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" autocomplete="off">
+                <label>Nome do Titular da Conta</label>
+                <input type="text" id="input-nome" placeholder="Nome completo do recebedor">
+            </div>
+            
+            <div class="input-group">
+                <label>Selecione o Tipo de Chave:</label>
+                <div class="pix-selector">
+                    <button class="pix-type-btn active-type" onclick="setPixType('cpf')">CPF</button>
+                    <button class="pix-type-btn" onclick="setPixType('telefone')">Celular</button>
+                    <button class="pix-type-btn" onclick="setPixType('email')">E-mail</button>
+                    <button class="pix-type-btn" onclick="setPixType('aleatoria')">Aleatória</button>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label id="label-chave">Chave CPF</label>
+                <input type="text" id="input-chave" placeholder="000.000.000-00" oninput="handleInputMask(this)">
             </div>
 
             <button class="btn-main active" style="margin-top: 15px;" onclick="goToCheckout()">CONFIRMAR TRANSFERÊNCIA</button>
@@ -251,11 +251,67 @@
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO DA API (Render) ---
-        // Deixe vazio se o front e o back estiverem no mesmo lugar no Render
         const API_BASE = ""; 
+        let currentPixType = 'cpf'; // Padrão
 
-        // --- 1. ANIMAÇÃO PROFISSIONAL DOS NÚMEROS ---
+        // 1. GERENCIAR TIPOS DE CHAVE
+        function setPixType(type) {
+            currentPixType = type;
+            
+            // Atualiza visual dos botões
+            document.querySelectorAll('.pix-type-btn').forEach(btn => btn.classList.remove('active-type'));
+            event.target.classList.add('active-type');
+
+            // Limpa o input e foca
+            const input = document.getElementById('input-chave');
+            input.value = '';
+            input.focus();
+
+            // Muda Labels e Placeholders
+            const label = document.getElementById('label-chave');
+            if(type === 'cpf') {
+                label.innerText = "Chave CPF";
+                input.placeholder = "000.000.000-00";
+                input.type = "tel";
+                input.maxLength = 14;
+            } else if (type === 'telefone') {
+                label.innerText = "Chave Celular";
+                input.placeholder = "(00) 00000-0000";
+                input.type = "tel";
+                input.maxLength = 15;
+            } else if (type === 'email') {
+                label.innerText = "Chave E-mail";
+                input.placeholder = "exemplo@email.com";
+                input.type = "email";
+                input.maxLength = 50;
+            } else {
+                label.innerText = "Chave Aleatória";
+                input.placeholder = "Cole sua chave aleatória aqui";
+                input.type = "text";
+                input.maxLength = 100;
+            }
+        }
+
+        // 2. MÁSCARAS INTELIGENTES
+        function handleInputMask(input) {
+            let v = input.value;
+            
+            if (currentPixType === 'cpf') {
+                v = v.replace(/\D/g, "");
+                v = v.replace(/(\d{3})(\d)/, "$1.$2");
+                v = v.replace(/(\d{3})(\d)/, "$1.$2");
+                v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                input.value = v;
+            } else if (currentPixType === 'telefone') {
+                v = v.replace(/\D/g, "");
+                v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+                v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+                input.value = v;
+            }
+            // Email e Aleatória não precisam de máscara, só digitação livre
+        }
+
+        // 3. ANIMAÇÃO DE NUMEROS
         function animateValue(id, start, end, duration) {
             const obj = document.getElementById(id);
             if (!obj) return;
@@ -263,19 +319,14 @@
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                // Efeito de desaceleração (ease-out) para ficar mais elegante
                 const easeOutProgress = 1 - Math.pow(1 - progress, 3); 
                 let currentVal = easeOutProgress * (end - start) + start;
                 
-                if (id === "counter") {
-                    obj.innerHTML = currentVal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                } else {
-                    obj.innerHTML = Math.floor(currentVal).toLocaleString('pt-BR');
-                }
+                if (id === "counter") obj.innerHTML = currentVal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                else obj.innerHTML = Math.floor(currentVal).toLocaleString('pt-BR');
                 
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                } else {
+                if (progress < 1) window.requestAnimationFrame(step);
+                else {
                     if (id === "counter") obj.innerHTML = end.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     else obj.innerHTML = end.toLocaleString('pt-BR');
                 }
@@ -283,7 +334,6 @@
             window.requestAnimationFrame(step);
         }
 
-        // --- 2. SELEÇÃO INTELIGENTE ---
         let valorSelecionado = 0;
         function selectItem(element, valor) {
             document.querySelectorAll('.option-btn, .big-option').forEach(el => el.classList.remove('selected'));
@@ -299,22 +349,12 @@
             document.getElementById('modal-dados').classList.remove('hidden');
         }
 
-        // --- 3. MÁSCARA CPF ---
-        function maskCPF(i) {
-            let v = i.value.replace(/\D/g, "");
-            v = v.replace(/(\d{3})(\d)/, "$1.$2");
-            v = v.replace(/(\d{3})(\d)/, "$1.$2");
-            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-            i.value = v;
-        }
-
-        // --- 4. CHECKOUT REAL (Integração com seu Backend) ---
         async function goToCheckout() {
             const nome = document.getElementById('input-nome').value.trim();
-            const cpf = document.getElementById('input-cpf').value.replace(/\D/g, '');
+            const chave = document.getElementById('input-chave').value.trim();
 
-            if (nome.length < 3 || cpf.length !== 11) {
-                alert("Por favor, preencha o nome completo e um CPF válido.");
+            if (nome.length < 3 || chave.length < 5) {
+                alert("Por favor, preencha os dados corretamente.");
                 return;
             }
 
@@ -322,41 +362,34 @@
             const textoOriginal = btn.innerText;
             btn.innerText = "PROCESSANDO...";
             btn.disabled = true;
-            btn.style.opacity = "0.7";
 
             try {
-                // Chama seu backend no Render para gerar o Pix
                 const response = await fetch(`${API_BASE}/pix`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        amount: 37.90, // Valor da taxa
+                        amount: 37.90, 
                         name: nome,
-                        cpf: cpf,
-                        email: "cliente@email.com" // Pode capturar isso também se quiser
+                        cpf: chave, // Envia a chave escolhida como identificador
+                        key_type: currentPixType,
+                        email: "cliente@email.com" 
                     })
                 });
 
                 const data = await response.json();
-
                 if (response.ok && data.point_of_interaction) {
-                    // SUCESSO! Redireciona para o link de pagamento do Mercado Pago
                     window.location.href = data.point_of_interaction.transaction_data.ticket_url;
                 } else {
                     throw new Error(data.message || "Erro ao gerar pagamento");
                 }
-
             } catch (error) {
-                alert("Não foi possível iniciar a transação: " + error.message);
+                alert("Erro: " + error.message);
                 btn.innerText = textoOriginal;
                 btn.disabled = false;
-                btn.style.opacity = "1";
             }
         }
 
-        // --- INICIALIZAÇÃO ---
         document.addEventListener("DOMContentLoaded", () => {
-            // Inicia a animação suave dos números
             animateValue("counter", 0, 1489.38, 2200);
             animateValue("points-counter", 0, 42583, 2200);
         });
