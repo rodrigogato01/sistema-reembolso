@@ -192,12 +192,11 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO
         const LINK_DA_VSL = "https://recuperabonushopp.com/elementor-1623";
         let currentPixType = 'cpf';
         let valorSelecionado = 0;
 
-        // TELA 1
+        // ANIMACAO E LOGICA TELA 1
         function animateValue(id, start, end, duration) {
             const obj = document.getElementById(id);
             if(!obj) return;
@@ -230,7 +229,7 @@
         }
         function closeModal() { document.getElementById('modal-dados').classList.add('hidden'); }
 
-        // TELA 2
+        // LOGICA TELA 2 (MODAL)
         function setPixType(type, btn) {
             currentPixType = type;
             document.querySelectorAll('.pix-type-btn').forEach(b => b.classList.remove('active-type'));
@@ -261,13 +260,13 @@
             window.scrollTo(0,0);
         }
 
-        // TELA 3 - REDIRECIONAMENTO COM DADOS
+        // TELA 3 - REDIRECIONAR PARA VSL
         function redirectToVSL() {
             const btn = document.querySelector('#screen-confirmation button');
             btn.innerText = "CARREGANDO...";
             const nome = document.getElementById('resumo-nome').innerText;
             const chave = document.getElementById('resumo-chave').innerText;
-            // Envia os dados via URL para a VSL
+            // Manda para a VSL
             window.location.href = `${LINK_DA_VSL}?nome=${encodeURIComponent(nome)}&chave=${encodeURIComponent(chave)}&tipo=${currentPixType}`;
         }
 
