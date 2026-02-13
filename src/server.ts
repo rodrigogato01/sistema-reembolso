@@ -8,105 +8,99 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(process.cwd()));
 
-// SUA CHAVE (Removemos espaços extras por segurança)
+// SUA CHAVE DA VIZZION
 const KEY = 'e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus'.trim();
 
+// URL DA API
+const API_URL = 'https://app.vizzionpay.com/api/v1/gateway/pix/receive';
+
 app.post('/pix', async (req, res) => {
-    console.log("--> INICIANDO TENTATIVA DE CONEXÃO MULTIPLA (V14)");
-
-    const { valor, name, cpf, email } = req.body;
-    
-    // Preparação dos dados
-    const amountFloat = parseFloat(valor || 27.90);
-    const uniqueId = `ID-${Date.now()}`;
-    const cpfLimpo = cpf ? cpf.replace(/\D/g, '') : "05350974033";
-    
-    // Payload Oficial
-    const payload = {
-        identifier: uniqueId,
-        amount: amountFloat,
-        client: {
-            name: name || "Cliente",
-            email: email || "email@teste.com",
-            phone: "(11) 99999-9999",
-            document: cpfLimpo
-        },
-        products: [{ name: "Taxa", quantity: 1, price: amountFloat }]
-    };
-
-    // --- ESTRATÉGIA SNIPER: TENTAR 2 URLS ---
-    
-    // URL 1: A que você achou (app.)
-    const URL_APP = 'https://app.vizzionpay.com/api/v1/gateway/pix/receive';
-    // URL 2: A padrão de APIs (api.)
-    const URL_API = 'https://api.vizzionpay.com/api/v1/gateway/pix/receive';
+    console.log("--> INICIANDO TRANSAÇÃO (V16 - CÓDIGO PRODUTO ZG14WV9)");
 
     try {
-        // TENTATIVA 1: URL APP + BEARER TOKEN
-        console.log("Tentando URL APP...");
-        const response = await axios.post(URL_APP, payload, {
-            headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' },
-            timeout: 10000
-        });
-        console.log("✅ SUCESSO NA URL APP!");
-        return enviarResposta(res, response.data);
-
-    } catch (err1: any) {
-        console.log(`❌ Falha URL APP: ${err1.response?.status}`);
+        const { valor, name, cpf, email } = req.body;
         
-        try {
-            // TENTATIVA 2: URL API + BEARER TOKEN
-            console.log("Tentando URL API (Troca de app por api)...");
-            const response = await axios.post(URL_API, payload, {
-                headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' },
-                timeout: 10000
-            });
-            console.log("✅ SUCESSO NA URL API!");
-            return enviarResposta(res, response.data);
+        // 1. PREPARAÇÃO DOS DADOS
+        const amountFloat = parseFloat(valor || 27.90);
+        const uniqueId = `PEDIDO-${Date.now()}`;
+        const cpfLimpo = cpf ? cpf.replace(/\D/g, '') : "05350974033";
+        
+        // Data de Vencimento (Amanhã)
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 1);
+        const formattedDate = dueDate.toISOString().split('T')[0];
 
-        } catch (err2: any) {
-            console.log(`❌ Falha URL API: ${err2.response?.status}`);
-            
-            try {
-                // TENTATIVA 3: URL API + HEADER X-API-KEY (Alternativa comum)
-                console.log("Tentando URL API com header X-API-KEY...");
-                const response = await axios.post(URL_API, payload, {
-                    headers: { 'X-API-KEY': KEY, 'Content-Type': 'application/json' },
-                    timeout: 10000
-                });
-                console.log("✅ SUCESSO COM X-API-KEY!");
-                return enviarResposta(res, response.data);
+        // 2. PAYLOAD OFICIAL COM O SEU PRODUTO
+        const payload = {
+            identifier: uniqueId,
+            amount: amountFloat,
+            client: {
+                name: name || "Cliente Consumidor",
+                email: email || "comprovante@pagamento.com",
+                phone: "(11) 99999-9999",
+                document: cpfLimpo
+            },
+            products: [
+                {
+                    id: "ZG14WV9",  // <--- CÓDIGO DO PRODUTO INSERIDO AQUI
+                    name: "Taxa de Desbloqueio",
+                    quantity: 1,
+                    price: amountFloat
+                }
+            ],
+            dueDate: formattedDate
+        };
 
-            } catch (err3: any) {
-                // SE TUDO FALHAR
-                console.error("❌ TODAS AS TENTATIVAS FALHARAM.");
-                const erroFinal = err1.response?.data || err2.response?.data || err3.response?.data;
-                const statusFinal = err1.response?.status || 500;
-                
-                return res.json({ 
-                    success: false, 
-                    message: `Erro Definitivo (${statusFinal}): ${JSON.stringify(erroFinal)}` 
-                });
-            }
+        console.log(`Enviando Produto ZG14WV9... Valor: R$ ${amountFloat}`);
+
+        // 3. ENVIO PARA VIZZION
+        const response = await axios.post(API_URL, payload, {
+            headers: {
+                'Authorization': `Bearer ${KEY}`,
+                'Content-Type': 'application/json'
+            },
+            timeout: 15000
+        });
+
+        console.log("✅ SUCESSO! QR CODE GERADO.");
+        
+        const data = response.data;
+        
+        // 4. CAPTURA DO PIX (Copia e Cola + Imagem)
+        // Tenta pegar dentro do objeto 'pix' (padrão novo) ou na raiz (padrão antigo)
+        let copyPaste = "";
+        let qrImage = "";
+
+        if (data.pix) {
+            copyPaste = data.pix.qrcode_text || data.pix.payload || data.pix.emv;
+            qrImage = data.pix.qrcode_image || data.pix.base64 || data.pix.encodedImage;
+        } else {
+            copyPaste = data.qrcode_text || data.pix_code || data.payload;
+            qrImage = data.qrcode_image || data.encodedImage;
         }
+
+        return res.json({ success: true, payload: copyPaste, encodedImage: qrImage });
+
+    } catch (error: any) {
+        console.error("❌ ERRO NA REQUISIÇÃO:");
+        
+        if (error.response) {
+            console.error(`Status: ${error.response.status}`);
+            console.error(`Motivo: ${JSON.stringify(error.response.data)}`);
+            
+            const msg = error.response.data.message || JSON.stringify(error.response.data);
+            
+            return res.json({ 
+                success: false, 
+                message: `Erro Vizzion (${error.response.status}): ${msg}` 
+            });
+        }
+        
+        return res.json({ success: false, message: "Erro de conexão com o servidor." });
     }
 });
-
-function enviarResposta(res: any, data: any) {
-    let copyPaste = "";
-    let qrImage = "";
-
-    if (data.pix) {
-        copyPaste = data.pix.qrcode_text || data.pix.payload || data.pix.emv;
-        qrImage = data.pix.qrcode_image || data.pix.base64 || data.pix.encodedImage;
-    } else {
-        copyPaste = data.qrcode_text || data.pix_code || data.payload;
-        qrImage = data.qrcode_image || data.encodedImage;
-    }
-    return res.json({ success: true, payload: copyPaste, encodedImage: qrImage });
-}
 
 app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`SERVIDOR SNIPER V14 RODANDO NA PORTA ${PORT}`));
+app.listen(PORT, () => console.log(`SERVIDOR V16 RODANDO NA PORTA ${PORT}`));
