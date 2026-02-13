@@ -8,119 +8,109 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(process.cwd()));
 
-// SUA CHAVE
-const KEY = 'e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus'.trim();
+// 1. SUA CHAVE (Com .trim() para remover espaços invisíveis)
+const VIZZION_PUBLIC = 'rodrigogato041_glxgrxj8x8yy8jo2'.trim();
+const VIZZION_SECRET = 'e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus'.trim();
+
+// 2. URL DA API
+const API_URL = 'https://app.vizzionpay.com/api/v1/gateway/pix/receive';
 
 app.post('/pix', async (req, res) => {
-    console.log("--> INICIANDO PROTOCOLO QUEBRA-CADEADO (V17)");
+    console.log("--> INICIANDO TRANSAÇÃO (V13 - AUTENTICAÇÃO REFORÇADA)");
 
-    const { valor, name, cpf, email } = req.body;
-    
-    // PREPARAÇÃO DOS DADOS
-    const amountFloat = parseFloat(valor || 27.90);
-    const uniqueId = `ID-${Date.now()}`;
-    const cpfLimpo = cpf ? cpf.replace(/\D/g, '') : "05350974033";
-    
-    // Data de Vencimento
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 1);
-    const formattedDate = dueDate.toISOString().split('T')[0];
+    try {
+        let { valor, name, cpf, email, phone } = req.body;
 
-    // PAYLOAD (COM O PRODUTO ZG14WV9 QUE VOCÊ ME PASSOU)
-    const payload = {
-        identifier: uniqueId,
-        amount: amountFloat,
-        client: {
-            name: name || "Cliente Consumidor",
-            email: email || "comprovante@pagamento.com",
-            phone: "(11) 99999-9999",
-            document: cpfLimpo
-        },
-        products: [
-            {
-                id: "ZG14WV9", // <--- ID DO PRODUTO OBRIGATÓRIO
-                name: "Taxa de Desbloqueio",
-                quantity: 1,
-                price: amountFloat
-            }
-        ],
-        dueDate: formattedDate
-    };
+        if (!valor) valor = 27.90;
 
-    // LISTA DE TENTATIVAS (AS 4 COMBINAÇÕES POSSÍVEIS)
-    const tentativas = [
-        {
-            nome: "TENTATIVA 1 (URL API + Bearer)",
-            url: 'https://api.vizzionpay.com/api/v1/gateway/pix/receive',
-            headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' }
-        },
-        {
-            nome: "TENTATIVA 2 (URL APP + Bearer)",
-            url: 'https://app.vizzionpay.com/api/v1/gateway/pix/receive',
-            headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' }
-        },
-        {
-            nome: "TENTATIVA 3 (URL API + X-API-KEY)",
-            url: 'https://api.vizzionpay.com/api/v1/gateway/pix/receive',
-            headers: { 'X-API-KEY': KEY, 'Content-Type': 'application/json' }
-        },
-        {
-            nome: "TENTATIVA 4 (URL APP + X-API-KEY)",
-            url: 'https://app.vizzionpay.com/api/v1/gateway/pix/receive',
-            headers: { 'X-API-KEY': KEY, 'Content-Type': 'application/json' }
+        let amountNumber = Number(valor);
+            
+        if (Number.isInteger(amountNumber) && amountNumber > 1000) {
+            amountNumber = amountNumber / 100;
         }
-    ];
 
-    // LOOP DE TENTATIVAS
-    for (const tentativa of tentativas) {
-        try {
-            console.log(`Trying: ${tentativa.nome}...`);
+        amountNumber = Math.round(amountNumber * 100) / 100;
+
+        const cpfLimpo = cpf ? cpf.replace(/\D/g, '') : "12345678900";
+        
+        // Gera ID único
+        const uniqueId = `ID-${Date.now()}`;
+
+        // Data de vencimento (Hoje + 1 dia)
+        const dueDate = new Date();
+        dueDate.setDate(dueDate.getDate() + 1);
+        const formattedDate = dueDate.toISOString().split('T')[0];
+
+        // 4. PAYLOAD OFICIAL
+        const payloadVizzion = {
+            identifier: uniqueId,
+            amount: amountNumber,
+            client: {
+                name: name || "Cliente Consumidor",
+                email: email || "cliente@pagamento.com",
+                phone: phone || "(11) 99999-9999",
+                document: cpfLimpo
+            },
+            products: [
+                {
+                    id: "v3b8k2m9x7",
+                    name: "Taxa de Desbloqueio",
+                    quantity: 1,
+                    price: amountNumber
+                }
+            ],
+            dueDate: formattedDate
+        };
+
+        console.log(`Enviando para Vizzion com a chave iniciada em: ${VIZZION_SECRET.substring(0, 5)}...`);
+
+        // 5. ENVIO COM CABEÇALHOS DE NAVEGADOR (Para evitar bloqueio)
+        const response = await axios.post(API_URL, payloadVizzion, {
+            headers: {
+                'x-public-key': VIZZION_PUBLIC,
+                'x-secret-key': VIZZION_SECRET,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            timeout: 25000 // Aumentei o tempo de espera
+        });
+
+        console.log("✅ VIZZION RESPONDEU 201 SUCESSO!");
+        
+        const data = response.data;
+
+        let payloadPix = "";
+        let imagemPix = "";
+
+        if (data.pix) {
+            payloadPix = data.pix.code || "";
+            imagemPix = data.pix.base64 || data.pix.image || "";
+        }
+
+        return res.json({
+            success: true,
+            payload: payloadPix,
+            encodedImage: imagemPix
+        });
+
+    } catch (error: any) {
+        console.error("❌ FALHA NA REQUISIÇÃO:");
+        
+        if (error.response) {
+            console.error(`Status: ${error.response.status}`); // 401 = Erro de Chave, 400 = Erro de Dados
+            console.error(`Mensagem: ${JSON.stringify(error.response.data)}`);
             
-            const response = await axios.post(tentativa.url, payload, {
-                headers: tentativa.headers,
-                timeout: 8000 // 8 segundos por tentativa
-            });
-
-            console.log(`✅ SUCESSO NA ${tentativa.nome}!`);
-            
-            // SE DEU CERTO, RETORNA E PARA O LOOP
-            const data = response.data;
-            let copyPaste = "";
-            let qrImage = "";
-
-            if (data.pix) {
-                copyPaste = data.pix.qrcode_text || data.pix.payload || data.pix.emv;
-                qrImage = data.pix.qrcode_image || data.pix.base64 || data.pix.encodedImage;
-            } else {
-                copyPaste = data.qrcode_text || data.pix_code || data.payload;
-                qrImage = data.qrcode_image || data.encodedImage;
-            }
-
-            return res.json({ success: true, payload: copyPaste, encodedImage: qrImage });
-
-        } catch (error: any) {
-            const status = error.response?.status;
-            console.log(`❌ Falhou ${tentativa.nome} (Status: ${status})`);
-            
-            // Se o erro NÃO for 401 (ex: 400, 500), significa que a chave funcionou mas os dados estão errados.
-            // Nesse caso, paramos e mostramos o erro real, pois não adianta trocar a chave.
-            if (status && status !== 401 && status !== 403) {
-                 const msg = error.response?.data?.message || JSON.stringify(error.response?.data);
-                 console.log("Erro de dados (não de chave). Parando tentativas.");
-                 return res.json({ success: false, message: `Erro Vizzion (${status}): ${msg}` });
-            }
-            // Se for 401, o loop continua para a próxima tentativa...
+            const msg = error.response.data.message || JSON.stringify(error.response.data);
+            return res.json({ success: false, message: `Erro Vizzion (${error.response.status}): ${msg}` });
+        } else {
+            console.error(error.message);
+            return res.json({ success: false, message: "Erro de conexão (Time out ou URL errada)" });
         }
     }
-
-    // SE CHEGOU AQUI, TODAS FALHARAM
-    return res.json({ 
-        success: false, 
-        message: "Erro 401: Nenhuma combinação de URL/Chave funcionou. Verifique se a chave está ativa no painel." 
-    });
 });
 
+// Rota para o HTML
 app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`SERVIDOR QUEBRA-CADEADO V17 RODANDO NA PORTA ${PORT}`));
+app.listen(PORT, () => console.log(`SERVIDOR V13 RODANDO NA PORTA ${PORT}`));
