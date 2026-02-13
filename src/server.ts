@@ -6,6 +6,7 @@ import path from 'path';
 const app = express();
 app.use(cors());
 app.use(express.json());
+// Serve os arquivos estáticos (HTML, CSS)
 app.use(express.static(process.cwd()));
 
 // --- CONFIGURAÇÕES DE PRODUÇÃO ---
@@ -19,23 +20,19 @@ app.post('/pix', async (req, res) => {
         // Recebe os dados do Frontend
         let { valor, name, cpf, email } = req.body;
 
-        // 1. VALIDAÇÃO DO VALOR (Crítico para não cobrar errado)
-        // Se não vier valor, usa o padrão da taxa.
+        // 1. VALIDAÇÃO DO VALOR
         if (!valor) valor = "27.90";
         
-        // Converte R$ 27.90 para 2790 (Centavos) - Obrigatório para Vizzion
+        // Converte para Centavos (Inteiro)
         const valorEmCentavos = Math.round(parseFloat(valor) * 100);
 
-        // 2. TRATAMENTO DOS DADOS DO CLIENTE
-        // Remove tudo que não for número do CPF
+        // 2. TRATAMENTO DOS DADOS
         let cpfLimpo = cpf ? cpf.replace(/\D/g, '') : '';
 
-        // FALLBACK DE SEGURANÇA:
-        // Se o cliente chegou aqui sem CPF (erro de fluxo), usamos um CPF genérico
-        // para garantir que o QR Code seja gerado e você receba o dinheiro.
+        // Fallback: Se não tiver CPF, usa um genérico válido para não perder a venda
         if (!cpfLimpo || cpfLimpo.length < 11) {
-            console.log("Aviso: Cliente sem CPF identificado. Usando genérico para processar pagamento.");
-            cpfLimpo = "07246738000"; // CPF Válido Genérico (Consumidor)
+            console.log("Aviso: Cliente sem CPF. Usando genérico.");
+            cpfLimpo = "07246738000"; 
         }
         
         if (!name || name.length < 3) {
@@ -46,7 +43,7 @@ app.post('/pix', async (req, res) => {
             email = "comprovante@pagamento.com";
         }
 
-        console.log(`Processando: R$ ${valor} (${valorEmCentavos} cts) | Cliente: ${name}`);
+        console.log(`Processando: R$ ${valor} | Cliente: ${name}`);
 
         // 3. ENVIO PARA A VIZZION
         const response = await axios.post(API_URL, {
@@ -56,7 +53,7 @@ app.post('/pix', async (req, res) => {
                 name: name,
                 document: cpfLimpo,
                 email: email,
-                phone: "11999999999" // Telefone não é obrigatório ser real para o Pix funcionar
+                phone: "11999999999"
             }
         }, {
             headers: {
@@ -64,14 +61,13 @@ app.post('/pix', async (req, res) => {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            timeout: 20000 // 20 segundos de tolerância
+            timeout: 20000 
         });
 
         console.log("✅ VIZZION APROVOU:", response.status);
 
         const data = response.data;
         
-        // Captura o código Pix em qualquer campo que a API devolver
         const payload = data.qr_code || data.pix_code || data.emv || data.payload;
         const imagem = data.qr_code_base64 || data.encodedImage || data.pix_qrcode;
 
@@ -81,10 +77,24 @@ app.post('/pix', async (req, res) => {
         console.error("❌ FALHA NA TRANSAÇÃO:");
         
         if (error.response) {
-            // Erro retornado pelo Banco/API
             console.error(`Status API: ${error.response.status}`);
             console.error(`Erro Detalhado: ${JSON.stringify(error.response.data)}`);
             
             return res.json({ 
                 success: false, 
-                message: `Erro no Processamento (${error.response.status}). Verifique
+                message: `Erro no Processamento (${error.response.status}). Verifique os dados.` 
+            });
+        } else {
+            console.error(error.message);
+            return res.json({ success: false, message: "Erro de comunicação com o gateway." });
+        }
+    }
+});
+
+// Rota para servir a página principal
+app.get('/', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'index.html'));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`SERVIDOR DE PRODUÇÃO RODANDO NA PORTA ${PORT}`));
