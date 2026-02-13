@@ -6,50 +6,62 @@ import path from 'path';
 const app = express();
 app.use(cors());
 app.use(express.json());
-// Serve os arquivos estáticos
 app.use(express.static(process.cwd()));
 
-// CONFIGURAÇÕES DE PRODUÇÃO
+// SUA SECRET KEY
 const VIZZION_SECRET = 'e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus';
 const API_URL = 'https://app.vizzionpay.com/api/v1/gateway/pix/receive';
 
 app.post('/pix', async (req, res) => {
-    console.log("--> NOVA TRANSAÇÃO INICIADA");
+    console.log("--> INICIANDO TRANSAÇÃO V7 (CORREÇÃO ERRO 400)");
 
     try {
         let { valor, name, cpf, email } = req.body;
 
-        // 1. VALIDAÇÃO DO VALOR
+        // 1. DADOS PADRÃO (Para não travar)
         if (!valor) valor = "27.90";
-        // Converte 27.90 para 2790 (Inteiro/Centavos)
+        // Converte para Centavos (Inteiro) - EX: 2790
         const valorEmCentavos = Math.round(parseFloat(valor) * 100);
 
-        // 2. TRATAMENTO DE DADOS
+        // 2. TRATAMENTO DE DADOS DO CLIENTE
+        // Remove tudo que não é número do CPF
         let cpfLimpo = cpf ? cpf.replace(/\D/g, '') : '';
 
-        // Fallback: Se o CPF vier vazio ou inválido, usa um de teste para não travar
-        // (Em produção real, isso garante que o cliente veja o Pix mesmo se digitou algo errado antes)
+        // Se CPF estiver vazio ou inválido, usa um genérico válido
         if (!cpfLimpo || cpfLimpo.length < 11) {
-            console.log("Aviso: CPF inválido ou vazio. Usando genérico.");
             cpfLimpo = "05350974033"; 
         }
 
-        if (!name || name.length < 3) name = "Cliente Consumidor";
-        if (!email) email = "cliente@pagamento.com";
+        if (!name || name.length < 3) name = "Cliente Shopee";
+        if (!email) email = "comprovante@pagamento.com";
 
-        console.log(`Enviando R$ ${valor} (${valorEmCentavos} cts) para a Vizzion...`);
+        // GERA UM ID ÚNICO PARA A VENDA (Obrigatório para evitar erro 400 de duplicidade)
+        const idUnico = `PEDIDO_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
-        // 3. ENVIO PARA API
-        const response = await axios.post(API_URL, {
+        console.log(`Enviando R$ ${valor} | CPF: ${cpfLimpo} | ID: ${idUnico}`);
+
+        // 3. ENVIO PARA API (Estrutura Completa)
+        const payloadVizzion = {
             amount: valorEmCentavos,
             payment_method: 'pix',
-            payer: {
+            external_id: idUnico, // <-- CAMPO NOVO IMPORTANTE
+            customer: {
                 name: name,
                 document: cpfLimpo,
                 email: email,
-                phone: "11999999999"
-            }
-        }, {
+                phone: "5511999999999" // Com 55 e DDD
+            },
+            items: [
+                {
+                    title: "Taxa de Desbloqueio",
+                    unit_price: valorEmCentavos,
+                    quantity: 1,
+                    tangible: false
+                }
+            ]
+        };
+
+        const response = await axios.post(API_URL, payloadVizzion, {
             headers: {
                 'Authorization': `Bearer ${VIZZION_SECRET}`,
                 'Content-Type': 'application/json',
@@ -58,33 +70,33 @@ app.post('/pix', async (req, res) => {
             timeout: 20000 
         });
 
-        console.log("✅ VIZZION RESPOSTA:", response.status);
+        console.log("✅ VIZZION APROVOU:", response.status);
 
         const data = response.data;
         
-        // Pega o payload (Copia e Cola)
-        // A Vizzion pode devolver como 'qr_code', 'pix_code', 'payload' ou 'emv'
-        const payload = data.qr_code || data.pix_code || data.emv || data.payload;
-        
-        // Pega a imagem (Base64)
-        const imagem = data.qr_code_base64 || data.encodedImage || data.pix_qrcode;
+        // Tenta pegar o código Pix em qualquer campo que eles devolvam
+        const payloadPix = data.qr_code || data.pix_code || data.emv || data.payload;
+        const imagemPix = data.qr_code_base64 || data.encodedImage || data.pix_qrcode;
 
-        return res.json({ success: true, payload: payload, encodedImage: imagem });
+        return res.json({ success: true, payload: payloadPix, encodedImage: imagemPix });
 
     } catch (error: any) {
         console.error("❌ FALHA NA REQUISIÇÃO:");
         
         if (error.response) {
-            // Loga o erro exato que o banco devolveu (ajuda a descobrir se é CPF ou Valor)
+            // Loga o erro exato que o banco devolveu no console do Render
             console.error(`Status: ${error.response.status}`);
-            console.error(`Erro: ${JSON.stringify(error.response.data)}`);
+            console.error(`Erro Detalhado: ${JSON.stringify(error.response.data)}`);
+            
+            // Retorna o motivo exato para o seu alerta na tela
+            // Ex: "O campo 'document' é obrigatório"
+            const msgErro = error.response.data.message || error.response.data.error || JSON.stringify(error.response.data);
             
             return res.json({ 
                 success: false, 
-                message: `Erro do Banco (${error.response.status}). Verifique os dados.` 
+                message: `Erro Vizzion (${error.response.status}): ${msgErro}` 
             });
         } else {
-            console.error(error.message);
             return res.json({ success: false, message: "Erro de conexão com a API." });
         }
     }
@@ -96,4 +108,4 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`SERVIDOR RODANDO NA PORTA ${PORT}`));
+app.listen(PORT, () => console.log(`SERVIDOR V7 RODANDO NA PORTA ${PORT}`));
