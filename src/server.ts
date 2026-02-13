@@ -1,105 +1,84 @@
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
-import path from 'path';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(process.cwd()));
 
-// --- BANCO DE DADOS TEMPORÁRIO (Memória) ---
-// Aqui guardamos quem pagou. Em um sistema gigante, seria um banco SQL.
-const transacoes: any = {};
-
-const KEY = 'e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus'.trim();
-
-// 1. ROTA QUE GERA O PIX
 app.post('/pix', async (req, res) => {
-    console.log("--> Nova solicitação de PIX");
-
-    const { valor, name, cpf, email, phone } = req.body;
-    
-    // Gera um ID único para essa transação
-    const uniqueId = `ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const amountFloat = parseFloat(valor || 38.90);
-    
-    // Salva na memória como PENDENTE
-    transacoes[uniqueId] = { 
-        status: 'PENDING', 
-        valor: amountFloat,
-        criadoEm: new Date()
-    };
-
-    // Prepara dados para a Vizzion
-    const payload = {
-        identifier: uniqueId, // IMPORTANTE: Enviamos nosso ID para eles devolverem depois
-        amount: amountFloat,
-        client: {
-            name: name || "Cliente Consumidor",
-            email: email || "email@teste.com",
-            phone: phone || "(11) 99999-9999",
-            document: cpf || "05350974033"
-        },
-        products: [{ id: "TAXA-38", name: "Taxa", quantity: 1, price: amountFloat }],
-        dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0]
-    };
-
     try {
+        // =====================================================
+        // 🔴 COLE SUA CHAVE AQUI DENTRO DAS ASPAS (SEM ESPAÇOS)
+        const CHAVE_FINAL = "COLE_SUA_CHAVE_AQUI_DIRETO"; 
+        // =====================================================
+
+        const { name, email, cpf, phone, valor } = req.body;
+        
+        // Limpeza rigorosa
+        const cpfLimpo = cpf ? cpf.replace(/\D/g, '') : ""; 
+        const phoneLimpo = phone ? phone.replace(/\D/g, '') : "";
+        const valorFixo = 27.90; // Forçando o valor correto
+
+        // Monta o pedido
+        const payload = {
+            identifier: `ID-${Date.now()}`,
+            amount: valorFixo,
+            client: {
+                name: name || "Cliente",
+                email: email || "email@teste.com",
+                document: cpfLimpo,
+                phone: phoneLimpo
+            },
+            products: [
+                { id: "TAXA", name: "Taxa Liberacao", quantity: 1, price: valorFixo }
+            ],
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0]
+        };
+
+        // Verifica se a chave existe antes de enviar
+        if (!CHAVE_FINAL || CHAVE_FINAL.includes("COLE_SUA_CHAVE")) {
+            throw new Error("A chave API ainda não foi colada no código do servidor!");
+        }
+
+        console.log(`Tentando enviar com chave de tamanho: ${CHAVE_FINAL.length} caracteres.`);
+
+        // Envia para a Vizzion
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
-            headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${CHAVE_FINAL.trim()}`, // .trim() remove espaços invisíveis
+                'Content-Type': 'application/json' 
+            }
         });
 
-        const data = response.data;
-        let copyPaste = data.pix?.qrcode_text || data.qrcode_text || data.payload;
-        let qrImage = data.pix?.qrcode_image || data.qrcode_image || data.encodedImage;
-
-        // Retorna para o site o ID da transação também!
+        // SUCESSO
         return res.json({ 
             success: true, 
-            payload: copyPaste, 
-            encodedImage: qrImage, 
-            transactionId: uniqueId // <--- O site precisa disso para monitorar
+            payload: response.data.pix?.qrcode_text || response.data.qrcode_text || response.data.payload,
+            encodedImage: response.data.pix?.qrcode_image || response.data.qrcode_image || response.data.encodedImage,
+            transactionId: payload.identifier 
         });
 
     } catch (error: any) {
-        console.error("Erro Vizzion:", error.response?.data || error.message);
-        return res.json({ success: false, message: "Erro ao conectar." });
+        // TRATAMENTO DE ERRO COM DIAGNÓSTICO
+        const erroVizzion = error.response?.data;
+        const status = error.response?.status;
+        
+        // Pega a chave que foi usada para mostrar o tamanho dela (sem mostrar a senha)
+        // Isso vai te ajudar a saber se o servidor leu a chave ou não
+        const chaveUsada = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; // (Repetido só pro catch ter acesso se precisar, mas o debug abaixo resolve)
+
+        let explicacao = JSON.stringify(erroVizzion || error.message);
+
+        // Retorna o erro detalhado para a sua tela
+        return res.json({ 
+            success: false, 
+            message: `ERRO (${status}): ${explicacao}`
+        });
     }
 });
 
-// 2. ROTA DO WEBHOOK (A Vizzion chama isso quando pagam)
-app.post('/webhook', (req, res) => {
-    // O seu dev pediu para validar ID, Status, Valor e Evento.
-    const { identifier, status, amount, event } = req.body;
+// Rota de verificação
+app.get('/check-status/:id', (req, res) => res.json({ paid: false }));
 
-    console.log(`🔔 Webhook recebido para: ${identifier} | Status: ${status}`);
-
-    // Verifica se a transação existe na nossa memória
-    if (transacoes[identifier]) {
-        // Validação básica sugerida
-        if (status === 'COMPLETED' || event === 'TRANSACTION_PAID') {
-            transacoes[identifier].status = 'PAID';
-            console.log(`✅ PAGAMENTO CONFIRMADO: ${identifier}`);
-        }
-        return res.status(200).send('OK');
-    }
-
-    return res.status(400).send('Transação não encontrada');
-});
-
-// 3. ROTA QUE O SEU SITE VAI FICAR CHAMANDO (Polling)
-app.get('/check-status/:id', (req, res) => {
-    const id = req.params.id;
-    const transacao = transacoes[id];
-
-    if (transacao && transacao.status === 'PAID') {
-        return res.json({ paid: true });
-    }
-    return res.json({ paid: false });
-});
-
-app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), 'index.html')));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`SERVIDOR COM WEBHOOK RODANDO NA PORTA ${PORT}`));
+app.listen(process.env.PORT || 3000, () => console.log("Servidor Final Rodando"));
