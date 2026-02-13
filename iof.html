@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 .button-container { display: flex; justify-content: center; align-items: center; width: 100%; padding: 20px; }
@@ -29,6 +30,7 @@
 .btn-copiar { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 50px; font-weight: 700; font-size: 16px; margin-top: 15px; cursor: pointer; }
 </style>
 </head>
+
 <body>
 
 <div class="button-container">
@@ -38,6 +40,7 @@
 </div>
 
 <div class="overlay" id="overlay"></div>
+
 <div class="modal-pix" id="modal_pix">
     <h3 style="color:#333; margin-bottom:5px;">✅ QR CODE GERADO</h3>
     <p style="color:#666; font-size:13px; margin-bottom:15px;">Finalize o pagamento para liberar seu saque.</p>
@@ -50,9 +53,9 @@
 
 <script>
 
-// =======================
+// =====================
 // ⏳ DELAY 30 SEGUNDOS
-// =======================
+// =====================
 let tempo = 30;
 const btnDelay = document.getElementById("btn_pagar");
 btnDelay.disabled = true;
@@ -69,14 +72,9 @@ const contador = setInterval(() => {
 }, 1000);
 
 
-// =======================
-// FUNÇÕES ORIGINAIS
-// =======================
-function getURLParameter(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
-
+// =====================
+// GERAR PIX
+// =====================
 function gerarPix() {
 
     const btn = document.getElementById("btn_pagar");
@@ -100,18 +98,20 @@ function gerarPix() {
             const qrDiv = document.getElementById("qr_code_div");
             qrDiv.innerHTML = "";
 
+            // ✅ CORREÇÃO DO QR CODE
             if (data.encodedImage && data.encodedImage.length > 50) {
                 const src = data.encodedImage.startsWith('http')
                     ? data.encodedImage
                     : `data:image/png;base64,${data.encodedImage}`;
+
                 qrDiv.innerHTML = `<img src="${src}">`;
             } else {
                 new QRCode(qrDiv, { text: data.payload, width: 200, height: 200 });
             }
 
-            // =======================
-            // 🔎 VERIFICAR PAGAMENTO
-            // =======================
+            // =====================
+            // VERIFICAR PAGAMENTO
+            // =====================
             const verificar = setInterval(() => {
 
                 fetch(`https://checkout-pix-profissional.onrender.com/status/${data.transactionId}`)
@@ -122,11 +122,9 @@ function gerarPix() {
 
                         clearInterval(verificar);
 
-                        // ❌ FECHA MODAL
                         document.getElementById("overlay").style.display = "none";
                         document.getElementById("modal_pix").style.display = "none";
 
-                        // 🎯 BOTÃO FINAL
                         const novoBotao = document.createElement("button");
                         novoBotao.className = "btn-resgatar";
                         novoBotao.style.animation = "none";
