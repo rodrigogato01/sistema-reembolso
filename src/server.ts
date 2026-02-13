@@ -97,45 +97,14 @@ app.post('/pix', async (req, res) => {
         console.error("❌ FALHA NA REQUISIÇÃO:");
         
         if (error.response) {
-
-            const debugData = {
-                status: error.response.status,
-                statusText: error.response.statusText,
-                headers: error.response.headers,
-                data: error.response.data,
-                request: {
-                    url: error.config?.url,
-                    method: error.config?.method,
-                    payload: error.config?.data
-                }
-            };
-        
-            // LOG COMPLETO NO CONSOLE DO SERVIDOR
-            console.error("===== ERRO COMPLETO VIZZION =====");
-            console.error(JSON.stringify(debugData, null, 2));
-            console.error("==================================");
-        
-            // RETORNA TUDO NO NAVEGADOR (DEBUG)
-            return res.json({
-                success: false,
-                message: "Erro na Vizzion",
-                debug: debugData
-            });
-        
+            console.error(`Status: ${error.response.status}`); // 401 = Erro de Chave, 400 = Erro de Dados
+            console.error(`Mensagem: ${JSON.stringify(error.response.data)}`);
+            
+            const msg = error.response.data.message || JSON.stringify(error.response.data);
+            return res.json({ success: false, message: `Erro Vizzion (${error.response.status}): ${msg}` });
         } else {
-        
-            console.error("===== ERRO DE CONEXÃO =====");
             console.error(error.message);
-            console.error("===========================");
-        
-            return res.json({
-                success: false,
-                message: "Erro de conexão (Time out ou URL errada)",
-                debug: {
-                    message: error.message,
-                    stack: error.stack
-                }
-            });
+            return res.json({ success: false, message: "Erro de conexão (Time out ou URL errada)" });
         }
     }
 });
