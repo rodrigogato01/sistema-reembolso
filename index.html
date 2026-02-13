@@ -7,8 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         /* =========================================
-           CSS GERAL & TELA 1
-           ========================================= */
+            CSS GERAL & TELA 1
+            ========================================= */
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body { 
@@ -65,62 +65,21 @@
         .shop-icon { width: 50px; height: 50px; background: #fff5f0; color: #F15A29; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 900; flex-shrink: 0; }
 
         /* =========================================
-           CSS TELA 2 (MODAL - CORRIGIDO PARA CELULAR)
-           ========================================= */
+            CSS TELA 2 (MODAL)
+            ========================================= */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; justify-content: center; z-index: 100; backdrop-filter: blur(2px); }
-        
-        .modal { 
-            width: 100%; max-width: 450px; 
-            background: #f5f5f5; 
-            border-radius: 18px 18px 0 0; 
-            /* CORREÇÃO AQUI: Altura máxima e Flexbox para permitir rolagem */
-            max-height: 90vh; 
-            display: flex;
-            flex-direction: column;
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-            box-shadow: 0 -5px 30px rgba(0,0,0,0.2); 
-        }
-        
+        .modal { width: 100%; max-width: 450px; background: #f5f5f5; border-radius: 18px 18px 0 0; overflow: hidden; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 -5px 30px rgba(0,0,0,0.2); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
-        .modal-header { 
-            text-align: center; font-weight: bold; font-size: 18px; padding: 18px; 
-            border-bottom: 1px solid #ddd; background: #f0f0f0; color: #333; 
-            position: relative; flex-shrink: 0; 
-        }
-        
+        .modal-header { text-align: center; font-weight: bold; font-size: 18px; padding: 18px; border-bottom: 1px solid #ddd; background: #f0f0f0; color: #333; position: relative; }
         .close-btn { position: absolute; right: 20px; top: 18px; cursor: pointer; color: #999; font-size: 22px; line-height: 22px; }
-        
-        .modal-body { 
-            padding: 25px 20px; 
-            /* CORREÇÃO AQUI: Scroll ativado se não couber na tela */
-            overflow-y: auto; 
-            padding-bottom: 50px; /* Espaço extra para rolar até o fim no celular */
-        }
-        
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; margin-bottom: 6px; font-weight: 600; color: #555; text-transform: uppercase; }
-        
-        /* CORREÇÃO AQUI: Estilo Caixa Branca Visível */
-        .form-group input, .form-group select { 
-            width: 100%; 
-            border: 1px solid #ccc; /* Borda visível */
-            background: #fff;       /* Fundo branco */
-            padding: 14px;          /* Maior área de toque */
-            border-radius: 8px; 
-            font-size: 16px; 
-            outline: none; 
-            color: #333; 
-            font-family: 'Roboto', sans-serif; 
-            appearance: none;
-        }
-        
+        .modal-body { padding: 25px 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; margin-bottom: 8px; font-weight: 600; color: #555; text-transform: uppercase; }
+        .form-group input, .form-group select { width: 100%; border: none; border-bottom: 1px solid #ddd; padding: 12px 0; font-size: 16px; background: transparent; outline: none; color: #333; border-radius: 0; font-family: 'Roboto', sans-serif; }
         .form-group input::placeholder { color: #ccc; font-weight: 400; }
-        .form-group input:focus, .form-group select:focus { border-color: #F15A29; box-shadow: 0 0 0 2px rgba(241, 90, 41, 0.1); }
-        
+        .form-group input:focus, .form-group select:focus { border-bottom-color: #F15A29; }
         .select-wrapper { position: relative; }
-        .select-wrapper::after { content: '▼'; font-size: 10px; color: #bbb; position: absolute; right: 15px; top: 18px; pointer-events: none; }
-        
+        .select-wrapper::after { content: '▼'; font-size: 10px; color: #bbb; position: absolute; right: 0; top: 15px; pointer-events: none; }
         .refund-box { display: flex; align-items: center; justify-content: center; gap: 8px; background: #e8f5e9; border-radius: 10px; padding: 12px; font-size: 13px; color: #00a870; font-weight: 500; margin: 25px 0; border: 1px solid #c8e6c9; }
         .btn-confirm { width: 100%; padding: 16px; border-radius: 10px; border: none; background: #F15A29; color: white; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(241, 90, 41, 0.3); text-transform: uppercase; transition: 0.2s; }
         .btn-confirm:active { transform: scale(0.98); }
@@ -129,28 +88,20 @@
         .secure { text-align: center; font-size: 11px; color: #999; padding-top: 15px; border-top: 1px solid #eee; margin-top: 10px; }
 
         /* =========================================
-           CSS TELA 3 (CONFIRMAÇÃO - NOVO DESIGN FIEL)
-           ========================================= */
+            CSS TELA 3 (CONFIRMAÇÃO)
+            ========================================= */
         .app { width: 100%; max-width: 420px; padding-bottom: 140px; margin: 0 auto; }
-
-        /* CARD PADRÃO */
         .card { background: #fff; margin: 15px; padding: 18px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .card h3 { font-size: 13px; color: #666; margin-bottom: 12px; letter-spacing: .3px; font-weight: 700; text-transform: uppercase; }
-
-        /* DESTAQUE */
         .destaque { border-left: 4px solid #ee4d2d; }
         .valor-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .valor { font-size: 22px; font-weight: bold; color: #ee4d2d; }
         .badge { background: #dff5e8; color: #1f9c6b; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
         .descricao { font-size: 14px; color: #333; line-height: 1.4; }
-
-        /* DADOS */
         .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
         .info-row:last-child { border-bottom: none; }
         .info-row span { color: #777; }
         .info-row strong { color: #000; }
-
-        /* STEPS */
         .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
         .circle { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold; flex-shrink: 0; }
         .red { background: #ffe5e0; color: #ee4d2d; }
@@ -158,12 +109,36 @@
         .gray { background: #eee; color: #999; }
         .step p { font-size: 13px; color: #777; margin: 2px 0 0 0; }
         .green-text { color: #1f9c6b; }
-
-        /* BOTTOM BAR */
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; margin: 0 auto; width: 100%; max-width: 450px; background: #fff; padding: 15px; box-shadow: 0 -4px 10px rgba(0,0,0,0.08); z-index: 50; }
         .cta { width: 100%; padding: 16px; background: #ee4d2d; color: #fff; font-weight: bold; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; text-transform: uppercase; }
         .cta:hover { opacity: 0.95; }
         .reembolso { text-align: center; font-size: 12px; color: #1f9c6b; margin-top: 8px; font-weight: 500; }
+
+        /* --- PARTE ADICIONADA: ESTILO SOMATÓRIA --- */
+        .resumo-financeiro {
+            background-color: #f9f9f9;
+            border: 1px dashed #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .linha-valor {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .linha-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: 900;
+            color: #333;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            margin-top: 5px;
+        }
 
     </style>
 </head>
@@ -171,7 +146,6 @@
 
     <div id="screen-dashboard" class="container-dashboard">
         <h1 class="title">Resgatar recompensas</h1>
-
         <div class="saldo-card">
             <div class="saldo-info">
                 <span class="saldo-label">Seu saldo</span>
@@ -180,25 +154,18 @@
             </div>
             <div class="coin">$</div>
         </div>
-
         <div class="bonus-bar">Última bonificação acrescentada: <strong>R$ 845,24</strong></div>
-
         <div class="card-white">
             <h3>Ganhar bônus</h3>
             <p class="pix-info">Transferência via <span class="pix-badge">PIX</span></p>
-
             <div class="valores-grid">
                 <button class="btn-valor" onclick="selectItem(this, 1.5)">R$ 1,5</button>
                 <button class="btn-valor" onclick="selectItem(this, 5.0)">R$ 5</button>
                 <button class="btn-valor" onclick="selectItem(this, 10.0)">R$ 10</button>
             </div>
-
             <div class="input-valor-big" onclick="selectItem(this, 1342.03)">R$ 1.342,03</div>
-
             <button id="btn-sacar" class="btn-action btn-disabled" onclick="openModal()">GANHAR BÔNUS</button>
-
            <p class="info-legal">Para sacar sua bonificação, você precisa de um saldo mínimo de R$1,5.<br>Os limites de saque podem variar conforme a região.</p>
-
             <div class="shop-section">
                 <div class="shop-text"><h4>Obtenha seu acesso exclusivo</h4><p>Descubra todos os benefícios liberados especialmente para você.</p></div>
                 <div class="shop-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></div>
@@ -211,38 +178,25 @@
             <div class="modal-header">Finalizar Saque <span class="close-btn" onclick="closeModal()">&times;</span></div>
             <div class="modal-body">
                 <div class="form-group"><label>Nome Completo</label><input type="text" id="input-nome" placeholder="Digite seu nome completo"></div>
-                
                 <div class="form-group"><label>E-mail (Obrigatório)</label><input type="email" id="input-email" placeholder="seu@email.com"></div>
-                
                 <div class="form-group">
                     <label>CPF do Titular (Obrigatório)</label>
                     <input type="tel" id="input-doc-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)">
                 </div>
-
                 <div class="form-group">
                     <label>Celular</label>
                     <input type="tel" id="input-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="maskPhone(this)">
                 </div>
-
                 <div class="form-group"><label>Tipo de Chave Pix</label><div class="select-wrapper"><select id="select-tipo" onchange="changeMask()"><option value="cpf">CPF</option><option value="telefone">Celular</option><option value="email">E-mail</option><option value="aleatoria">Chave Aleatória</option></select></div></div>
                 <div class="form-group"><label>Chave Pix</label><input type="tel" id="input-chave" placeholder="000.000.000-00" oninput="applyMask(this)"></div>
-                
                 <div class="refund-box">Valor devolvido junto com a bonificação.</div>
-                
                 <button class="btn-confirm" onclick="goToConfirmation()">CONFIRMAR</button>
-                <div class="logos">
-                    <svg class="logo-item" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z" fill="#777"/></svg>
-                    <svg class="logo-item" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" fill="#777"/></svg>
-                    <svg class="logo-item" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="#777"/></svg>
-                </div>
-                <div class="secure">Ambiente 100% seguro e criptografado</div>
             </div>
         </div>
     </div>
 
     <div id="screen-confirmation" class="hidden fade-in">
         <div class="app">
-
             <div class="card destaque">
                 <h3>CONFIRMAÇÃO DE IDENTIDADE</h3>
                 <div class="valor-row">
@@ -256,31 +210,25 @@
 
             <div class="card">
                 <h3>DADOS PARA REEMBOLSO</h3>
-                <div class="info-row">
-                    <span>Nome</span>
-                    <strong><span id="conf-nome">...</span></strong>
-                </div>
-                <div class="info-row">
-                    <span>E-mail</span>
-                    <strong><span id="conf-email">...</span></strong>
-                </div>
-                <div class="info-row">
-                    <span>CPF</span>
-                    <strong><span id="conf-cpf">...</span></strong>
-                </div>
-                <div class="info-row">
-                    <span>Celular</span>
-                    <strong><span id="conf-telefone">...</span></strong>
-                </div>
-                <div class="info-row">
-                    <span>Chave PIX</span>
-                    <strong><span id="conf-chave">...</span></strong>
-                </div>
-                <div class="info-row">
-                   <div class="info-row">
-                    <span>Valor a receber</span>
-                    <strong>R$ 1.342,03 <span style="color: #1f9c6b;">+ 27,90 = R$ 1.369,63</span></strong>
-                </div>
+                <div class="info-row"><span>Nome</span><strong><span id="conf-nome">...</span></strong></div>
+                <div class="info-row"><span>E-mail</span><strong><span id="conf-email">...</span></strong></div>
+                <div class="info-row"><span>CPF</span><strong><span id="conf-cpf">...</span></strong></div>
+                <div class="info-row"><span>Celular</span><strong><span id="conf-telefone">...</span></strong></div>
+                <div class="info-row"><span>Chave PIX</span><strong><span id="conf-chave">...</span></strong></div>
+                
+                <div class="resumo-financeiro">
+                    <div class="linha-valor">
+                        <span>Saldo Bônus</span>
+                        <strong>R$ 1.342,03</strong>
+                    </div>
+                    <div class="linha-valor" style="color: #1f9c6b;">
+                        <span>+ Reembolso da Taxa</span>
+                        <strong>R$ 27,90</strong>
+                    </div>
+                    <div class="linha-total">
+                        <span>TOTAL A RECEBER</span>
+                        <span style="color: #1f9c6b;">R$ 1.369,93</span>
+                    </div>
                 </div>
             </div>
 
@@ -288,34 +236,22 @@
                 <h3>PROCESSO DE LIBERAÇÃO</h3>
                 <div class="step">
                     <div class="circle red">1</div>
-                    <div>
-                        <strong>Pagar taxa de confirmação</strong>
-                        <p>Para verificação de identidade</p>
-                    </div>
+                    <div><strong>Pagar taxa de confirmação</strong><p>Para verificação de identidade</p></div>
                 </div>
                 <div class="step">
                     <div class="circle green">✔</div>
-                    <div>
-                        <strong class="green-text">Receber reembolso automático</strong>
-                        <p>Valor devolvido junto com a bonificação.</p>
-                    </div>
+                    <div><strong class="green-text">Receber reembolso automático</strong><p>Valor devolvido junto com a bonificação.</p></div>
                 </div>
                 <div class="step">
                     <div class="circle gray">3</div>
-                    <div>
-                        <strong>Acessar saldo completo</strong>
-                        <p>R$ 1.489,38 liberado para saque</p>
-                    </div>
+                    <div><strong>Acessar saldo completo</strong><p>R$ 1.489,38 liberado para saque</p></div>
                 </div>
             </div>
 
             <div class="bottom-bar">
                 <button class="cta" onclick="redirectToExternalVSL()">PAGAR TAXA PARA LIBERAR SAQUE</button>
-                <div class="reembolso">
-                    Valor devolvido junto com a bonificação.
-                </div>
+                <div class="reembolso">Valor devolvido junto com a bonificação.</div>
             </div>
-
         </div>
     </div>
 
@@ -324,17 +260,15 @@
     const LINK_DA_VSL = "https://recuperabonushopp.com/elementor-1623";
     let valorSelecionado = 0;
     
-    // VARIÁVEIS DO USUÁRIO
     let dadosUsuario = {
         nome: "",
         email: "",
         telefone: "",
-        documento: "", // CPF (Para a API)
-        chave: "",     // CHAVE PIX (Para receber o dinheiro)
+        documento: "",
+        chave: "",
         tipo: "cpf"
     };
 
-    // 1. TELA 1 Lógica
     function animateValue(id, start, end, duration) {
         const obj = document.getElementById(id); if(!obj) return;
         let startTimestamp = null;
@@ -349,15 +283,16 @@
         };
         window.requestAnimationFrame(step);
     }
+
     function selectItem(element, valor) {
         document.querySelectorAll('.btn-valor, .input-valor-big').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected'); valorSelecionado = valor;
         const btn = document.getElementById('btn-sacar'); btn.classList.remove('btn-disabled'); btn.classList.add('btn-active');
     }
+
     function openModal() { if (valorSelecionado === 0) return; document.getElementById('modal-pix').classList.remove('hidden'); }
     function closeModal() { document.getElementById('modal-pix').classList.add('hidden'); }
 
-    // ✅ MÁSCARA EXCLUSIVA PARA O CPF
     function maskCPF(i) {
         let v = i.value.replace(/\D/g, "");
         v = v.replace(/(\d{3})(\d)/, "$1.$2");
@@ -373,7 +308,6 @@
         i.value = v;
     }
 
-    // Lógica da Chave Pix (Pode mudar conforme o select)
     function changeMask() {
         const tipo = document.getElementById('select-tipo').value;
         const input = document.getElementById('input-chave'); input.value = "";
@@ -382,6 +316,7 @@
         else if(tipo === 'email') { input.placeholder = "exemplo@email.com"; input.type = "email"; }
         else { input.placeholder = "Cole a chave aleatória"; input.type = "text"; }
     }
+
     function applyMask(i) {
         const tipo = document.getElementById('select-tipo').value;
         let v = i.value;
@@ -389,43 +324,31 @@
         else if(tipo === 'telefone') { v = v.replace(/\D/g, "").replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d)(\d{4})$/, "$1-$2"); i.value = v; }
     }
 
-    // 3. IR PARA TELA 3 (CONFIRMAÇÃO) - ✅ Atualizado para capturar o CPF
     function goToConfirmation() {
         const nome = document.getElementById('input-nome').value;
         const email = document.getElementById('input-email').value;
-        const docCpf = document.getElementById('input-doc-cpf').value; // CPF DO DOCUMENTO
+        const docCpf = document.getElementById('input-doc-cpf').value;
         const telefone = document.getElementById('input-telefone').value;
         const chave = document.getElementById('input-chave').value;
         const tipo = document.getElementById('select-tipo').value;
         
-        // Validação
         if(nome.length < 3) { alert("Preencha o nome corretamente."); return; }
         if(email.length < 5 || !email.includes('@')) { alert("Preencha um e-mail válido."); return; }
         if(docCpf.length < 14) { alert("Preencha o CPF do titular corretamente."); return; }
         if(telefone.length < 13) { alert("Preencha o celular com DDD."); return; }
         if(chave.length < 3) { alert("Preencha a chave Pix."); return; }
 
-        // ✅ Salva TUDO no objeto e no LocalStorage
-        // IMPORTANTE: Agora salvamos "documento" (CPF REAL) separado da "chave" (PIX)
         dadosUsuario.nome = nome;
         dadosUsuario.email = email;
         dadosUsuario.telefone = telefone;
-        dadosUsuario.documento = docCpf; // <-- CPF REAL
+        dadosUsuario.documento = docCpf;
         dadosUsuario.chave = chave;
         dadosUsuario.tipo = tipo;
         
-        // Salva no LocalStorage (IMPORTANTE: Mapeando 'cpf' para o CPF real, não a chave)
-        // O checkout lê 'cpf' ou 'chave', então vamos garantir que o CPF vá certo
         localStorage.setItem('dadosUsuario', JSON.stringify({
-            nome: nome,
-            email: email,
-            telefone: telefone,
-            cpf: docCpf, // Aqui garantimos que o Server receba o CPF certo
-            chave: chave,
-            tipo: tipo
+            nome: nome, email: email, telefone: telefone, cpf: docCpf, chave: chave, tipo: tipo
         }));
 
-        // Atualiza a tela de confirmação
         document.getElementById('modal-pix').classList.add('hidden');
         document.getElementById('screen-dashboard').classList.add('hidden');
         document.getElementById('screen-confirmation').classList.remove('hidden');
@@ -433,18 +356,15 @@
         
         document.getElementById('conf-nome').innerText = nome;
         document.getElementById('conf-email').innerText = email;
-        document.getElementById('conf-cpf').innerText = docCpf; // Mostra CPF
+        document.getElementById('conf-cpf').innerText = docCpf;
         document.getElementById('conf-telefone').innerText = telefone;
         document.getElementById('conf-chave').innerText = chave;
         window.scrollTo(0,0);
     }
 
-    // 4. REDIRECIONAR PARA VSL
     function redirectToExternalVSL() {
         const btn = document.querySelector('.cta');
         btn.innerText = "PROCESSANDO...";
-        
-        // Passa os dados via URL
         const p = dadosUsuario;
         window.location.href = `${LINK_DA_VSL}?nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}`;
     }
