@@ -4,33 +4,103 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
-<style>
-    /* Estilos (Mantendo o design Clean aprovado) */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    .button-container { display: flex; justify-content: center; align-items: center; width: 100%; padding: 20px; }
-    
-    .btn-resgatar {
-        background: #FF5F2C; color: white; border: none; width: 100%; max-width: 380px; 
-        padding: 25px 20px; font-size: 22px; font-weight: 900; text-transform: uppercase;
-        border-radius: 12px; cursor: pointer; box-shadow: 0 8px 0 #d1491f, 0 15px 20px rgba(0,0,0,0.2);
-        transition: all 0.1s; position: relative; top: 0; animation: pulse-orange 2s infinite;
-    }
-    .btn-resgatar:active { top: 8px; box-shadow: 0 0 0 #d1491f, 0 0 0 rgba(0,0,0,0); }
-    .btn-resgatar:disabled { background: #ccc; box-shadow: none; top: 0; animation: none; cursor: wait; }
-    
-    @keyframes pulse-orange {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0.7); }
-        70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 95, 44, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0); }
-    }
 
-    /* Modal */
-    .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9998; backdrop-filter: blur(5px); }
-    .modal-pix { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 9999; text-align: center; width: 90%; max-width: 400px; }
-    #qr_code_div img { margin: 20px auto; border-radius: 10px; max-width: 100%; border: 2px solid #eee; }
-    .btn-copiar { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 50px; font-weight: 700; font-size: 16px; margin-top: 15px; cursor: pointer; }
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+}
+
+.btn-resgatar {
+    background: #FF5F2C;
+    color: white;
+    border: none;
+    width: 100%;
+    max-width: 380px;
+    padding: 25px 20px;
+    font-size: 22px;
+    font-weight: 900;
+    text-transform: uppercase;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #d1491f, 0 15px 20px rgba(0,0,0,0.2);
+    transition: all 0.1s;
+    position: relative;
+    top: 0;
+    animation: pulse-orange 2s infinite;
+}
+
+.btn-resgatar:active {
+    top: 8px;
+    box-shadow: 0 0 0 #d1491f, 0 0 0 rgba(0,0,0,0);
+}
+
+.btn-resgatar:disabled {
+    background: #ccc;
+    box-shadow: none;
+    top: 0;
+    animation: none;
+    cursor: wait;
+}
+
+@keyframes pulse-orange {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0.7); }
+    70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 95, 44, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0); }
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 9998;
+    backdrop-filter: blur(5px);
+}
+
+.modal-pix {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    z-index: 9999;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+#qr_code_div img {
+    margin: 20px auto;
+    border-radius: 10px;
+    max-width: 100%;
+    border: 2px solid #eee;
+}
+
+.btn-copiar {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 15px;
+    cursor: pointer;
+}
 </style>
 </head>
+
 <body>
 
 <div class="button-container">
@@ -40,101 +110,136 @@
 </div>
 
 <div class="overlay" id="overlay"></div>
+
 <div class="modal-pix" id="modal_pix">
     <h3 style="color:#333; margin-bottom:5px;">✅ QR CODE GERADO</h3>
-    <p style="color:#666; font-size:13px; margin-bottom:15px;">Finalize o pagamento para liberar seu saque.</p>
+    <p style="color:#666; font-size:13px; margin-bottom:15px;">
+        Finalize o pagamento para liberar seu saque.
+    </p>
     <div id="qr_code_div"></div>
-    <textarea id="txt_codigo" style="width:100%; height:60px; margin-top:10px; background:#f5f5f5; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:12px; color:#555;" readonly>Gerando PIX...</textarea>
-    <button class="btn-copiar" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
+    <textarea id="txt_codigo"
+        style="width:100%; height:60px; margin-top:10px; background:#f5f5f5;
+        border:1px solid #ddd; border-radius:8px; padding:10px;
+        font-size:12px; color:#555;" readonly>Gerando PIX...</textarea>
+    <button class="btn-copiar" onclick="copiarCodigo()">
+        COPIAR CÓDIGO PIX
+    </button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-    // --- FUNÇÃO PARA PEGAR PARÂMETROS DA URL ---
-    // É isso que o seu desenvolvedor pediu. Ele olha o link e extrai os dados.
-    function getURLParameter(name) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(name);
-    }
 
-    function gerarPix() {
-        const btn = document.getElementById("btn_pagar");
-        btn.innerHTML = "PROCESSANDO...";
-        btn.disabled = true;
+function getURLParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
 
-        // 1. CAPTURA DOS DADOS DIRETO DA URL (PRIORIDADE TOTAL)
-        // O código agora busca ?nome=X&email=Y&cpf=Z na barra de endereço
-        const urlNome = getURLParameter('nome');
-        const urlEmail = getURLParameter('email');
-        const urlPhone = getURLParameter('phone'); // ou 'telefone' dependendo de como enviou
-        const urlCpf = getURLParameter('cpf');
+function gerarPix() {
 
-        // Backup do LocalStorage (caso a URL esteja limpa)
-        const storedData = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
+    const btn = document.getElementById("btn_pagar");
+    btn.innerHTML = "PROCESSANDO...";
+    btn.disabled = true;
 
-        // 2. DEFINIÇÃO FINAL DOS DADOS (Url > Memória > Padrão)
-        const finalNome = urlNome || storedData.nome || "Cliente Consumidor";
-        const finalEmail = urlEmail || storedData.email || "cliente@pagamento.com";
-        const finalPhone = urlPhone || storedData.telefone || "(11) 99999-9999";
-        const finalCpf = urlCpf || storedData.documento || storedData.cpf || "00000000000";
+    const urlNome = getURLParameter('nome');
+    const urlEmail = getURLParameter('email');
+    const urlPhone = getURLParameter('phone');
+    const urlCpf = getURLParameter('cpf');
 
-        // LOG PARA SEU DESENVOLVEDOR VER NO CONSOLE (F12)
-        console.log("--> DADOS CAPTURADOS:");
-        console.log("Nome:", finalNome);
-        console.log("Email:", finalEmail);
-        console.log("CPF:", finalCpf);
-        console.log("Phone:", finalPhone);
+    const storedData = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
 
-        // 3. ENVIA PARA O SERVIDOR
-        fetch("https://checkout-pix-profissional.onrender.com/pix", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                valor: "27.90", 
-                name: finalNome,
-                email: finalEmail,
-                phone: finalPhone,
-                cpf: finalCpf
-            })
+    const finalNome = urlNome || storedData.nome || "Cliente Consumidor";
+    const finalEmail = urlEmail || storedData.email || "cliente@pagamento.com";
+    const finalPhone = urlPhone || storedData.telefone || "(11)999999999";
+    const finalCpf = urlCpf || storedData.documento || storedData.cpf || "00000000000";
+
+    fetch("https://checkout-pix-profissional.onrender.com/pix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            valor: "27.90",
+            name: finalNome,
+            email: finalEmail,
+            phone: finalPhone,
+            cpf: finalCpf
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById("overlay").style.display = "block";
-                document.getElementById("modal_pix").style.display = "block";
-                document.getElementById("txt_codigo").value = data.payload;
+    })
+    .then(res => res.json())
+    .then(data => {
 
-                const qrDiv = document.getElementById("qr_code_div");
-                qrDiv.innerHTML = "";
-                
-                if(data.encodedImage && data.encodedImage.length > 50) {
-                     const src = data.encodedImage.startsWith('http') ? data.encodedImage : `data:image/png;base64,${data.encodedImage}`;
-                     qrDiv.innerHTML = `<img src="${src}">`;
-                } else {
-                    new QRCode(qrDiv, { text: data.payload, width: 200, height: 200 });
-                }
+        if (data.success) {
+
+            const transactionId = data.transactionId || data.id || data.txid;
+
+            document.getElementById("overlay").style.display = "block";
+            document.getElementById("modal_pix").style.display = "block";
+            document.getElementById("txt_codigo").value = data.payload;
+
+            const qrDiv = document.getElementById("qr_code_div");
+            qrDiv.innerHTML = "";
+
+            if (data.encodedImage && data.encodedImage.length > 50) {
+                const src = data.encodedImage.startsWith('http')
+                    ? data.encodedImage
+                    : `data:image/png;base64,${data.encodedImage}`;
+                qrDiv.innerHTML = `<img src="${src}">`;
             } else {
-                alert("Erro: " + (data.message || "Tente novamente."));
-                btn.innerHTML = "RESGATAR R$ 1.342,03";
-                btn.disabled = false;
+                new QRCode(qrDiv, {
+                    text: data.payload,
+                    width: 200,
+                    height: 200
+                });
             }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Erro de conexão.");
+
+            if (transactionId) {
+                verificarPagamento(transactionId);
+            }
+
+        } else {
+            alert("Erro ao gerar pagamento.");
             btn.innerHTML = "RESGATAR R$ 1.342,03";
             btn.disabled = false;
-        });
-    }
+        }
 
-    function copiarCodigo() {
-        const copyText = document.getElementById("txt_codigo");
-        copyText.select();
-        copyText.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(copyText.value);
-        alert("Código PIX copiado!");
-    }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro de conexão.");
+        btn.innerHTML = "RESGATAR R$ 1.342,03";
+        btn.disabled = false;
+    });
+}
+
+function verificarPagamento(transactionId) {
+
+    const intervalo = setInterval(() => {
+
+        fetch(`https://checkout-pix-profissional.onrender.com/status/${transactionId}`)
+        .then(res => res.json())
+        .then(data => {
+
+            if (data.status === "approved" || data.status === "paid") {
+
+                clearInterval(intervalo);
+
+                window.location.href = "https://recuperabonushopp.com/elementor-1064";
+
+            }
+
+        })
+        .catch(err => console.error("Erro ao verificar status:", err));
+
+    }, 5000);
+}
+
+function copiarCodigo() {
+    const copyText = document.getElementById("txt_codigo");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    alert("Código PIX copiado!");
+}
+
 </script>
 
 </body>
