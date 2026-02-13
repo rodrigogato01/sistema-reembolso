@@ -8,109 +8,98 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(process.cwd()));
 
-// 1. SUA CHAVE (Com .trim() para remover espaços invisíveis)
-const VIZZION_PUBLIC = 'rodrigogato041_glxgrxj8x8yy8jo2'.trim();
-const VIZZION_SECRET = 'e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus'.trim();
+// --- BANCO DE DADOS TEMPORÁRIO (Memória) ---
+// Aqui guardamos quem pagou. Em um sistema gigante, seria um banco SQL.
+const transacoes: any = {};
 
-// 2. URL DA API
-const API_URL = 'https://app.vizzionpay.com/api/v1/gateway/pix/receive';
+const KEY = 'e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus'.trim();
 
+// 1. ROTA QUE GERA O PIX
 app.post('/pix', async (req, res) => {
-    console.log("--> INICIANDO TRANSAÇÃO (V13 - AUTENTICAÇÃO REFORÇADA)");
+    console.log("--> Nova solicitação de PIX");
+
+    const { valor, name, cpf, email, phone } = req.body;
+    
+    // Gera um ID único para essa transação
+    const uniqueId = `ID-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const amountFloat = parseFloat(valor || 38.90);
+    
+    // Salva na memória como PENDENTE
+    transacoes[uniqueId] = { 
+        status: 'PENDING', 
+        valor: amountFloat,
+        criadoEm: new Date()
+    };
+
+    // Prepara dados para a Vizzion
+    const payload = {
+        identifier: uniqueId, // IMPORTANTE: Enviamos nosso ID para eles devolverem depois
+        amount: amountFloat,
+        client: {
+            name: name || "Cliente Consumidor",
+            email: email || "email@teste.com",
+            phone: phone || "(11) 99999-9999",
+            document: cpf || "05350974033"
+        },
+        products: [{ id: "TAXA-38", name: "Taxa", quantity: 1, price: amountFloat }],
+        dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0]
+    };
 
     try {
-        let { valor, name, cpf, email, phone } = req.body;
-
-        if (!valor) valor = 27.90;
-
-        let amountNumber = Number(valor);
-            
-        if (Number.isInteger(amountNumber) && amountNumber > 1000) {
-            amountNumber = amountNumber / 100;
-        }
-
-        amountNumber = Math.round(amountNumber * 100) / 100;
-
-        const cpfLimpo = cpf ? cpf.replace(/\D/g, '') : "12345678900";
-        
-        // Gera ID único
-        const uniqueId = `ID-${Date.now()}`;
-
-        // Data de vencimento (Hoje + 1 dia)
-        const dueDate = new Date();
-        dueDate.setDate(dueDate.getDate() + 1);
-        const formattedDate = dueDate.toISOString().split('T')[0];
-
-        // 4. PAYLOAD OFICIAL
-        const payloadVizzion = {
-            identifier: uniqueId,
-            amount: amountNumber,
-            client: {
-                name: name || "Cliente Consumidor",
-                email: email || "cliente@pagamento.com",
-                phone: phone || "(11) 99999-9999",
-                document: cpfLimpo
-            },
-            products: [
-                {
-                    id: "v3b8k2m9x7",
-                    name: "Taxa de Desbloqueio",
-                    quantity: 1,
-                    price: amountNumber
-                }
-            ],
-            dueDate: formattedDate
-        };
-
-        console.log(`Enviando para Vizzion com a chave iniciada em: ${VIZZION_SECRET.substring(0, 5)}...`);
-
-        // 5. ENVIO COM CABEÇALHOS DE NAVEGADOR (Para evitar bloqueio)
-        const response = await axios.post(API_URL, payloadVizzion, {
-            headers: {
-                'x-public-key': VIZZION_PUBLIC,
-                'x-secret-key': VIZZION_SECRET,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            timeout: 25000 // Aumentei o tempo de espera
+        const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
+            headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' }
         });
 
-        console.log("✅ VIZZION RESPONDEU 201 SUCESSO!");
-        
         const data = response.data;
+        let copyPaste = data.pix?.qrcode_text || data.qrcode_text || data.payload;
+        let qrImage = data.pix?.qrcode_image || data.qrcode_image || data.encodedImage;
 
-        let payloadPix = "";
-        let imagemPix = "";
-
-        if (data.pix) {
-            payloadPix = data.pix.code || "";
-            imagemPix = data.pix.base64 || data.pix.image || "";
-        }
-
-        return res.json({
-            success: true,
-            payload: payloadPix,
-            encodedImage: imagemPix
+        // Retorna para o site o ID da transação também!
+        return res.json({ 
+            success: true, 
+            payload: copyPaste, 
+            encodedImage: qrImage, 
+            transactionId: uniqueId // <--- O site precisa disso para monitorar
         });
 
     } catch (error: any) {
-        console.error("❌ FALHA NA REQUISIÇÃO:");
-        
-        if (error.response) {
-            console.error(`Status: ${error.response.status}`); // 401 = Erro de Chave, 400 = Erro de Dados
-            console.error(`Mensagem: ${JSON.stringify(error.response.data)}`);
-            
-            const msg = error.response.data.message || JSON.stringify(error.response.data);
-            return res.json({ success: false, message: `Erro Vizzion (${error.response.status}): ${msg}` });
-        } else {
-            console.error(error.message);
-            return res.json({ success: false, message: "Erro de conexão (Time out ou URL errada)" });
-        }
+        console.error("Erro Vizzion:", error.response?.data || error.message);
+        return res.json({ success: false, message: "Erro ao conectar." });
     }
 });
 
-// Rota para o HTML
+// 2. ROTA DO WEBHOOK (A Vizzion chama isso quando pagam)
+app.post('/webhook', (req, res) => {
+    // O seu dev pediu para validar ID, Status, Valor e Evento.
+    const { identifier, status, amount, event } = req.body;
+
+    console.log(`🔔 Webhook recebido para: ${identifier} | Status: ${status}`);
+
+    // Verifica se a transação existe na nossa memória
+    if (transacoes[identifier]) {
+        // Validação básica sugerida
+        if (status === 'COMPLETED' || event === 'TRANSACTION_PAID') {
+            transacoes[identifier].status = 'PAID';
+            console.log(`✅ PAGAMENTO CONFIRMADO: ${identifier}`);
+        }
+        return res.status(200).send('OK');
+    }
+
+    return res.status(400).send('Transação não encontrada');
+});
+
+// 3. ROTA QUE O SEU SITE VAI FICAR CHAMANDO (Polling)
+app.get('/check-status/:id', (req, res) => {
+    const id = req.params.id;
+    const transacao = transacoes[id];
+
+    if (transacao && transacao.status === 'PAID') {
+        return res.json({ paid: true });
+    }
+    return res.json({ paid: false });
+});
+
 app.get('/', (req, res) => res.sendFile(path.join(process.cwd(), 'index.html')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`SERVIDOR V13 RODANDO NA PORTA ${PORT}`));
+app.listen(PORT, () => console.log(`SERVIDOR COM WEBHOOK RODANDO NA PORTA ${PORT}`));
