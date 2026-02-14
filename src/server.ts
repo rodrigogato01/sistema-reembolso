@@ -8,7 +8,7 @@ app.use(express.json());
 
 // =====================================================
 // 🔴 CHAVE VIZZION AQUI
-const KEY = "SUA_CHAVE_AQUI_DIRETO"; 
+const KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 // =====================================================
 
 // "Banco de Dados" em memória para armazenar as transações geradas
