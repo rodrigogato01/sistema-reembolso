@@ -15,6 +15,13 @@ const KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus";
 // (Num cenário ideal, salva-se num BD real. Aqui usamos Map para resposta imediata)
 const bancoTransacoes = new Map();
 
+// =====================================================
+// 👉 CORREÇÃO ADICIONADA: PARA PARAR DE DAR "Cannot GET /"
+// =====================================================
+app.get('/', (req, res) => {
+    res.send("🚀 Servidor de Pagamentos Vizzion Pay Rodando Perfeitamente!");
+});
+
 // ROTA 1: GERA O PIX
 app.post('/pix', async (req, res) => {
     try {
