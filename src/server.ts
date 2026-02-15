@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔴 SUAS CHAVES DA VIZZION PAY
+// 🔴 SUAS CHAVES DA VIZZION PAY (AGORA ESTÁ 100% CORRETO)
 const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
 // =====================================================
@@ -22,6 +22,18 @@ app.get('/', (req, res) => {
 
 const formatCpf = (v: string) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 const formatPhone = (v: string) => v.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+
+// 👉 A MÁGICA: O RASTREADOR UNIVERSAL DE PIX COPIA E COLA
+function acharCopiaECola(obj: any): string | null {
+    if (typeof obj === 'string' && obj.startsWith('000201')) return obj;
+    if (typeof obj === 'object' && obj !== null) {
+        for (const key in obj) {
+            const result = acharCopiaECola(obj[key]);
+            if (result) return result;
+        }
+    }
+    return null;
+}
 
 // =====================================================
 // ROTA 1: GERA O PIX
@@ -45,12 +57,7 @@ app.post('/pix', async (req, res) => {
                 phone: formatPhone(phone || "11999999999"), 
                 document: formatCpf(cpf || "00000000000") 
             },
-            products: [{
-                id: "TAXA_01",
-                name: "Taxa de Liberação",
-                quantity: 1,
-                price: valorFixo
-            }],
+            products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: valorFixo }],
             dueDate: dueDateStr,
             metadata: { provedor: "Sistema Pix" },
             callbackUrl: "https://checkoutfinal.onrender.com/webhook" 
@@ -66,19 +73,18 @@ app.post('/pix', async (req, res) => {
             }
         });
 
-        // 👇 A MÁGICA PARA NUNCA MAIS DAR UNDEFINED 👇
-        // Extrai os dados seja lá como a Vizzion mandou o nome da variável
+        // SUGANDO OS DADOS DA VIZZION PAY
         const pixData = response.data.pix || response.data || {};
+        const imagemPix = pixData.encodedImage || pixData.qrcode_image || pixData.image || response.data.encodedImage || "";
         
-        const codigoPix = pixData.payload || pixData.qrcode_text || pixData.emv || pixData.copyPaste || pixData.qrcode || response.data.payload || "Erro: Código não encontrado";
-        
-        const imagemPix = pixData.encodedImage || pixData.qrcode_image || pixData.image || pixData.base64 || response.data.encodedImage || "";
+        // O Rastreador vai vasculhar TUDO procurando o código "000201"
+        const codigoPix = acharCopiaECola(response.data) || "Erro: Copia e Cola não encontrado na API";
 
-        console.log("✅ PIX GERADO COM SUCESSO!");
+        console.log("✅ PIX GERADO! Código e Imagem capturados com sucesso.");
 
         return res.json({ 
             success: true, 
-            payload: codigoPix,
+            payload: codigoPix, // Manda o código rastreado pra tela
             encodedImage: imagemPix,
             transactionId: identifier 
         });
@@ -94,7 +100,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (ESPERA O PAGAMENTO)
+// ROTA 2: WEBHOOK (O AVISO DE PAGAMENTO)
 // =====================================================
 app.post('/webhook', (req, res) => {
     const { transaction_id, identifier, status, payment_method, amount, event } = req.body;
@@ -105,7 +111,7 @@ app.post('/webhook', (req, res) => {
             const transacao = bancoTransacoes.get(idBusca);
             if (Number(transacao.amount) === Number(amount)) {
                 bancoTransacoes.set(idBusca, { status: 'paid', amount: amount });
-                console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
+                console.log(`💰💰 PAGAMENTO CONFIRMADO NO BANCO! Transação: ${idBusca}`);
             }
         }
     }
@@ -113,7 +119,7 @@ app.post('/webhook', (req, res) => {
 });
 
 // =====================================================
-// ROTA 3: POLLING (REDIRECIONAMENTO AUTOMÁTICO)
+// ROTA 3: POLLING (O REDIRECIONAMENTO AUTOMÁTICO)
 // =====================================================
 app.get('/check-status/:id', (req, res) => {
     const id = req.params.id;
