@@ -8,27 +8,23 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔴 SUAS CREDENCIAIS DA VIZZION PAY
-// Lembre-se: Troque a SECRET_KEY pela chave nova que você vai gerar agora!
+// 🔴 SUAS CHAVES DA VIZZION PAY
 const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
 // =====================================================
 
-// Banco de dados em memória
 const bancoTransacoes = new Map();
 
-// Faz o site aparecer na URL do Render
 app.use(express.static(path.resolve())); 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve('index.html'));
 });
 
-// Formatadores obrigatórios
 const formatCpf = (v: string) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 const formatPhone = (v: string) => v.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
 
 // =====================================================
-// ROTA 1: GERAÇÃO DO PIX
+// ROTA 1: GERA O PIX
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
@@ -40,7 +36,6 @@ app.post('/pix', async (req, res) => {
         amanha.setDate(amanha.getDate() + 1);
         const dueDateStr = amanha.toISOString().split('T')[0];
 
-        // O payload exato da documentação
         const payload = {
             identifier: identifier,
             amount: valorFixo,
@@ -61,10 +56,8 @@ app.post('/pix', async (req, res) => {
             callbackUrl: "https://checkoutfinal.onrender.com/webhook" 
         };
 
-        // Salva a transação como pendente no nosso banco
         bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
 
-        // 👉 AQUI ESTÁ A CORREÇÃO DE OURO DA DOCUMENTAÇÃO:
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
             headers: { 
                 'x-public-key': PUBLIC_KEY,
@@ -73,18 +66,26 @@ app.post('/pix', async (req, res) => {
             }
         });
 
-        // Devolve o QR Code para a tela
+        // 👇 A MÁGICA PARA NUNCA MAIS DAR UNDEFINED 👇
+        // Extrai os dados seja lá como a Vizzion mandou o nome da variável
+        const pixData = response.data.pix || response.data || {};
+        
+        const codigoPix = pixData.payload || pixData.qrcode_text || pixData.emv || pixData.copyPaste || pixData.qrcode || response.data.payload || "Erro: Código não encontrado";
+        
+        const imagemPix = pixData.encodedImage || pixData.qrcode_image || pixData.image || pixData.base64 || response.data.encodedImage || "";
+
+        console.log("✅ PIX GERADO COM SUCESSO!");
+
         return res.json({ 
             success: true, 
-            payload: response.data.pix?.qrcode_text || response.data.qrcode_text,
-            encodedImage: response.data.pix?.qrcode_image || response.data.qrcode_image,
+            payload: codigoPix,
+            encodedImage: imagemPix,
             transactionId: identifier 
         });
 
     } catch (error: any) {
-        // Mostra o erro EXATO na sua tela se algo falhar
         const erroReal = error.response?.data ? JSON.stringify(error.response.data) : error.message;
-        console.error("Erro Vizzion:", erroReal);
+        console.error("❌ Erro Vizzion:", erroReal);
         return res.status(error.response?.status || 401).json({ 
             success: false, 
             message: `Erro Vizzion: ${erroReal}` 
@@ -93,7 +94,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (O AVISO DE PAGAMENTO)
+// ROTA 2: WEBHOOK (ESPERA O PAGAMENTO)
 // =====================================================
 app.post('/webhook', (req, res) => {
     const { transaction_id, identifier, status, payment_method, amount, event } = req.body;
@@ -104,7 +105,7 @@ app.post('/webhook', (req, res) => {
             const transacao = bancoTransacoes.get(idBusca);
             if (Number(transacao.amount) === Number(amount)) {
                 bancoTransacoes.set(idBusca, { status: 'paid', amount: amount });
-                console.log(`✅ Pix Confirmado! ID: ${idBusca}`);
+                console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
             }
         }
     }
@@ -112,7 +113,7 @@ app.post('/webhook', (req, res) => {
 });
 
 // =====================================================
-// ROTA 3: POLLING (A TELA ESPERANDO O PAGAMENTO)
+// ROTA 3: POLLING (REDIRECIONAMENTO AUTOMÁTICO)
 // =====================================================
 app.get('/check-status/:id', (req, res) => {
     const id = req.params.id;
