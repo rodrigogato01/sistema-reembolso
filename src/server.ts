@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
+import path from 'path'; // <-- ADICIONADO PARA LER SEU ARQUIVO HTML
 
 const app = express();
 app.use(cors());
@@ -12,14 +13,16 @@ const KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus";
 // =====================================================
 
 // "Banco de Dados" em memória para armazenar as transações geradas
-// (Num cenário ideal, salva-se num BD real. Aqui usamos Map para resposta imediata)
 const bancoTransacoes = new Map();
 
 // =====================================================
-// 👉 CORREÇÃO ADICIONADA: PARA PARAR DE DAR "Cannot GET /"
+// 👉 AQUI ESTÁ A MÁGICA PARA APARECER A SUA PÁGINA
 // =====================================================
+app.use(express.static(path.resolve())); // Permite carregar imagens e estilos soltos na pasta
+
 app.get('/', (req, res) => {
-    res.send("🚀 Servidor de Pagamentos Vizzion Pay Rodando Perfeitamente!");
+    // Quando entrarem no link, o servidor vai exibir o seu arquivo "index.html"
+    res.sendFile(path.resolve('index.html'));
 });
 
 // ROTA 1: GERA O PIX
