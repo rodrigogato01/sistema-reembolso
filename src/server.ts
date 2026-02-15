@@ -8,7 +8,8 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔴 SUAS CREDENCIAIS COMPLETAS DA VIZZION PAY
+// 🔴 SUAS CREDENCIAIS DA VIZZION PAY
+// Lembre-se: Troque a SECRET_KEY pela chave nova que você vai gerar agora!
 const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
 // =====================================================
@@ -16,13 +17,13 @@ const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
 // Banco de dados em memória
 const bancoTransacoes = new Map();
 
-// Faz o site aparecer na URL
+// Faz o site aparecer na URL do Render
 app.use(express.static(path.resolve())); 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve('index.html'));
 });
 
-// Formatadores obrigatórios (para a Vizzion não rejeitar CPF/Telefone)
+// Formatadores obrigatórios
 const formatCpf = (v: string) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 const formatPhone = (v: string) => v.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
 
@@ -63,13 +64,11 @@ app.post('/pix', async (req, res) => {
         // Salva a transação como pendente no nosso banco
         bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
 
-        // 👉 A REQUISIÇÃO COM AS DUAS CHAVES JUNTAS
+        // 👉 AQUI ESTÁ A CORREÇÃO DE OURO DA DOCUMENTAÇÃO:
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
             headers: { 
-                'Authorization': `Bearer ${SECRET_KEY}`, 
-                'x-api-key': SECRET_KEY,
-                'x-public-key': PUBLIC_KEY,     // Enviando a Chave Pública
-                'client-id': PUBLIC_KEY,        // Enviando a Chave Pública (formato alternativo comum)
+                'x-public-key': PUBLIC_KEY,
+                'x-secret-key': SECRET_KEY,
                 'Content-Type': 'application/json'
             }
         });
@@ -119,7 +118,6 @@ app.get('/check-status/:id', (req, res) => {
     const id = req.params.id;
     const transacao = bancoTransacoes.get(id);
 
-    // Se o webhook confirmou, libera o redirecionamento
     if (transacao && transacao.status === 'paid') {
         return res.json({ paid: true }); 
     } else {
