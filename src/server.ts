@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.resolve('index.html'));
 });
 
-// FUNÇÕES PARA FORÇAR A MÁSCARA EXATAMENTE COMO A VIZZION PEDE
+// Formatadores obrigatórios da documentação
 function formatCpf(cpf: string) {
     const v = cpf.replace(/\D/g, '');
     if (v.length === 11) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
@@ -43,12 +43,10 @@ app.post('/pix', async (req, res) => {
         const valorFixo = parseFloat(valor) || 79.10; 
         const identifier = `ID${Date.now()}`; 
 
-        // Data de vencimento para amanhã (Formato YYYY-MM-DD)
         const amanha = new Date();
         amanha.setDate(amanha.getDate() + 1);
         const dueDateStr = amanha.toISOString().split('T')[0];
 
-        // Formatando os dados no padrão exato da documentação que você enviou
         const payload = {
             identifier: identifier,
             amount: valorFixo,
@@ -58,14 +56,7 @@ app.post('/pix', async (req, res) => {
                 phone: formatPhone(phone || "11999999999"), 
                 document: formatCpf(cpf || "00000000000") 
             },
-            products: [
-                {
-                    id: "TAXA_FINAL",
-                    name: "Taxa de Ativacao",
-                    quantity: 1,
-                    price: valorFixo
-                }
-            ],
+            products: [{ id: "TAXA_FINAL", name: "Taxa de Ativacao", quantity: 1, price: valorFixo }],
             dueDate: dueDateStr,
             metadata: {},
             callbackUrl: "https://checkoutfinal.onrender.com/webhook" 
@@ -73,9 +64,13 @@ app.post('/pix', async (req, res) => {
 
         bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
 
+        // 👉 AQUI ESTÁ A CORREÇÃO: Enviando a chave em todos os formatos possíveis para a Vizzion achar.
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
             headers: { 
                 'Authorization': `Bearer ${KEY}`, 
+                'token': KEY,
+                'api-key': KEY,
+                'x-api-key': KEY,
                 'Content-Type': 'application/json' 
             }
         });
@@ -88,14 +83,9 @@ app.post('/pix', async (req, res) => {
         });
 
     } catch (error: any) {
-        // AQUI ESTÁ A CHAVE DE OURO: Vamos mostrar o erro EXATO que a Vizzion está devolvendo
         const erroReal = error.response?.data ? JSON.stringify(error.response.data) : error.message;
         console.error("Erro Vizzion:", erroReal);
-        
-        return res.json({ 
-            success: false, 
-            message: `Detalhe do erro Vizzion: ${erroReal}` 
-        });
+        return res.json({ success: false, message: `Detalhe do erro Vizzion: ${erroReal}` });
     }
 });
 
@@ -131,4 +121,4 @@ app.get('/check-status/:id', (req, res) => {
     }
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor da Vizzion rodando!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Rodando!"));
