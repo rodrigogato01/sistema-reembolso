@@ -8,7 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔴 CHAVE VIZZION AQUI (GARANTA QUE ELA ESTÁ ATIVA NO PAINEL DELES)
+// 🔴 CHAVE VIZZION AQUI
 const KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 // =====================================================
 
@@ -16,18 +16,15 @@ const KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus";
 const bancoTransacoes = new Map();
 
 // =====================================================
-// ROTA PARA APARECER O SEU SITE VISUAL
+// 👉 PERMITE CARREGAR O ARQUIVO HTML DA PÁGINA
 // =====================================================
 app.use(express.static(path.resolve())); 
 
 app.get('/', (req, res) => {
-    // Exibe o arquivo HTML do site quando acessam a URL do Render
     res.sendFile(path.resolve('index.html'));
 });
 
-// =====================================================
 // ROTA 1: GERA O PIX
-// =====================================================
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor } = req.body;
@@ -46,15 +43,11 @@ app.post('/pix', async (req, res) => {
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0]
         };
 
-        // SALVA A TRANSAÇÃO NO "BANCO" COMO PENDENTE (Como o Cauê pediu)
+        // 1. SALVA A TRANSAÇÃO NO "BANCO" COMO PENDENTE
         bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
 
-        // CHAMA A VIZZION PAY
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
-            headers: { 
-                'Authorization': `Bearer ${KEY}`, 
-                'Content-Type': 'application/json' 
-            }
+            headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' }
         });
 
         return res.json({ 
@@ -65,28 +58,25 @@ app.post('/pix', async (req, res) => {
         });
 
     } catch (error: any) {
-        // Se der erro de credencial, vai aparecer no log do Render e na tela
-        console.error("Erro Vizzion:", error.response?.data || error.message);
-        return res.json({ 
-            success: false, 
-            message: `Erro: ${error.response?.data?.message || error.message}` 
-        });
+        // Código de erro original (sem textos inventados)
+        return res.json({ success: false, message: `Erro: ${error.message}` });
     }
 });
 
-// =====================================================
-// ROTA 2: O WEBHOOK (LÓGICA DO CAUÊ)
-// =====================================================
+// ROTA 2: O WEBHOOK (PROCESSA A MENSAGEM DO DEV)
 app.post('/webhook', (req, res) => {
+    // Captura os dados da Vizzion Pay
     const { transaction_id, identifier, status, payment_method, amount, event } = req.body;
 
+    // Correção Crucial: A Vizzion pode devolver o nosso ID no campo 'identifier'
     const idBusca = identifier || transaction_id;
-    console.log(`🔔 Webhook Recebido - ID: ${idBusca} | Status: ${status} | Evento: ${event}`);
 
-    // Validações que o Cauê pediu: PIX, COMPLETED e TRANSACTION_PAID
+    console.log(`🔔 Webhook Recebido - ID: ${idBusca} | Status: ${status}`);
+
+    // Validações que o desenvolvedor pediu
     if (payment_method === 'PIX' && status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         
-        // Verifica se a transação existe no banco
+        // Verifica se a transação existe no banco usando o ID correto
         if (bancoTransacoes.has(idBusca)) {
             const transacao = bancoTransacoes.get(idBusca);
             
@@ -95,8 +85,6 @@ app.post('/webhook', (req, res) => {
                 // ATUALIZA O STATUS PARA PAGO
                 bancoTransacoes.set(idBusca, { status: 'paid', amount: amount });
                 console.log(`✅ Pagamento Confirmado e Atualizado: ${idBusca}`);
-            } else {
-                console.log(`❌ Erro: Valor divergente no webhook.`);
             }
         }
     }
@@ -105,9 +93,7 @@ app.post('/webhook', (req, res) => {
     return res.status(200).send("OK");
 });
 
-// =====================================================
 // ROTA 3: POLLING (O FRONT-END PERGUNTA A CADA 3 SEGUNDOS)
-// =====================================================
 app.get('/check-status/:id', (req, res) => {
     const id = req.params.id;
     const transacao = bancoTransacoes.get(id);
@@ -120,4 +106,4 @@ app.get('/check-status/:id', (req, res) => {
     }
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Vizzion rodando com Webhook e Página Ativa!"));
+app.listen(process.env.PORT || 3000, () => console.log("Servidor com Webhook Rodando 🚀"));
