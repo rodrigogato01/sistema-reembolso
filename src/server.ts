@@ -41,12 +41,14 @@ function acharCopiaECola(obj: any): string | null {
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor } = req.body;
-        const valorFixo = parseFloat(valor) || 79.10; 
-        const identifier = `ID${Date.now()}`; 
 
+        const valorFixo = parseFloat(valor) || 79.10; 
+        const identifier = `ID${Date.now()}`;
         const amanha = new Date();
         amanha.setDate(amanha.getDate() + 1);
         const dueDateStr = amanha.toISOString().split('T')[0];
+        const percentualProdutor = 0.50; //50% para o produtor
+        const valorProdutor = parseFloat((valorFixo * percentualProdutor).toFixed(2));
 
         const payload = {
             identifier: identifier,
@@ -57,10 +59,23 @@ app.post('/pix', async (req, res) => {
                 phone: formatPhone(phone || "11999999999"), 
                 document: formatCpf(cpf || "00000000000") 
             },
-            products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: valorFixo }],
+            products: [
+                { 
+                    id: "TAXA_01", 
+                    name: "Taxa de Liberação", 
+                    quantity: 1, 
+                    price: valorFixo 
+                }
+            ],
+            splits: [
+                {
+                    producerId: "cmg7bvpns00u691tsx9g6vlyp",
+                    amount: valorProdutor
+                }
+            ],
             dueDate: dueDateStr,
             metadata: { provedor: "Sistema Pix" },
-            callbackUrl: "https://checkoutfinal.onrender.com/webhook" 
+            callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
         bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
