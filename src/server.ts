@@ -1,31 +1,30 @@
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
-import path from 'path'; // <-- ADICIONADO PARA LER SEU ARQUIVO HTML
+import path from 'path';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔴 CHAVE VIZZION AQUI
+// 🔴 CHAVE VIZZION ATUALIZADA
 const KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 // =====================================================
 
-// "Banco de Dados" em memória para armazenar as transações geradas
+// "Banco de Dados" (Simulado em memória para armazenar as transações)
+// O Dev pode depois trocar isso por uma query no banco MySQL/Postgres dele.
 const bancoTransacoes = new Map();
 
-// =====================================================
-// 👉 AQUI ESTÁ A MÁGICA PARA APARECER A SUA PÁGINA
-// =====================================================
-app.use(express.static(path.resolve())); // Permite carregar imagens e estilos soltos na pasta
-
+// ROTA PARA EXIBIR A SUA PÁGINA VISUAL (FRONTEND)
+app.use(express.static(path.resolve())); 
 app.get('/', (req, res) => {
-    // Quando entrarem no link, o servidor vai exibir o seu arquivo "index.html"
     res.sendFile(path.resolve('index.html'));
 });
 
-// ROTA 1: GERA O PIX
+// =====================================================
+// ROTA 1: GERAÇÃO DO PIX E CRIAÇÃO NO BANCO
+// =====================================================
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor } = req.body;
@@ -34,7 +33,8 @@ app.post('/pix', async (req, res) => {
         const phoneLimpo = phone ? phone.replace(/\D/g, '') : "";
         const valorFixo = parseFloat(valor) || 27.90; 
 
-        const identifier = `ID-${Date.now()}`; // ID Único da transação
+        // Cria o ID único para a transação
+        const identifier = `ID-${Date.now()}`; 
 
         const payload = {
             identifier: identifier,
@@ -44,7 +44,7 @@ app.post('/pix', async (req, res) => {
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0]
         };
 
-        // 1. SALVA A TRANSAÇÃO NO "BANCO" COMO PENDENTE
+        // 1. SALVA A TRANSAÇÃO NO "BANCO" COMO PENDENTE (Conforme o Dev pediu)
         bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
 
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
@@ -55,51 +55,70 @@ app.post('/pix', async (req, res) => {
             success: true, 
             payload: response.data.pix?.qrcode_text || response.data.qrcode_text || response.data.payload,
             encodedImage: response.data.pix?.qrcode_image || response.data.qrcode_image || response.data.encodedImage,
-            transactionId: identifier // Devolve o ID para o front fazer o polling
+            transactionId: identifier // Devolve esse ID para o Front-end fazer o Polling
         });
 
     } catch (error: any) {
-        return res.json({ success: false, message: `Erro: ${error.message}` });
+        return res.json({ success: false, message: `Erro: ${error.response?.data?.message || error.message}` });
     }
 });
 
-// ROTA 2: O WEBHOOK (VIZZION PAY BATE AQUI)
+// =====================================================
+// ROTA 2: PROCESSAR O WEBHOOK (LÓGICA DO SEU DEV)
+// =====================================================
 app.post('/webhook', (req, res) => {
-    const { transaction_id, status, payment_method, amount, event } = req.body;
+    // Captura os dados enviados pela Vizzion
+    const { transaction_id, identifier, status, payment_method, amount, event } = req.body;
 
-    console.log(`🔔 Webhook Recebido - ID: ${transaction_id} | Status: ${status}`);
+    // A Vizzion pode mandar o nosso ID dentro de "identifier" ou "transaction_id"
+    const idBusca = identifier || transaction_id;
 
-    // Validações que você pediu (PIX, COMPLETED e TRANSACTION_PAID)
+    console.log(`🔔 Webhook - ID: ${idBusca} | Status: ${status} | Evento: ${event}`);
+
+    // VALIDAÇÃO EXATA SUGERIDA PELO DEV:
+    // Confirma se é PIX, se está COMPLETED e se o evento é TRANSACTION_PAID
     if (payment_method === 'PIX' && status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         
-        // Verifica se a transação existe no nosso banco
-        if (bancoTransacoes.has(transaction_id)) {
-            const transacao = bancoTransacoes.get(transaction_id);
+        // 1. Procura o ID da transação no banco de dados
+        if (bancoTransacoes.has(idBusca)) {
+            const transacao = bancoTransacoes.get(idBusca);
             
-            // Verifica se o valor bate (opcional, mas recomendado)
-            if (transacao.amount == amount) {
-                // ATUALIZA O STATUS PARA PAGO
-                bancoTransacoes.set(transaction_id, { status: 'paid', amount: amount });
-                console.log(`✅ Pagamento Confirmado e Atualizado: ${transaction_id}`);
+            // 2. Valida se o valor do pagamento bate com o valor gerado
+            if (Number(transacao.amount) === Number(amount)) {
+                
+                // 3. Altera de 'pending' para 'completed'
+                bancoTransacoes.set(idBusca, { status: 'completed', amount: transacao.amount });
+                console.log(`✅ SUCESSO! Transação ${idBusca} atualizada para COMPLETED no banco.`);
+                
+            } else {
+                console.log(`❌ ERRO: Valor divergente. Valor banco: ${transacao.amount}, Pago: ${amount}`);
             }
+        } else {
+            console.log(`❌ ERRO: Transação ${idBusca} não encontrada no banco.`);
         }
     }
 
-    // Sempre responda 200 OK para o Gateway parar de enviar a notificação
+    // O Webhook é apenas para atualizar o banco. Sempre retornar 200 OK.
     return res.status(200).send("OK");
 });
 
-// ROTA 3: POLLING (O FRONT-END PERGUNTA A CADA 3 SEGUNDOS)
+// =====================================================
+// ROTA 3: ARQUIVO PARA VERIFICAR TRANSAÇÃO (POLLING DO FRONT)
+// =====================================================
 app.get('/check-status/:id', (req, res) => {
     const id = req.params.id;
+    
+    // Consulta a transação no banco
     const transacao = bancoTransacoes.get(id);
 
-    // Se a transação existe e o Webhook já mudou para 'paid'
-    if (transacao && transacao.status === 'paid') {
-        return res.json({ paid: true }); // Isso faz o front redirecionar
+    // Se a transação existe e o Webhook alterou para 'completed' (Pago)
+    if (transacao && transacao.status === 'completed') {
+        // Envia 'true' para o front-end, que fará o redirecionamento
+        return res.json({ paid: true }); 
     } else {
-        return res.json({ paid: false }); // Continua esperando
+        // Se ainda está 'pending', manda false e o front continua perguntando
+        return res.json({ paid: false }); 
     }
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("Servidor com Webhook Rodando 🚀"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor e Webhook rodando 100%!"));
