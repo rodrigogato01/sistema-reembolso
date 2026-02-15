@@ -8,30 +8,39 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔴 CHAVE VIZZION AQUI 
+// 🔴 CHAVE VIZZION AQUI
 const KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 // =====================================================
 
-// "Banco de Dados" em memória
 const bancoTransacoes = new Map();
 
-// SERVIR A PÁGINA HTML NO SEU LINK
 app.use(express.static(path.resolve())); 
 app.get('/', (req, res) => {
     res.sendFile(path.resolve('index.html'));
 });
 
+// FUNÇÕES PARA FORÇAR A MÁSCARA EXATAMENTE COMO A VIZZION PEDE
+function formatCpf(cpf: string) {
+    const v = cpf.replace(/\D/g, '');
+    if (v.length === 11) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    return cpf;
+}
+
+function formatPhone(phone: string) {
+    const v = phone.replace(/\D/g, '');
+    if (v.length === 11) return v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    if (v.length === 10) return v.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+    return phone;
+}
+
 // =====================================================
-// ROTA 1: GERA O PIX (FORMATO EXATO DA VIZZION PAY)
+// ROTA 1: GERA O PIX
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor } = req.body;
         
-        // Garante que o valor é um número (float) como a Vizzion pede
         const valorFixo = parseFloat(valor) || 79.10; 
-        
-        // ID único
         const identifier = `ID${Date.now()}`; 
 
         // Data de vencimento para amanhã (Formato YYYY-MM-DD)
@@ -39,17 +48,15 @@ app.post('/pix', async (req, res) => {
         amanha.setDate(amanha.getDate() + 1);
         const dueDateStr = amanha.toISOString().split('T')[0];
 
-        // =====================================================
-        // O PAYLOAD EXATO QUE VOCÊ ME MANDOU NA DOCUMENTAÇÃO
-        // =====================================================
+        // Formatando os dados no padrão exato da documentação que você enviou
         const payload = {
             identifier: identifier,
             amount: valorFixo,
             client: { 
                 name: name || "Cliente Consumidor", 
                 email: email || "email@pendente.com", 
-                phone: phone || "(11) 99999-9999", 
-                document: cpf || "000.000.000-00" 
+                phone: formatPhone(phone || "11999999999"), 
+                document: formatCpf(cpf || "00000000000") 
             },
             products: [
                 {
@@ -61,14 +68,11 @@ app.post('/pix', async (req, res) => {
             ],
             dueDate: dueDateStr,
             metadata: {},
-            // 👉 A MÁGICA DO WEBHOOK ACONTECE AQUI DENTRO:
             callbackUrl: "https://checkoutfinal.onrender.com/webhook" 
         };
 
-        // Salva transação no banco antes de gerar
         bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
 
-        // Manda pra Vizzion
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
             headers: { 
                 'Authorization': `Bearer ${KEY}`, 
@@ -76,7 +80,6 @@ app.post('/pix', async (req, res) => {
             }
         });
 
-        // Devolve pro HTML
         return res.json({ 
             success: true, 
             payload: response.data.pix?.qrcode_text || response.data.qrcode_text || response.data.payload,
@@ -85,32 +88,29 @@ app.post('/pix', async (req, res) => {
         });
 
     } catch (error: any) {
-        console.error("Erro Vizzion:", error.response?.data || error.message);
+        // AQUI ESTÁ A CHAVE DE OURO: Vamos mostrar o erro EXATO que a Vizzion está devolvendo
+        const erroReal = error.response?.data ? JSON.stringify(error.response.data) : error.message;
+        console.error("Erro Vizzion:", erroReal);
+        
         return res.json({ 
             success: false, 
-            message: "Erro na comunicação com a API de Pagamento." 
+            message: `Detalhe do erro Vizzion: ${erroReal}` 
         });
     }
 });
 
 // =====================================================
-// ROTA 2: O WEBHOOK (VIZZION AVISA AQUI QUE FOI PAGO)
+// ROTA 2: O WEBHOOK
 // =====================================================
 app.post('/webhook', (req, res) => {
     const { transaction_id, identifier, status, payment_method, amount, event } = req.body;
-    
-    // Identificador
     const idBusca = identifier || transaction_id;
-    console.log(`🔔 Webhook Recebido - ID: ${idBusca} | Status: ${status}`);
 
-    // Validação de pagamento PIX e COMPLETED
     if (payment_method === 'PIX' && status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         if (bancoTransacoes.has(idBusca)) {
             const transacao = bancoTransacoes.get(idBusca);
-            
             if (Number(transacao.amount) === Number(amount)) {
                 bancoTransacoes.set(idBusca, { status: 'paid', amount: amount });
-                console.log(`✅ Pix Confirmado! Transação ${idBusca} atualizada para PAID.`);
             }
         }
     }
@@ -118,7 +118,7 @@ app.post('/webhook', (req, res) => {
 });
 
 // =====================================================
-// ROTA 3: POLLING (O SITE PERGUNTA SE JÁ PODE REDIRECIONAR)
+// ROTA 3: POLLING
 // =====================================================
 app.get('/check-status/:id', (req, res) => {
     const id = req.params.id;
@@ -131,4 +131,4 @@ app.get('/check-status/:id', (req, res) => {
     }
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor da Vizzion rodando 100%!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor da Vizzion rodando!"));
