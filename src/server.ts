@@ -117,21 +117,14 @@ app.post('/pix', async (req, res) => {
 // =====================================================
 // ROTA 2: WEBHOOK (O AVISO DE PAGAMENTO)
 // =====================================================
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
 
     if (!transaction) {
         return res.status(400).send("Invalid payload");
     }
 
-    const {
-        id,
-        identifier,
-        status,
-        paymentMethod,
-        amount
-    } = transaction;
-
+    const { id, identifier, status, paymentMethod, amount } = transaction;
     const idBusca = identifier || id;
 
     if (
@@ -143,12 +136,23 @@ app.post('/webhook', (req, res) => {
             const transacao = bancoTransacoes.get(idBusca);
 
             if (Number(transacao.amount) === Number(amount)) {
+                
                 bancoTransacoes.set(idBusca, {
                     status: 'paid',
                     amount: amount
                 });
 
                 console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
+
+                try {
+                    const pushcutUrl = 'https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o';
+                    
+                    await fetch(pushcutUrl); 
+                    
+                } catch (error) {
+                    console.error('❌ Erro ao disparar:', error.message);
+                }
+
             } else {
                 console.log(`⚠️ Valor divergente no webhook`);
             }
