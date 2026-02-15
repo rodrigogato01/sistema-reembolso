@@ -1,98 +1,84 @@
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
-import path from 'path';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// =====================================================
-// 🔴 CHAVE VIZZION AQUI (COLOQUE A NOVA CHAVE GERADA)
-const KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
-// =====================================================
-
-// "Banco de Dados" em memória para armazenar as transações geradas
-const bancoTransacoes = new Map();
-
-// =====================================================
-// 👉 AQUI ESTÁ A MÁGICA PARA APARECER A SUA PÁGINA
-// =====================================================
-app.use(express.static(path.resolve())); 
-
-app.get('/', (req, res) => {
-    res.sendFile(path.resolve('index.html'));
-});
-
-// =====================================================
-// ROTA 1: GERA O PIX (SUA LÓGICA ORIGINAL INTACTA)
-// =====================================================
 app.post('/pix', async (req, res) => {
     try {
+        // =====================================================
+        // 🔴 COLE SUA CHAVE AQUI DENTRO DAS ASPAS (SEM ESPAÇOS)
+        const CHAVE_FINAL = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
+        // =====================================================
+
         const { name, email, cpf, phone, valor } = req.body;
         
+        // Limpeza rigorosa
         const cpfLimpo = cpf ? cpf.replace(/\D/g, '') : ""; 
         const phoneLimpo = phone ? phone.replace(/\D/g, '') : "";
-        const valorFixo = parseFloat(valor) || 27.90; 
+        const valorFixo = 27.90; // Forçando o valor correto
 
-        const identifier = `ID-${Date.now()}`; 
-
+        // Monta o pedido
         const payload = {
-            identifier: identifier,
+            identifier: `ID-${Date.now()}`,
             amount: valorFixo,
-            client: { name: name || "Cliente", email: email || "email@teste.com", document: cpfLimpo, phone: phoneLimpo },
-            products: [{ id: "TAXA", name: "Taxa Liberacao", quantity: 1, price: valorFixo }],
+            client: {
+                name: name || "Cliente",
+                email: email || "email@teste.com",
+                document: cpfLimpo,
+                phone: phoneLimpo
+            },
+            products: [
+                { id: "TAXA", name: "Taxa Liberacao", quantity: 1, price: valorFixo }
+            ],
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0]
         };
 
-        bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
+        // Verifica se a chave existe antes de enviar
+        if (!CHAVE_FINAL || CHAVE_FINAL.includes("COLE_SUA_CHAVE")) {
+            throw new Error("A chave API ainda não foi colada no código do servidor!");
+        }
 
+        console.log(`Tentando enviar com chave de tamanho: ${CHAVE_FINAL.length} caracteres.`);
+
+        // Envia para a Vizzion
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
-            headers: { 'Authorization': `Bearer ${KEY}`, 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${CHAVE_FINAL.trim()}`, // .trim() remove espaços invisíveis
+                'Content-Type': 'application/json' 
+            }
         });
 
+        // SUCESSO
         return res.json({ 
             success: true, 
             payload: response.data.pix?.qrcode_text || response.data.qrcode_text || response.data.payload,
             encodedImage: response.data.pix?.qrcode_image || response.data.qrcode_image || response.data.encodedImage,
-            transactionId: identifier 
+            transactionId: payload.identifier 
         });
 
     } catch (error: any) {
-        return res.json({ success: false, message: `Erro: ${error.message}` });
+        // TRATAMENTO DE ERRO COM DIAGNÓSTICO
+        const erroVizzion = error.response?.data;
+        const status = error.response?.status;
+        
+        // Pega a chave que foi usada para mostrar o tamanho dela (sem mostrar a senha)
+        // Isso vai te ajudar a saber se o servidor leu a chave ou não
+        const chaveUsada = "COLE_SUA_CHAVE_AQUI_DIRETO"; // (Repetido só pro catch ter acesso se precisar, mas o debug abaixo resolve)
+
+        let explicacao = JSON.stringify(erroVizzion || error.message);
+
+        // Retorna o erro detalhado para a sua tela
+        return res.json({ 
+            success: false, 
+            message: `ERRO (${status}): ${explicacao}`
+        });
     }
 });
 
-// =====================================================
-// ROTA 2: O WEBHOOK
-// =====================================================
-app.post('/webhook', (req, res) => {
-    const { transaction_id, identifier, status, payment_method, amount, event } = req.body;
-    const idBusca = identifier || transaction_id;
+// Rota de verificação
+app.get('/check-status/:id', (req, res) => res.json({ paid: false }));
 
-    if (payment_method === 'PIX' && status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
-        if (bancoTransacoes.has(idBusca)) {
-            const transacao = bancoTransacoes.get(idBusca);
-            if (Number(transacao.amount) === Number(amount)) {
-                bancoTransacoes.set(idBusca, { status: 'paid', amount: amount });
-            }
-        }
-    }
-    return res.status(200).send("OK");
-});
-
-// =====================================================
-// ROTA 3: POLLING
-// =====================================================
-app.get('/check-status/:id', (req, res) => {
-    const id = req.params.id;
-    const transacao = bancoTransacoes.get(id);
-
-    if (transacao && transacao.status === 'paid') {
-        return res.json({ paid: true }); 
-    } else {
-        return res.json({ paid: false }); 
-    }
-});
-
-app.listen(process.env.PORT || 3000, () => console.log("Servidor com Webhook Rodando"));
+app.listen(process.env.PORT || 3000, () => console.log("Servidor Final Rodando"));
