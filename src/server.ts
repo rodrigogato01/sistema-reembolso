@@ -103,18 +103,45 @@ app.post('/pix', async (req, res) => {
 // ROTA 2: WEBHOOK (O AVISO DE PAGAMENTO)
 // =====================================================
 app.post('/webhook', (req, res) => {
-    const { transaction_id, identifier, status, payment_method, amount, event } = req.body;
-    const idBusca = identifier || transaction_id;
+    const { event, transaction } = req.body;
 
-    if (payment_method === 'PIX' && status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
+    if (!transaction) {
+        return res.status(400).send("Invalid payload");
+    }
+
+    const {
+        id,
+        identifier,
+        status,
+        paymentMethod,
+        amount
+    } = transaction;
+
+    const idBusca = identifier || id;
+
+    if (
+        paymentMethod === 'PIX' &&
+        status === 'COMPLETED' &&
+        event === 'TRANSACTION_PAID'
+    ) {
         if (bancoTransacoes.has(idBusca)) {
             const transacao = bancoTransacoes.get(idBusca);
+
             if (Number(transacao.amount) === Number(amount)) {
-                bancoTransacoes.set(idBusca, { status: 'paid', amount: amount });
-                console.log(`💰💰 PAGAMENTO CONFIRMADO NO BANCO! Transação: ${idBusca}`);
+                bancoTransacoes.set(idBusca, {
+                    status: 'paid',
+                    amount: amount
+                });
+
+                console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
+            } else {
+                console.log(`⚠️ Valor divergente no webhook`);
             }
+        } else {
+            console.log(`⚠️ Transação não encontrada: ${idBusca}`);
         }
     }
+
     return res.status(200).send("OK");
 });
 
