@@ -1,108 +1,117 @@
-import express from 'express';
-import cors from 'cors';
-import axios from 'axios';
-import path from 'path';
+<script>
 
-const app = express();
+function gerarPix() {
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.resolve()));
+    const btn = document.getElementById("btn_pagar");
+    btn.innerHTML = "PROCESSANDO...";
+    btn.disabled = true;
 
-const PORT = process.env.PORT || 3000;
+    fetch("https://checkout-pix-profissional.onrender.com/pix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ valor: "27.90" })
+    })
+    .then(res => res.json())
+    .then(data => {
 
-const SECRET_KEY = process.env.SECRET_KEY!;
-const PUBLIC_KEY = process.env.PUBLIC_KEY!;
+        console.log("RESPOSTA PIX:", data);
 
-const bancoTransacoes = new Map<string, any>();
+        if (!data.success) throw new Error("Falha ao gerar PIX");
 
-app.get('/', (_, res) => {
-  res.sendFile(path.resolve('index.html'));
-});
+        abrirModal(data);
 
-function acharCopiaECola(obj: any): string | null {
-  if (typeof obj === 'string' && obj.startsWith('000201')) return obj;
+        // ✅ Só verifica se backend mandar paymentId
+        if (data.paymentId) {
+            verificarPagamento(data.paymentId, btn);
+        } else {
+            console.warn("⚠️ paymentId não veio do backend");
+            liberarBotao(btn);
+        }
 
-  if (typeof obj === 'object' && obj !== null) {
-    for (const key in obj) {
-      const result = acharCopiaECola(obj[key]);
-      if (result) return result;
-    }
-  }
-  return null;
+    })
+    .catch(err => {
+        console.error("ERRO PIX:", err);
+        alert("Erro ao gerar pagamento");
+        liberarBotao(btn);
+    });
 }
 
-app.post('/pix', async (req, res) => {
-  try {
+function abrirModal(data) {
 
-    const identifier = `ID${Date.now()}`;
-    const valor = 79.10;
+    overlay.style.display = "block";
+    modal_pix.style.display = "block";
 
-    const payload = {
-      identifier,
-      amount: valor,
-      client: { name: "Cliente" },
-      callbackUrl: "https://SEUAPP.onrender.com/webhook"
-    };
+    txt_codigo.value = data.payload;
 
-    bancoTransacoes.set(identifier, { status: 'pending' });
+    qr_code_div.innerHTML = "";
 
-    const response = await axios.post(
-      'https://app.vizzionpay.com/api/v1/gateway/pix/receive',
-      payload,
-      {
-        headers: {
-          'x-public-key': PUBLIC_KEY,
-          'x-secret-key': SECRET_KEY
-        }
-      }
-    );
+    if (data.encodedImage) {
 
-    const codigoPix = acharCopiaECola(response.data);
+        const src = data.encodedImage.startsWith("http")
+            ? data.encodedImage
+            : `data:image/png;base64,${data.encodedImage}`;
 
-    res.json({
-      success: true,
-      payload: codigoPix,
-      encodedImage: response.data?.encodedImage || "",
-      transactionId: identifier
-    });
+        qr_code_div.innerHTML = `<img src="${src}">`;
 
-  } catch (err: any) {
+    } else {
 
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
+        new QRCode(qr_code_div, {
+            text: data.payload,
+            width: 200,
+            height: 200
+        });
+    }
+}
 
-  }
-});
+function verificarPagamento(paymentId, btn) {
 
-app.post('/webhook', (req, res) => {
+    console.log("🔎 Verificando pagamento:", paymentId);
 
-  const { transaction } = req.body;
+    const intervalo = setInterval(() => {
 
-  if (transaction?.identifier) {
+        fetch(`https://checkout-pix-profissional.onrender.com/status/${paymentId}`)
+        .then(res => res.json())
+        .then(data => {
 
-    bancoTransacoes.set(transaction.identifier, {
-      status: 'paid'
-    });
+            console.log("STATUS:", data);
 
-    console.log("💰 PAGAMENTO CONFIRMADO");
-  }
+            if (data.status === "approved" || data.status === "paid") {
 
-  res.sendStatus(200);
-});
+                clearInterval(intervalo);
 
-app.get('/check-status/:id', (req, res) => {
+                fecharModal();
+                liberarBotao(btn);
 
-  const transacao = bancoTransacoes.get(req.params.id);
+                alert("✅ Pagamento confirmado");
 
-  res.json({
-    paid: transacao?.status === 'paid'
-  });
+            }
 
-});
+        })
+        .catch(err => {
+            console.error("ERRO STATUS:", err);
+            clearInterval(intervalo);
+            liberarBotao(btn);
+        });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Rodando na porta ${PORT}`);
-});
+    }, 3000);
+}
+
+function fecharModal() {
+    overlay.style.display = "none";
+    modal_pix.style.display = "none";
+    qr_code_div.innerHTML = "";
+    txt_codigo.value = "";
+}
+
+function liberarBotao(btn) {
+    btn.innerHTML = "RESGATAR R$ 1.342,03";
+    btn.disabled = false;
+}
+
+function copiarCodigo() {
+    txt_codigo.select();
+    navigator.clipboard.writeText(txt_codigo.value);
+    alert("Código PIX copiado!");
+}
+
+</script>
