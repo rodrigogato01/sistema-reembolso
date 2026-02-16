@@ -13,7 +13,8 @@ app.use(express.json());
 // =====================================================
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 
-async function enviarAcessoCurso(emailCliente, nomeCliente) {
+// 👇 CORREÇÃO FEITA AQUI: Adicionado ': string' para o TypeScript aprovar
+async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
     try {
         await resend.emails.send({
             from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
@@ -138,7 +139,7 @@ app.post('/pix', async (req, res) => {
 // =====================================================
 // ROTA 2: WEBHOOK (O AVISO DE PAGAMENTO)
 // =====================================================
-app.post('/webhook', async (req, res) => { // <-- ACRESCENTADO O 'async' AQUI
+app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
 
     if (!transaction) {
@@ -179,9 +180,9 @@ app.post('/webhook', async (req, res) => { // <-- ACRESCENTADO O 'async' AQUI
                 if (dados.client && dados.client.email) {
                     const email = dados.client.email;
                     const nome = dados.client.name;
-                    
-                    // O servidor dispara o e-mail silenciosamente
                     await enviarAcessoCurso(email, nome);
+                } else if (transaction.client && transaction.client.email) {
+                    await enviarAcessoCurso(transaction.client.email, transaction.client.name);
                 }
                 // ==========================================================
 
