@@ -1,167 +1,165 @@
-import express from 'express';
-import cors from 'cors';
-import axios from 'axios';
-import path from 'path';
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagamento PIX</title>
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const SECRET_KEY = process.env.SECRET_KEY;
-const PUBLIC_KEY = process.env.PUBLIC_KEY;
-
-const bancoTransacoes = new Map();
-
-app.use(express.static(path.resolve()));
-app.get('/', (req, res) => {
-  res.sendFile(path.resolve('index.html'));
-});
-
-const formatCpf = v =>
-  v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-
-const formatPhone = v =>
-  v.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-
-function acharCopiaECola(obj) {
-  if (typeof obj === 'string' && obj.startsWith('000201')) return obj;
-
-  if (typeof obj === 'object' && obj !== null) {
-    for (const key in obj) {
-      const result = acharCopiaECola(obj[key]);
-      if (result) return result;
-    }
-  }
-  return null;
+<style>
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background:#f5f5f5;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 
-// ================= GERAR PIX =================
-app.post('/pix', async (req, res) => {
-  try {
-    const { name, email, cpf, phone, valor } = req.body;
+.box{
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+  width:350px;
+  text-align:center;
+  box-shadow:0 0 15px rgba(0,0,0,0.08);
+}
 
-    const valorFixo = parseFloat(valor) || 79.10;
-    const identifier = `ID${Date.now()}`;
+button{
+  background:#00a650;
+  color:#fff;
+  border:none;
+  padding:15px;
+  width:100%;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+}
 
-    const amanha = new Date();
-    amanha.setDate(amanha.getDate() + 1);
+button:disabled{
+  background:#ccc;
+}
 
-    const payload = {
-      identifier,
-      amount: valorFixo,
-      client: {
-        name: name || "Cliente",
-        email: email || "cliente@email.com",
-        phone: formatPhone(phone || "11999999999"),
-        document: formatCpf(cpf || "00000000000")
-      },
-      products: [
-        {
-          id: "TAXA_01",
-          name: "Taxa de Liberação",
-          quantity: 1,
-          price: valorFixo
-        }
-      ],
-      splits: [
-        {
-          producerId: "cmg7bvpns00u691tsx9g6vlyp",
-          amount: Number((valorFixo * 0.5).toFixed(2))
-        }
-      ],
-      dueDate: amanha.toISOString().split('T')[0],
-      callbackUrl: "https://checkoutfinal.onrender.com/webhook"
-    };
+#qrcode{
+  width:230px;
+  margin:20px auto;
+  display:none;
+}
 
-    bancoTransacoes.set(identifier, {
-      status: 'pending',
-      amount: valorFixo
-    });
+#pixCode{
+  font-size:12px;
+  word-break:break-all;
+  background:#f1f1f1;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+  display:none;
+}
 
-    const response = await axios.post(
-      'https://app.vizzionpay.com/api/v1/gateway/pix/receive',
-      payload,
-      {
-        headers: {
-          'x-public-key': PUBLIC_KEY,
-          'x-secret-key': SECRET_KEY,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+#liberar{
+  margin-top:15px;
+  display:none;
+  background:#007bff;
+}
+</style>
+</head>
 
-    const pixData = response.data.pix || response.data || {};
+<body>
 
-    const imagemPix =
-      pixData.encodedImage ||
-      pixData.qrcode_image ||
-      pixData.image ||
-      "";
+<div class="box">
 
-    const codigoPix =
-      acharCopiaECola(response.data) ||
-      "Erro ao localizar código PIX";
+<h3>🔐 Pagamento via PIX</h3>
 
-    return res.json({
-      success: true,
-      payload: codigoPix,
-      encodedImage: imagemPix,
-      transactionId: identifier
-    });
+<button onclick="gerarPix()" id="gerarBtn">
+Gerar PIX
+</button>
 
-  } catch (error) {
-    const erroReal = error.response?.data
-      ? JSON.stringify(error.response.data)
-      : error.message;
+<img id="qrcode">
 
-    console.error("❌ Erro Vizzion:", erroReal);
+<div id="pixCode"></div>
 
-    res.status(500).json({
-      success: false,
-      message: `Erro Vizzion: ${erroReal}`
-    });
-  }
-});
+<button id="liberar" onclick="redirecionar()">
+RESGATAR AGORA
+</button>
 
-// ================= WEBHOOK =================
-app.post('/webhook', (req, res) => {
+</div>
 
-  const { event, transaction } = req.body;
+<script>
 
-  if (!transaction) return res.sendStatus(400);
+const API = "https://SEUAPP.onrender.com"
 
-  const { identifier, status, paymentMethod, amount } = transaction;
+let transactionId = null
 
-  if (
-    paymentMethod === 'PIX' &&
-    status === 'COMPLETED' &&
-    event === 'TRANSACTION_PAID'
-  ) {
-    if (bancoTransacoes.has(identifier)) {
+async function gerarPix(){
 
-      bancoTransacoes.set(identifier, {
-        status: 'paid',
-        amount
-      });
+document.getElementById("gerarBtn").disabled = true
 
-      console.log(`💰 PAGAMENTO CONFIRMADO! ${identifier}`);
-    }
-  }
+const response = await fetch(API + "/pix",{
+method:"POST",
+headers:{ "Content-Type":"application/json" },
+body:JSON.stringify({
+name:"Cliente",
+email:"cliente@email.com",
+cpf:"00000000000",
+phone:"11999999999",
+valor:79.10
+})
+})
 
-  res.sendStatus(200);
-});
+const data = await response.json()
 
-// ================= CHECK STATUS =================
-app.get('/check-status/:id', (req, res) => {
+if(data.success){
 
-  const transacao = bancoTransacoes.get(req.params.id);
+transactionId = data.transactionId
 
-  res.json({
-    paid: transacao?.status === 'paid'
-  });
+document.getElementById("qrcode").src = data.encodedImage
+document.getElementById("qrcode").style.display = "block"
 
-});
+const pixCode = document.getElementById("pixCode")
+pixCode.innerText = data.payload
+pixCode.style.display = "block"
 
-app.listen(process.env.PORT || 3000, () =>
-  console.log("🚀 Servidor rodando")
-);
+pixCode.onclick = () => {
+navigator.clipboard.writeText(data.payload)
+pixCode.innerText = "✅ Copiado!"
+}
+
+verificarPagamento()
+
+}
+}
+
+// 🔄 polling
+async function verificarPagamento(){
+
+const interval = setInterval(async()=>{
+
+const res = await fetch(API + "/check-status/" + transactionId)
+const data = await res.json()
+
+if(data.paid){
+
+clearInterval(interval)
+
+document.getElementById("qrcode").style.display = "none"
+document.getElementById("pixCode").style.display = "none"
+
+document.getElementById("liberar").style.display = "block"
+
+setTimeout(()=>{
+redirecionar()
+},3000)
+
+}
+
+},3000)
+
+}
+
+function redirecionar(){
+window.location.href = "https://recuperabonushopp.com/elementor-1064"
+}
+
+</script>
+
+</body>
+</html>
