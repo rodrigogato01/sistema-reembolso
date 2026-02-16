@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Acesso Confirmado</title>
+<title>Acesso Confirmado | Shopee Bônus</title>
 
 <style>
 :root{
@@ -25,7 +25,7 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
+    min-height:100vh;
     padding:20px;
 }
 
@@ -35,7 +35,7 @@ body{
     width:100%;
     border-radius:18px;
     box-shadow:0 15px 40px rgba(0,0,0,0.08);
-    padding:45px 35px;
+    padding:40px 30px;
     text-align:center;
     animation:fadeIn 0.6s ease;
 }
@@ -48,36 +48,74 @@ body{
 
 h1{
     margin-top:20px;
-    font-size:26px;
+    font-size:24px;
     color:var(--dark);
+    line-height: 1.3;
 }
 
 .subtitle{
-    margin-top:12px;
+    margin-top:15px;
     font-size:16px;
     color:#555;
+    line-height: 1.5;
+}
+
+.highlight-valor {
+    color: var(--green);
+    font-weight: 900;
+    font-size: 20px;
+    display: block;
+    margin-top: 5px;
 }
 
 .info-box{
-    margin-top:28px;
+    margin-top:25px;
     background:#f9f9f9;
-    padding:20px;
+    padding:18px;
     border-radius:12px;
-    border:1px solid #eee;
+    border:1px dashed #ddd;
     font-size:14px;
-    color:#444;
+    color:#666;
     line-height:1.6;
 }
 
-.highlight{
-    color:var(--primary);
-    font-weight:bold;
+/* BOTÃO DE ACESSO AO CURSO */
+.btn-curso {
+    display: inline-block;
+    margin-top: 30px;
+    background-color: var(--green);
+    color: white;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 16px;
+    width: 100%;
+    padding: 18px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    box-shadow: 0 10px 20px rgba(31, 156, 107, 0.2);
+    transition: 0.3s;
+    animation: pulseBtn 1.5s infinite;
+}
+
+.btn-curso:hover {
+    transform: scale(1.02);
+    background-color: #188a5d;
+}
+
+@keyframes pulseBtn {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 156, 107, 0.7); }
+    70% { transform: scale(1.03); box-shadow: 0 0 0 15px rgba(31, 156, 107, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31, 156, 107, 0); }
 }
 
 .secure{
-    margin-top:30px;
-    font-size:12px;
-    color:#777;
+    margin-top:25px;
+    font-size:11px;
+    color:#999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
 }
 
 @keyframes pop{
@@ -101,17 +139,21 @@ h1{
     <h1>Parabéns! 🎉</h1>
 
     <p class="subtitle">
-        Sua ativação foi concluída com sucesso.
+        Informamos que sua bonificação no programa da Shopee foi processada com sucesso, e o valor de 
+        <span class="highlight-valor">R$ 1.489,38</span> já está disponível para você.
     </p>
 
+    <a href="https://www.youtube.com/playlist?list=PLUvZw3_AgGShs94tp72Bh8WMzr1WrAOJC" class="btn-curso">
+        ACESSAR MEU CURSO AGORA
+    </a>
+
     <div class="info-box">
-        📩 Todas as informações de acesso foram enviadas para o seu 
-        <span class="highlight">e-mail cadastrado</span>.<br><br>
-        Caso não encontre na caixa principal, verifique também as abas de spam ou promoções.
+        💡 <strong>Dica importante:</strong><br>
+        O acesso às aulas e o guia de resgate também foram enviados para o seu e-mail. Salve o link acima nos seus favoritos!
     </div>
 
     <div class="secure">
-        🔒 Ambiente protegido | Processamento realizado com segurança
+        🔒 Sistema de Liberação Segura | Shopee Brasil
     </div>
 
 </div>
