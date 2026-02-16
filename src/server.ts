@@ -1,83 +1,108 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pagamento PIX</title>
+import express from 'express';
+import cors from 'cors';
+import axios from 'axios';
+import path from 'path';
 
-<style>
-body{font-family:Arial;background:#f4f4f4;text-align:center;padding:40px}
-.box{background:#fff;padding:20px;border-radius:10px;max-width:400px;margin:auto}
-button{background:#00a650;color:#fff;border:none;padding:15px;width:100%;border-radius:8px;font-size:16px;margin-top:15px}
-#continuar{display:none;background:#007bff}
-#pixCode{word-break:break-all;background:#eee;padding:10px;margin-top:10px;border-radius:8px;font-size:12px}
-</style>
-</head>
+const app = express();
 
-<body>
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.resolve()));
 
-<div class="box">
+const PORT = process.env.PORT || 3000;
 
-<h2>Pagamento via PIX</h2>
+const SECRET_KEY = process.env.SECRET_KEY!;
+const PUBLIC_KEY = process.env.PUBLIC_KEY!;
 
-<button onclick="gerarPix()" id="btnPix">Gerar QR Code</button>
+const bancoTransacoes = new Map<string, any>();
 
-<div id="qrcode"></div>
-<div id="pixCode"></div>
+app.get('/', (_, res) => {
+  res.sendFile(path.resolve('index.html'));
+});
 
-<button id="continuar" onclick="continuar()">Continuar</button>
+function acharCopiaECola(obj: any): string | null {
+  if (typeof obj === 'string' && obj.startsWith('000201')) return obj;
 
-</div>
+  if (typeof obj === 'object' && obj !== null) {
+    for (const key in obj) {
+      const result = acharCopiaECola(obj[key]);
+      if (result) return result;
+    }
+  }
+  return null;
+}
 
-<script>
+app.post('/pix', async (req, res) => {
+  try {
 
-let transactionId = null
+    const identifier = `ID${Date.now()}`;
+    const valor = 79.10;
 
-async function gerarPix(){
+    const payload = {
+      identifier,
+      amount: valor,
+      client: { name: "Cliente" },
+      callbackUrl: "https://SEUAPP.onrender.com/webhook"
+    };
 
-  document.getElementById("btnPix").disabled = true
+    bancoTransacoes.set(identifier, { status: 'pending', amount: valor });
 
-  const req = await fetch("/pix",{method:"POST"})
-  const res = await req.json()
+    const response = await axios.post(
+      'https://app.vizzionpay.com/api/v1/gateway/pix/receive',
+      payload,
+      {
+        headers: {
+          'x-public-key': PUBLIC_KEY,
+          'x-secret-key': SECRET_KEY
+        }
+      }
+    );
 
-  transactionId = res.transactionId
+    const codigoPix = acharCopiaECola(response.data);
 
-  if(res.encodedImage){
-    document.getElementById("qrcode").innerHTML =
-      `<img src="data:image/png;base64,${res.encodedImage}" width="220">`
+    res.json({
+      success: true,
+      payload: codigoPix,
+      encodedImage: response.data?.encodedImage || "",
+      transactionId: identifier
+    });
+
+  } catch (err: any) {
+
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+
+  }
+});
+
+app.post('/webhook', (req, res) => {
+
+  const { transaction } = req.body;
+
+  if (transaction?.identifier) {
+
+    bancoTransacoes.set(transaction.identifier, {
+      status: 'paid'
+    });
+
+    console.log("💰 PAGAMENTO CONFIRMADO");
   }
 
-  document.getElementById("pixCode").innerText = res.payload
+  res.sendStatus(200);
+});
 
-  consultarStatus()
-}
+app.get('/check-status/:id', (req, res) => {
 
-function consultarStatus(){
+  const transacao = bancoTransacoes.get(req.params.id);
 
-  const intervalo = setInterval(async()=>{
+  res.json({
+    paid: transacao?.status === 'paid'
+  });
 
-    const req = await fetch(`/check-status/${transactionId}`)
-    const res = await req.json()
+});
 
-    if(res.paid){
-
-      clearInterval(intervalo)
-
-      document.getElementById("qrcode").innerHTML = ""
-      document.getElementById("pixCode").innerHTML = "✅ PAGAMENTO CONFIRMADO"
-
-      document.getElementById("continuar").style.display = "block"
-
-    }
-
-  },3000)
-}
-
-function continuar(){
-  window.location.href="https://recuperabonushopp.com/elementor-1064"
-}
-
-</script>
-
-</body>
-</html>
+app.listen(PORT, () => {
+  console.log(`🚀 Rodando na porta ${PORT}`);
+});
