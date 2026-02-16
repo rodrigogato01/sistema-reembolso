@@ -2,51 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import path from 'path';
-import { Resend } from 'resend'; // <-- ACRESCENTADO
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// =====================================================
-// ACRESCENTADO: CONFIGURAÇÃO DO RESEND
-const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
-
-async function enviarAcessoCurso(emailCliente, nomeCliente) {
-  try {
-    await resend.emails.send({
-      from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>', 
-      to: emailCliente,
-      subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação Shopee',
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-          <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
-          <p style="font-size: 16px; color: #555;">Informamos que sua bonificação no programa da Shopee foi processada com sucesso.</p>
-          <p style="font-size: 16px; color: #555;">O valor de <strong style="color: #1f9c6b;">R$ 1.489,38</strong> está aguardando você.</p>
-          <p style="font-size: 16px; color: #555;">Clique no botão abaixo para acessar o guia de resgate e as aulas exclusivas imediatamente:</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="https://www.youtube.com/playlist?list=PLUvZw3_AgGShs94tp72Bh8WMzr1WrAOJC" 
-               style="background: #1f9c6b; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
-              ACESSAR MINHAS AULAS AGORA
-            </a>
-          </div>
-
-          <p style="font-size: 14px; color: #777; border-top: 1px solid #eee; pt: 15px;">
-            <strong>Dica:</strong> Se o botão não funcionar, copie e cole o link abaixo no seu navegador:<br>
-            https://www.youtube.com/playlist?list=PLUvZw3_AgGShs94tp72Bh8WMzr1WrAOJC
-          </p>
-          
-          <p style="font-size: 12px; color: #999; margin-top: 20px;">Equipe de Liberação | Shopee Brasil</p>
-        </div>
-      `
-    });
-    console.log(`📧 E-mail invisível enviado com sucesso para: ${emailCliente}`);
-  } catch (error) {
-    console.error("❌ Erro ao disparar e-mail pelo Resend:", error);
-  }
-}
-// =====================================================
 
 // =====================================================
 // 🔴 SUAS CHAVES DA VIZZION PAY (AGORA ESTÁ 100% CORRETO)
@@ -119,8 +78,7 @@ app.post('/pix', async (req, res) => {
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
-        // ACRESCENTADO: Salvando o e-mail e nome do cliente para usar no disparo depois
-        bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo, emailCliente: payload.client.email, nomeCliente: payload.client.name });
+        bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
 
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
             headers: { 
@@ -186,19 +144,11 @@ app.post('/webhook', (req, res) => {
 
             if (Number(transacao.amount) === Number(amount)) {
                 bancoTransacoes.set(idBusca, {
-                    ...transacao, // Mantém os dados antigos (email e nome)
                     status: 'paid',
                     amount: amount
                 });
 
                 console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
-
-                // =====================================================
-                // ACRESCENTADO: DISPARO FANTASMA DO E-MAIL AQUI
-                if (transacao.emailCliente) {
-                    enviarAcessoCurso(transacao.emailCliente, transacao.nomeCliente);
-                }
-                // =====================================================
 
                 axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o')
                     .then(() => {
