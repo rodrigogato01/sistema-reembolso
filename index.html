@@ -2,14 +2,74 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Pagamento PIX</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagamento via PIX</title>
 
 <style>
-body{font-family:Arial;background:#f4f4f4;text-align:center;padding:40px}
-.box{background:#fff;padding:20px;border-radius:10px;max-width:400px;margin:auto}
-button{background:#00a650;color:#fff;border:none;padding:15px;width:100%;border-radius:8px;font-size:16px;margin-top:15px}
-#continuar{display:none;background:#007bff}
-#pixCode{word-break:break-all;background:#eee;padding:10px;margin-top:10px;border-radius:8px;font-size:12px}
+body{
+  margin:0;
+  background:#f5f6fa;
+  font-family:Arial,Helvetica,sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.box{
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  width:100%;
+  max-width:420px;
+  box-shadow:0 0 20px rgba(0,0,0,0.08);
+}
+
+h2{
+  margin-bottom:20px;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.gerar{
+  background:#00a650;
+  color:#fff;
+}
+
+#continuar{
+  background:#007bff;
+  color:#fff;
+  display:none;
+  margin-top:15px;
+}
+
+#pixCode{
+  background:#f1f1f1;
+  padding:12px;
+  border-radius:8px;
+  font-size:12px;
+  margin-top:15px;
+  word-break:break-all;
+  cursor:pointer;
+}
+
+.status{
+  margin-top:15px;
+  font-size:14px;
+}
+
+.qr{
+  margin-top:20px;
+}
+
 </style>
 </head>
 
@@ -19,37 +79,64 @@ button{background:#00a650;color:#fff;border:none;padding:15px;width:100%;border-
 
 <h2>Pagamento via PIX</h2>
 
-<button onclick="gerarPix()">Gerar QR Code</button>
+<button class="gerar" id="gerarBtn" onclick="gerarPix()">
+Gerar QR Code
+</button>
 
-<div id="qrcode"></div>
-<div id="pixCode"></div>
+<div class="status" id="status"></div>
 
-<button id="continuar" onclick="continuar()">Continuar</button>
+<div class="qr" id="qrcode"></div>
+
+<div id="pixCode" onclick="copiarPix()"></div>
+
+<button id="continuar" onclick="continuar()">
+Continuar
+</button>
 
 </div>
 
 <script>
 
 let transactionId = null
+let intervalo = null
 
 async function gerarPix(){
 
-  const req = await fetch("/pix",{method:"POST"})
-  const res = await req.json()
+  const btn = document.getElementById("gerarBtn")
+  btn.disabled = true
+  btn.innerText = "Gerando PIX..."
 
-  transactionId = res.transactionId
+  document.getElementById("status").innerHTML = "⏳ Gerando pagamento..."
 
-  document.getElementById("qrcode").innerHTML =
-    `<img src="data:image/png;base64,${res.encodedImage}" width="220">`
+  try{
 
-  document.getElementById("pixCode").innerText = res.payload
+    const response = await fetch("/pix", { method:"POST" })
+    const data = await response.json()
 
-  consultarStatus()
+    transactionId = data.transactionId
+
+    document.getElementById("status").innerHTML = "📲 Escaneie o QR Code ou copie o código"
+
+    document.getElementById("qrcode").innerHTML =
+      `<img src="data:image/png;base64,${data.encodedImage}" width="220">`
+
+    document.getElementById("pixCode").innerText = data.payload
+
+    verificarPagamento()
+
+  }catch(e){
+
+    document.getElementById("status").innerHTML = "❌ Erro ao gerar pagamento"
+    btn.disabled = false
+    btn.innerText = "Gerar QR Code"
+
+  }
+
 }
 
-function consultarStatus(){
+function verificarPagamento(){
 
-  const intervalo = setInterval(async()=>{
+  intervalo = setInterval(async()=>{
 
     const req = await fetch(`/check-status/${transactionId}`)
     const res = await req.json()
@@ -58,18 +145,32 @@ function consultarStatus(){
 
       clearInterval(intervalo)
 
-      document.getElementById("qrcode").innerHTML = ""
-      document.getElementById("pixCode").innerHTML = "✅ PAGAMENTO CONFIRMADO"
+      document.getElementById("status").innerHTML = "✅ Pagamento confirmado!"
+
+      document.getElementById("qrcode").style.display = "none"
+      document.getElementById("pixCode").style.display = "none"
 
       document.getElementById("continuar").style.display = "block"
 
     }
 
   },3000)
+
+}
+
+function copiarPix(){
+
+  const texto = document.getElementById("pixCode").innerText
+
+  if(texto){
+    navigator.clipboard.writeText(texto)
+    alert("Código PIX copiado!")
+  }
+
 }
 
 function continuar(){
-  window.location.href="https://recuperabonushopp.com/elementor-1064"
+  window.location.href = "https://recuperabonushopp.com/elementor-1064"
 }
 
 </script>
