@@ -2,14 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import path from 'path';
-import { Resend } from 'resend';
+import { Resend } from 'resend'; // <-- 1. ACRESCENTADO: Importação do Resend
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// ACRESCENTADO: CONFIGURAÇÃO DO RESEND
+// ACRESCENTADO: CONFIGURAÇÃO DO RESEND E FUNÇÃO DE DISPARO
 // =====================================================
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 
@@ -29,8 +29,7 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
 // =====================================================
 
 // =====================================================
-// 🔴 SUAS CHAVES DA VIZZION PAY
-// =====================================================
+// 🔴 SUAS CHAVES DA VIZZION PAY (AGORA ESTÁ 100% CORRETO)
 const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
 // =====================================================
@@ -100,12 +99,12 @@ app.post('/pix', async (req, res) => {
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
-        // ACRESCENTADO: Salvamos o email aqui para usar no webhook depois
+        // ACRESCENTADO: Salva o email e o nome junto com a transação para o servidor lembrar quem é na hora de enviar o e-mail
         bancoTransacoes.set(identifier, { 
             status: 'pending', 
-            amount: valorFixo, 
-            emailCliente: payload.client.email, 
-            nomeCliente: payload.client.name 
+            amount: valorFixo,
+            emailCliente: payload.client.email,
+            nomeCliente: payload.client.name
         });
 
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
@@ -116,22 +115,24 @@ app.post('/pix', async (req, res) => {
             }
         });
 
+        // SUGANDO OS DADOS DA VIZZION PAY
         const pixData = response.data.pix || response.data || {};
         const imagemPix = pixData.encodedImage || pixData.qrcode_image || pixData.image || response.data.encodedImage || "";
+        
+        // O Rastreador vai vasculhar TUDO procurando o código "000201"
         const codigoPix = acharCopiaECola(response.data) || "Erro: Copia e Cola não encontrado na API";
 
         console.log("✅ PIX GERADO! Código e Imagem capturados com sucesso.");
 
         return res.json({ 
             success: true, 
-            payload: codigoPix,
+            payload: codigoPix, // Manda o código rastreado pra tela
             encodedImage: imagemPix,
             transactionId: identifier 
         });
 
-    // 👇 CORREÇÃO FEITA AQUI: Removido o ": any" do error para não dar o erro TS1110
     } catch (error) {
-        const err = error as any;
+        const err = error as any; // Correção TS1110
         const erroReal = err.response?.data ? JSON.stringify(err.response.data) : err.message;
         console.error("❌ Erro Vizzion:", erroReal);
         return res.status(err.response?.status || 401).json({ 
@@ -144,7 +145,7 @@ app.post('/pix', async (req, res) => {
 // =====================================================
 // ROTA 2: WEBHOOK (O AVISO DE PAGAMENTO)
 // =====================================================
-app.post('/webhook', async (req, res) => {
+app.post('/webhook', async (req, res) => { // <-- 2. ACRESCENTADO 'async' AQUI
     const { event, transaction } = req.body;
 
     if (!transaction) {
@@ -171,7 +172,7 @@ app.post('/webhook', async (req, res) => {
 
             if (Number(transacao.amount) === Number(amount)) {
                 bancoTransacoes.set(idBusca, {
-                    ...transacao,
+                    ...transacao, // <-- ACRESCENTADO: Mantém o email salvo na memória
                     status: 'paid',
                     amount: amount
                 });
@@ -179,7 +180,7 @@ app.post('/webhook', async (req, res) => {
                 console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
 
                 // ==========================================================
-                // 🔥 COMANDO DE DISPARO FANTASMA
+                // 🔥 É EXATAMENTE AQUI QUE VOCÊ COLOCA O COMANDO DE DISPARO
                 // ==========================================================
                 if (transacao.emailCliente) {
                     await enviarAcessoCurso(transacao.emailCliente, transacao.nomeCliente);
@@ -187,8 +188,12 @@ app.post('/webhook', async (req, res) => {
                 // ==========================================================
 
                 axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o')
-                    .then(() => console.log('🔔 Notificação enviada'))
-                    .catch(err => console.error('❌ Erro notificação:', err.message));
+                    .then(() => {
+                        console.log('🔔 Notificação enviada com sucesso');
+                    })
+                    .catch(err => {
+                        console.error('❌ Erro ao enviar notificação:', err.message);
+                    });
 
             } else {
                 console.log(`⚠️ Valor divergente no webhook`);
@@ -202,7 +207,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 // =====================================================
-// ROTA 3: POLLING
+// ROTA 3: POLLING (O REDIRECIONAMENTO AUTOMÁTICO)
 // =====================================================
 app.get('/check-status/:id', (req, res) => {
     const id = req.params.id;
