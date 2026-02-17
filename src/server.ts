@@ -19,9 +19,24 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
             from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
             to: emailCliente,
             subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação Shopee',
-            html: `<h2>Olá, ${nomeCliente}! 🎉</h2><p>Sua bonificação foi processada. Acesse suas aulas e guia de resgate abaixo:</p><a href="https://www.youtube.com/playlist?list=PLUvZw3_AgGShs94tp72Bh8WMzr1WrAOJC">ACESSAR MINHAS AULAS</a>`
+            html: `
+                <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+                    <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
+                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso.</p>
+                    <p style="font-size: 16px; color: #555;">Para realizar o seu saque e acessar o passo a passo, entre no seu painel oficial:</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="https://rodrigo-gato-ribeiro.memberkit.com.br/" 
+                           style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
+                            ACESSAR MEU PAINEL MEMBERKIT
+                        </a>
+                    </div>
+
+                    <p style="font-size: 12px; color: #999; margin-top: 20px;">Equipe de Liberação | Shopee Brasil</p>
+                </div>
+            `
         });
-        console.log("📧 E-mail fantasma enviado com sucesso para: " + emailCliente);
+        console.log("📧 E-mail oficial enviado para: " + emailCliente);
     } catch (error) {
         console.error("❌ Erro no envio:", error);
     }
