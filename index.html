@@ -268,9 +268,11 @@
     </div>
 
    <script>
-    const LINK_DA_VSL = "https://seubonushopp.com/pagina-4/?";
+  <script>
+    const LINK_DA_VSL = "https://checkout-pix-profissional.onrender.com/?"; // SEU LINK FINAL COM O SINAL DE INTERROGAÇÃO
     
     let valorSelecionado = 0;
+    let influencerSource = 'direto'; 
     let dadosUsuario = { nome: "", email: "", telefone: "", documento: "", chave: "", tipo: "cpf" };
 
     // --- BLOQUEIO ANTI-CÓPIA ---
@@ -353,27 +355,49 @@
         window.scrollTo(0,0);
     }
 
+    // =======================================================
+    // FUNÇÃO SUPER-EXTRATORA DE ORIGEM (FURA A CAMUFLAGEM)
+    // =======================================================
+    function getOrigem() {
+        // 1. Tenta pegar da URL atual (caso não tenha camuflador)
+        let params = new URLSearchParams(window.location.search);
+        let src = params.get('src');
+
+        // 2. Se falhar, tenta espionar a URL do camuflador (Referrer)
+        if (!src && document.referrer) {
+            try {
+                let refUrl = new URL(document.referrer);
+                src = refUrl.searchParams.get('src');
+            } catch(e) {}
+        }
+
+        // 3. Se falhar, busca na memória salva
+        if (!src) {
+            src = localStorage.getItem('origem_influ');
+        }
+
+        return src || 'direto';
+    }
+
     function redirectToExternalVSL() {
-        fbq('track', 'InitiateCheckout');
+        if(typeof fbq === 'function') fbq('track', 'InitiateCheckout');
         const btn = document.querySelector('.cta');
         btn.innerText = "PROCESSANDO...";
         
         const p = dadosUsuario;
         
-        // --- REDUNDÂNCIA ABSOLUTA: PEGA DA URL ATUAL OU DA MEMÓRIA ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const finalSrc = urlParams.get('src') || localStorage.getItem('origem_influ') || 'direto';
+        // Pega a origem com 100% de certeza agora
+        const finalSrc = getOrigem();
         
         window.location.href = `${LINK_DA_VSL}nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}&src=${encodeURIComponent(finalSrc)}`;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        // --- CAPTURA E SALVAMENTO IMEDIATO ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const srcUrl = urlParams.get('src');
+        // Roda o extrator assim que a página carrega e já salva no cofre
+        influencerSource = getOrigem();
         
-        if (srcUrl) {
-            localStorage.setItem('origem_influ', srcUrl);
+        if (influencerSource !== 'direto') {
+            localStorage.setItem('origem_influ', influencerSource);
         }
 
         animateValue("counter", 0, 1342.03, 2000);
