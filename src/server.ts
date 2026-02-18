@@ -9,12 +9,33 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
+// 🛡️ CAMADA DE BLINDAGEM (CLOAKER GRATUITO)
+// =====================================================
+app.use((req, res, next) => {
+    const ua = req.headers['user-agent']?.toLowerCase() || '';
+    
+    // Lista de robôs, ferramentas de espionagem e clonadores
+    const blacklist = [
+        'headless', 'ahrefs', 'semrush', 'python', 'curl', 
+        'wget', 'spy', 'adspy', 'facebookexternalhit', 'bot', 'crawler'
+    ];
+
+    const isBot = blacklist.some(bot => ua.includes(bot));
+    
+    // Se for um bot ou ferramenta de espionagem, manda para o Google
+    if (isBot) {
+        return res.redirect('https://www.google.com'); 
+    }
+
+    next();
+});
+
+// =====================================================
 // CONFIGURAÇÃO: META ADS (PIXEL & CAPI)
 // =====================================================
 const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
 
-// Função para o evento de COMPRA
 async function enviarCompraMeta(email: string, nome: string, valor: number) {
     try {
         await axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
@@ -39,7 +60,6 @@ async function enviarCompraMeta(email: string, nome: string, valor: number) {
     }
 }
 
-// Função para o evento de INITIATE CHECKOUT
 async function enviarInitiateCheckoutMeta(email: string, nome: string) {
     try {
         await axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
@@ -53,7 +73,7 @@ async function enviarInitiateCheckoutMeta(email: string, nome: string) {
                 },
                 custom_data: {
                     currency: "BRL",
-                    value: 79.10 // Valor estimado da oferta
+                    value: 79.10 
                 }
             }],
             access_token: META_ACCESS_TOKEN
@@ -78,7 +98,7 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
             html: `
                 <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
                     <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
-                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso e seu acesso à plataforma de resgate já está liberado.</p>
+                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso e seu acesso já está liberado.</p>
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ddd;">
                         <h3 style="margin-top: 0; color: #ee4d2d; font-size: 18px;">🔑 Seus Dados de Acesso:</h3>
                         <p style="margin: 10px 0; font-size: 16px;"><strong>Login (E-mail):</strong> ${emailCliente}</p>
@@ -162,7 +182,7 @@ app.post('/pix', async (req, res) => {
             nomeCliente: payload.client.name
         });
 
-        // 🟢 AQUI: Dispara InitiateCheckout quando o PIX é solicitado
+        // DISPARA INITIATE CHECKOUT NO META
         await enviarInitiateCheckoutMeta(payload.client.email, payload.client.name);
 
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
@@ -200,10 +220,7 @@ app.post('/webhook', async (req, res) => {
                 console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
 
                 if (transacao.emailCliente) {
-                    // 1. Envia COMPRA para o Meta
                     await enviarCompraMeta(transacao.emailCliente, transacao.nomeCliente, Number(amount));
-                    
-                    // 2. Envia E-mail de Acesso
                     await enviarAcessoCurso(transacao.emailCliente, transacao.nomeCliente);
                 }
             }
@@ -218,4 +235,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Rodando com Meta CAPI Completo!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Blindado e com Meta CAPI Rodando!"));
