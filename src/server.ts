@@ -198,8 +198,18 @@ app.post('/pix', async (req, res) => {
         const imagemPix = pixData.encodedImage || pixData.qrcode_image || pixData.image || response.data.encodedImage || "";
         const codigoPix = acharCopiaECola(response.data) || "Erro: Copia e Cola não encontrado na API";
 
+        // --- LOG DETALHADO DA GERAÇÃO ---
         console.log("✅ PIX GERADO!");
-        return res.json({ success: true, payload: codigoPix, encodedImage: imagemPix, transactionId: identifier });
+        console.log(`📢 Origem: ${origem || 'direto'}`); // <--- Agora você vê o nome aqui
+        console.log(`👤 Cliente: ${name}`);
+        console.log(`-----------------------------------`);
+
+        return res.json({ 
+            success: true, 
+            payload: codigoPix, 
+            encodedImage: imagemPix, 
+            transactionId: identifier 
+        });
     } catch (error: any) {
         console.error("❌ Erro Vizzion:", JSON.stringify(error.response?.data || error.message, null, 2));
         return res.status(401).json({ success: false, message: `Erro Vizzion` });
