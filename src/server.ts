@@ -98,7 +98,7 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
             html: `
                 <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
                     <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
-                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso e seu acesso já está liberado.</p>
+                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso e seu acesso à plataforma de resgate já está liberado.</p>
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ddd;">
                         <h3 style="margin-top: 0; color: #ee4d2d; font-size: 18px;">🔑 Seus Dados de Acesso:</h3>
                         <p style="margin: 10px 0; font-size: 16px;"><strong>Login (E-mail):</strong> ${emailCliente}</p>
@@ -152,7 +152,7 @@ function acharCopiaECola(obj: any): string | null {
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
-        const { name, email, cpf, phone, valor } = req.body;
+        const { name, email, cpf, phone, valor, origem } = req.body; // <--- ACRESCENTADO: Origem (src)
         const valorFixo = parseFloat(valor) || 79.10; 
         const identifier = `ID${Date.now()}`;
         const amanha = new Date();
@@ -175,14 +175,15 @@ app.post('/pix', async (req, res) => {
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
+        // Salva os dados incluindo a ORIGEM da influenciadora
         bancoTransacoes.set(identifier, { 
             status: 'pending', 
             amount: valorFixo,
             emailCliente: payload.client.email,
-            nomeCliente: payload.client.name
+            nomeCliente: payload.client.name,
+            origem: origem || 'direto' // <--- ACRESCENTADO: Origem salva na memória
         });
 
-        // DISPARA INITIATE CHECKOUT NO META
         await enviarInitiateCheckoutMeta(payload.client.email, payload.client.name);
 
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
@@ -217,7 +218,11 @@ app.post('/webhook', async (req, res) => {
             if (Number(transacao.amount) === Number(amount)) {
                 bancoTransacoes.set(idBusca, { ...transacao, status: 'paid', amount: amount });
                 
-                console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
+                // LOG PROFISSIONAL DE VENDA COM ORIGEM
+                console.log(`💰 VENDA CONFIRMADA!`);
+                console.log(`👤 Cliente: ${transacao.nomeCliente}`);
+                console.log(`📢 Origem: ${transacao.origem}`); // <--- AQUI VOCÊ VÊ QUAL INFLU VENDEU
+                console.log(`💵 Valor: R$ ${amount}`);
 
                 if (transacao.emailCliente) {
                     await enviarCompraMeta(transacao.emailCliente, transacao.nomeCliente, Number(amount));
@@ -235,4 +240,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Blindado e com Meta CAPI Rodando!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Blindado e com Rastreio de Origem Rodando!"));
