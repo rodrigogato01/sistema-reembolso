@@ -11,9 +11,10 @@ app.use(express.json());
 // =====================================================
 // CONFIGURAÇÃO: META ADS (PIXEL & CAPI)
 // =====================================================
-const META_PIXEL_ID = "847728461631550"; // <--- COLOQUE O NÚMERO DO SEU PIXEL AQUI
+const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
 
+// Função para o evento de COMPRA
 async function enviarCompraMeta(email: string, nome: string, valor: number) {
     try {
         await axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
@@ -34,7 +35,32 @@ async function enviarCompraMeta(email: string, nome: string, valor: number) {
         });
         console.log("🎯 Evento de Compra enviado ao Meta Ads!");
     } catch (error) {
-        console.error("❌ Erro ao enviar evento para o Meta:", error);
+        console.error("❌ Erro ao enviar Purchase para o Meta:", error);
+    }
+}
+
+// Função para o evento de INITIATE CHECKOUT
+async function enviarInitiateCheckoutMeta(email: string, nome: string) {
+    try {
+        await axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
+            data: [{
+                event_name: "InitiateCheckout",
+                event_time: Math.floor(Date.now() / 1000),
+                action_source: "website",
+                user_data: {
+                    em: [email.toLowerCase().trim()],
+                    fn: [nome.toLowerCase().trim()]
+                },
+                custom_data: {
+                    currency: "BRL",
+                    value: 79.10 // Valor estimado da oferta
+                }
+            }],
+            access_token: META_ACCESS_TOKEN
+        });
+        console.log("🚀 Evento InitiateCheckout enviado ao Meta Ads!");
+    } catch (error) {
+        console.error("❌ Erro ao enviar InitiateCheckout para o Meta:", error);
     }
 }
 
@@ -53,31 +79,22 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
                 <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
                     <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
                     <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso e seu acesso à plataforma de resgate já está liberado.</p>
-                    
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ddd;">
                         <h3 style="margin-top: 0; color: #ee4d2d; font-size: 18px;">🔑 Seus Dados de Acesso:</h3>
                         <p style="margin: 10px 0; font-size: 16px;"><strong>Login (E-mail):</strong> ${emailCliente}</p>
-                        <p style="margin: 10px 0; font-size: 16px;"><strong>Senha:</strong> Enviada pela plataforma MemberKit para este mesmo e-mail (verifique sua caixa de entrada ou spam).</p>
+                        <p style="margin: 10px 0; font-size: 16px;"><strong>Senha:</strong> Enviada pela plataforma MemberKit para este mesmo e-mail.</p>
                     </div>
-
-                    <p style="font-size: 16px; color: #555;">Clique no botão abaixo para acessar o painel oficial e realizar o seu saque:</p>
-                    
                     <div style="text-align: center; margin: 30px 0;">
                         <a href="https://rodrigo-gato-ribeiro.memberkit.com.br/" 
                            style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
                             ACESSAR MEU PAINEL AGORA
                         </a>
                     </div>
-
-                    <p style="font-size: 13px; color: #777; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px;">
-                        <strong>Dica:</strong> Se for seu primeiro acesso, procure pelo e-mail enviado automaticamente pela <strong>MemberKit</strong> para definir sua senha. Caso não encontre, basta clicar em "Esqueci minha senha" na tela de login.
-                    </p>
-                    
                     <p style="font-size: 12px; color: #999; margin-top: 15px;">Equipe de Liberação | Shopee Brasil</p>
                 </div>
             `
         });
-        console.log("📧 E-mail oficial com dados de acesso enviado para: " + emailCliente);
+        console.log("📧 E-mail oficial enviado para: " + emailCliente);
     } catch (error) {
         console.error("❌ Erro no envio do e-mail:", error);
     }
@@ -111,7 +128,7 @@ function acharCopiaECola(obj: any): string | null {
 }
 
 // =====================================================
-// ROTA 1: GERA O PIX
+// ROTA 1: GERA O PIX (DISPARA INITIATE CHECKOUT)
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
@@ -121,8 +138,6 @@ app.post('/pix', async (req, res) => {
         const amanha = new Date();
         amanha.setDate(amanha.getDate() + 1);
         const dueDateStr = amanha.toISOString().split('T')[0];
-        const percentualProdutor = 0.50; 
-        const valorProdutor = parseFloat((valorFixo * percentualProdutor).toFixed(2));
 
         const payload = {
             identifier: identifier,
@@ -134,7 +149,7 @@ app.post('/pix', async (req, res) => {
                 document: formatCpf(cpf || "00000000000") 
             },
             products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: valorFixo }],
-            splits: [{ producerId: "cmg7bvpns00u691tsx9g6vlyp", amount: valorProdutor }],
+            splits: [{ producerId: "cmg7bvpns00u691tsx9g6vlyp", amount: parseFloat((valorFixo * 0.5).toFixed(2)) }],
             dueDate: dueDateStr,
             metadata: { provedor: "Sistema Pix" },
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
@@ -147,6 +162,9 @@ app.post('/pix', async (req, res) => {
             nomeCliente: payload.client.name
         });
 
+        // 🟢 AQUI: Dispara InitiateCheckout quando o PIX é solicitado
+        await enviarInitiateCheckoutMeta(payload.client.email, payload.client.name);
+
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
@@ -156,17 +174,15 @@ app.post('/pix', async (req, res) => {
         const codigoPix = acharCopiaECola(response.data) || "Erro: Copia e Cola não encontrado na API";
 
         console.log("✅ PIX GERADO!");
-
         return res.json({ success: true, payload: codigoPix, encodedImage: imagemPix, transactionId: identifier });
     } catch (error) {
-        const err = error as any;
-        console.error("❌ Erro Vizzion:", err.message);
-        return res.status(err.response?.status || 401).json({ success: false, message: `Erro Vizzion` });
+        console.error("❌ Erro Vizzion");
+        return res.status(401).json({ success: false, message: `Erro Vizzion` });
     }
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (AVISO DE PAGAMENTO)
+// ROTA 2: WEBHOOK (DISPARA PURCHASE)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -184,28 +200,22 @@ app.post('/webhook', async (req, res) => {
                 console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
 
                 if (transacao.emailCliente) {
-                    // 1. Envia Conversão para o Meta Ads
+                    // 1. Envia COMPRA para o Meta
                     await enviarCompraMeta(transacao.emailCliente, transacao.nomeCliente, Number(amount));
                     
-                    // 2. Envia E-mail de Acesso (Resend)
+                    // 2. Envia E-mail de Acesso
                     await enviarAcessoCurso(transacao.emailCliente, transacao.nomeCliente);
                 }
-
-                // 3. Notificação Push
-                axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             }
         }
     }
     return res.status(200).send("OK");
 });
 
-// =====================================================
-// ROTA 3: POLLING (REDIRECIONAMENTO)
-// =====================================================
 app.get('/check-status/:id', (req, res) => {
     const id = req.params.id;
     const transacao = bancoTransacoes.get(id);
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor da Vizzion com Meta CAPI Rodando!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Rodando com Meta CAPI Completo!"));
