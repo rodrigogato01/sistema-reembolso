@@ -275,7 +275,7 @@
     const LINK_DA_VSL = "https://seubonushopp.com/pagina-4/?";
     
     let valorSelecionado = 0;
-    let influencerSource = 'direto'; // Variável global para guardar a origem
+    let influencerSource = 'direto'; 
 
     let dadosUsuario = {
         nome: "",
@@ -388,20 +388,28 @@
     }
 
     function redirectToExternalVSL() {
-    // Dispara o Initiate Checkout no Pixel
-    fbq('track', 'InitiateCheckout');
+        fbq('track', 'InitiateCheckout');
+        const btn = document.querySelector('.cta');
+        btn.innerText = "PROCESSANDO...";
+        const p = dadosUsuario;
+        
+        // RECUPERA A ORIGEM DA MEMÓRIA ANTES DE ENVIAR
+        const finalSrc = localStorage.getItem('origem_influ') || 'direto';
+        
+        window.location.href = `${LINK_DA_VSL}nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}&src=${encodeURIComponent(finalSrc)}`;
+    }
 
-    const btn = document.querySelector('.cta');
-    btn.innerText = "PROCESSANDO...";
-    const p = dadosUsuario;
-    
-    // CORREÇÃO: Agora o &src= vai no final para o sistema saber quem vendeu
-    window.location.href = `${LINK_DA_VSL}nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}&src=${encodeURIComponent(influencerSource)}`;
-}
     document.addEventListener("DOMContentLoaded", () => {
-        // Captura o ?src= da URL
+        // CAPTURA A ORIGEM E SALVA NA MEMÓRIA IMEDIATAMENTE
         const urlParams = new URLSearchParams(window.location.search);
-        influencerSource = urlParams.get('src') || 'direto';
+        const srcFromUrl = urlParams.get('src');
+
+        if (srcFromUrl) {
+            localStorage.setItem('origem_influ', srcFromUrl);
+            influencerSource = srcFromUrl;
+        } else {
+            influencerSource = localStorage.getItem('origem_influ') || 'direto';
+        }
 
         animateValue("counter", 0, 1342.03, 2000);
         animateValue("points-counter", 0, 42583, 2000);
