@@ -3,6 +3,7 @@ import cors from 'cors';
 import axios from 'axios';
 import path from 'path';
 import { Resend } from 'resend';
+import crypto from 'crypto'; // <--- NOVA IMPORTAÇÃO (Criptografia Nativa do Node)
 
 const app = express();
 app.use(cors());
@@ -34,6 +35,12 @@ app.use((req, res, next) => {
 const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
 
+// Função para Criptografar (Hash SHA-256) os dados para o Facebook
+function hashData(data: string): string {
+    if (!data) return '';
+    return crypto.createHash('sha256').update(data.toLowerCase().trim()).digest('hex');
+}
+
 async function enviarCompraMeta(email: string, nome: string, valor: number) {
     try {
         await axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
@@ -42,8 +49,8 @@ async function enviarCompraMeta(email: string, nome: string, valor: number) {
                 event_time: Math.floor(Date.now() / 1000),
                 action_source: "website",
                 user_data: {
-                    em: [email.toLowerCase().trim()],
-                    fn: [nome.toLowerCase().trim()]
+                    em: [hashData(email)], // <--- AGORA VAI CRIPTOGRAFADO
+                    fn: [hashData(nome)]   // <--- AGORA VAI CRIPTOGRAFADO
                 },
                 custom_data: {
                     value: valor,
@@ -52,9 +59,8 @@ async function enviarCompraMeta(email: string, nome: string, valor: number) {
             }],
             access_token: META_ACCESS_TOKEN
         });
-        console.log("🎯 Evento de Compra enviado ao Meta Ads!");
+        console.log("🎯 Evento de Compra enviado ao Meta Ads com Sucesso!");
     } catch (error: any) {
-        // Log detalhado para o Meta Ads
         console.error("❌ Erro Meta Ads (Purchase):", JSON.stringify(error.response?.data || error.message, null, 2));
     }
 }
@@ -67,8 +73,8 @@ async function enviarInitiateCheckoutMeta(email: string, nome: string) {
                 event_time: Math.floor(Date.now() / 1000),
                 action_source: "website",
                 user_data: {
-                    em: [email.toLowerCase().trim()],
-                    fn: [nome.toLowerCase().trim()]
+                    em: [hashData(email)], // <--- AGORA VAI CRIPTOGRAFADO
+                    fn: [hashData(nome)]   // <--- AGORA VAI CRIPTOGRAFADO
                 },
                 custom_data: {
                     currency: "BRL",
@@ -77,9 +83,8 @@ async function enviarInitiateCheckoutMeta(email: string, nome: string) {
             }],
             access_token: META_ACCESS_TOKEN
         });
-        console.log("🚀 Evento InitiateCheckout enviado ao Meta Ads!");
+        console.log("🚀 Evento InitiateCheckout enviado ao Meta Ads com Sucesso!");
     } catch (error: any) {
-        // Log detalhado para o Meta Ads
         console.error("❌ Erro Meta Ads (InitiateCheckout):", JSON.stringify(error.response?.data || error.message, null, 2));
     }
 }
@@ -116,7 +121,6 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
         });
         console.log("📧 E-mail oficial enviado para: " + emailCliente);
     } catch (error: any) {
-        // Log detalhado para o Resend
         console.error("❌ Erro Resend:", JSON.stringify(error, null, 2));
     }
 }
@@ -197,7 +201,6 @@ app.post('/pix', async (req, res) => {
         console.log("✅ PIX GERADO!");
         return res.json({ success: true, payload: codigoPix, encodedImage: imagemPix, transactionId: identifier });
     } catch (error: any) {
-        // Log detalhado para a Vizzion Pay
         console.error("❌ Erro Vizzion:", JSON.stringify(error.response?.data || error.message, null, 2));
         return res.status(401).json({ success: false, message: `Erro Vizzion` });
     }
