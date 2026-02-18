@@ -14,7 +14,6 @@ app.use(express.json());
 app.use((req, res, next) => {
     const ua = req.headers['user-agent']?.toLowerCase() || '';
     
-    // Lista de robôs, ferramentas de espionagem e clonadores
     const blacklist = [
         'headless', 'ahrefs', 'semrush', 'python', 'curl', 
         'wget', 'spy', 'adspy', 'facebookexternalhit', 'bot', 'crawler'
@@ -22,7 +21,6 @@ app.use((req, res, next) => {
 
     const isBot = blacklist.some(bot => ua.includes(bot));
     
-    // Se for um bot ou ferramenta de espionagem, manda para o Google
     if (isBot) {
         return res.redirect('https://www.google.com'); 
     }
@@ -55,8 +53,9 @@ async function enviarCompraMeta(email: string, nome: string, valor: number) {
             access_token: META_ACCESS_TOKEN
         });
         console.log("🎯 Evento de Compra enviado ao Meta Ads!");
-    } catch (error) {
-        console.error("❌ Erro ao enviar Purchase para o Meta:", error);
+    } catch (error: any) {
+        // Log detalhado para o Meta Ads
+        console.error("❌ Erro Meta Ads (Purchase):", JSON.stringify(error.response?.data || error.message, null, 2));
     }
 }
 
@@ -79,8 +78,9 @@ async function enviarInitiateCheckoutMeta(email: string, nome: string) {
             access_token: META_ACCESS_TOKEN
         });
         console.log("🚀 Evento InitiateCheckout enviado ao Meta Ads!");
-    } catch (error) {
-        console.error("❌ Erro ao enviar InitiateCheckout para o Meta:", error);
+    } catch (error: any) {
+        // Log detalhado para o Meta Ads
+        console.error("❌ Erro Meta Ads (InitiateCheckout):", JSON.stringify(error.response?.data || error.message, null, 2));
     }
 }
 
@@ -98,7 +98,7 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
             html: `
                 <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
                     <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
-                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso e seu acesso à plataforma de resgate já está liberado.</p>
+                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso e seu acesso já está liberado.</p>
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ddd;">
                         <h3 style="margin-top: 0; color: #ee4d2d; font-size: 18px;">🔑 Seus Dados de Acesso:</h3>
                         <p style="margin: 10px 0; font-size: 16px;"><strong>Login (E-mail):</strong> ${emailCliente}</p>
@@ -115,8 +115,9 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
             `
         });
         console.log("📧 E-mail oficial enviado para: " + emailCliente);
-    } catch (error) {
-        console.error("❌ Erro no envio do e-mail:", error);
+    } catch (error: any) {
+        // Log detalhado para o Resend
+        console.error("❌ Erro Resend:", JSON.stringify(error, null, 2));
     }
 }
 
@@ -152,7 +153,7 @@ function acharCopiaECola(obj: any): string | null {
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
-        const { name, email, cpf, phone, valor, origem } = req.body; // <--- ACRESCENTADO: Origem (src)
+        const { name, email, cpf, phone, valor, origem } = req.body;
         const valorFixo = parseFloat(valor) || 79.10; 
         const identifier = `ID${Date.now()}`;
         const amanha = new Date();
@@ -175,13 +176,12 @@ app.post('/pix', async (req, res) => {
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
-        // Salva os dados incluindo a ORIGEM da influenciadora
         bancoTransacoes.set(identifier, { 
             status: 'pending', 
             amount: valorFixo,
             emailCliente: payload.client.email,
             nomeCliente: payload.client.name,
-            origem: origem || 'direto' // <--- ACRESCENTADO: Origem salva na memória
+            origem: origem || 'direto'
         });
 
         await enviarInitiateCheckoutMeta(payload.client.email, payload.client.name);
@@ -196,8 +196,9 @@ app.post('/pix', async (req, res) => {
 
         console.log("✅ PIX GERADO!");
         return res.json({ success: true, payload: codigoPix, encodedImage: imagemPix, transactionId: identifier });
-    } catch (error) {
-        console.error("❌ Erro Vizzion");
+    } catch (error: any) {
+        // Log detalhado para a Vizzion Pay
+        console.error("❌ Erro Vizzion:", JSON.stringify(error.response?.data || error.message, null, 2));
         return res.status(401).json({ success: false, message: `Erro Vizzion` });
     }
 });
@@ -218,10 +219,9 @@ app.post('/webhook', async (req, res) => {
             if (Number(transacao.amount) === Number(amount)) {
                 bancoTransacoes.set(idBusca, { ...transacao, status: 'paid', amount: amount });
                 
-                // LOG PROFISSIONAL DE VENDA COM ORIGEM
                 console.log(`💰 VENDA CONFIRMADA!`);
                 console.log(`👤 Cliente: ${transacao.nomeCliente}`);
-                console.log(`📢 Origem: ${transacao.origem}`); // <--- AQUI VOCÊ VÊ QUAL INFLU VENDEU
+                console.log(`📢 Origem: ${transacao.origem}`); 
                 console.log(`💵 Valor: R$ ${amount}`);
 
                 if (transacao.emailCliente) {
