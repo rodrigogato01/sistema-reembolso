@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Resgatar recompensas</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '847728461631550');
+    fbq('track', 'PageView');
+    </script>
     <style>
         /* =========================================
             CSS GERAL & TELA 1
@@ -262,7 +275,8 @@
     const LINK_DA_VSL = "https://seubonushopp.com/pagina-4/?";
     
     let valorSelecionado = 0;
-    
+    let influencerSource = 'direto'; // Variável global para guardar a origem
+
     let dadosUsuario = {
         nome: "",
         email: "",
@@ -270,6 +284,14 @@
         documento: "",
         chave: "",
         tipo: "cpf"
+    };
+
+    // --- BLOQUEIO ANTI-CÓPIA (DENTRO DO SCRIPT) ---
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function(e) {
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+            return false;
+        }
     };
 
     function animateValue(id, start, end, duration) {
@@ -366,13 +388,22 @@
     }
 
     function redirectToExternalVSL() {
+        // DISPARA INITIATE CHECKOUT NO PIXEL
+        fbq('track', 'InitiateCheckout');
+
         const btn = document.querySelector('.cta');
         btn.innerText = "PROCESSANDO...";
         const p = dadosUsuario;
-        window.location.href = `${LINK_DA_VSL}?nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}`;
+        
+        // Monta a URL final enviando também a origem (src) para a VSL
+        window.location.href = `${LINK_DA_VSL}nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}&src=${encodeURIComponent(influencerSource)}`;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+        // Captura o ?src= da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        influencerSource = urlParams.get('src') || 'direto';
+
         animateValue("counter", 0, 1342.03, 2000);
         animateValue("points-counter", 0, 42583, 2000);
     });
