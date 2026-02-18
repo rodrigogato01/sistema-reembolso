@@ -388,17 +388,16 @@
     }
 
     function redirectToExternalVSL() {
-        // DISPARA INITIATE CHECKOUT NO PIXEL
-        fbq('track', 'InitiateCheckout');
+    // Dispara o Initiate Checkout no Pixel
+    fbq('track', 'InitiateCheckout');
 
-        const btn = document.querySelector('.cta');
-        btn.innerText = "PROCESSANDO...";
-        const p = dadosUsuario;
-        
-        // Monta a URL final enviando também a origem (src) para a VSL
-        window.location.href = `${LINK_DA_VSL}nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}&src=${encodeURIComponent(influencerSource)}`;
-    }
-
+    const btn = document.querySelector('.cta');
+    btn.innerText = "PROCESSANDO...";
+    const p = dadosUsuario;
+    
+    // CORREÇÃO: Agora o &src= vai no final para o sistema saber quem vendeu
+    window.location.href = `${LINK_DA_VSL}nome=${encodeURIComponent(p.nome)}&email=${encodeURIComponent(p.email)}&phone=${encodeURIComponent(p.telefone)}&cpf=${encodeURIComponent(p.documento)}&src=${encodeURIComponent(influencerSource)}`;
+}
     document.addEventListener("DOMContentLoaded", () => {
         // Captura o ?src= da URL
         const urlParams = new URLSearchParams(window.location.search);
