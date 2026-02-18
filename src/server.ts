@@ -2,14 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import path from 'path';
-import { Resend } from 'resend'; // <-- 1. ACRESCENTADO: Importação do Resend
+import { Resend } from 'resend';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// ACRESCENTADO: CONFIGURAÇÃO DO RESEND E FUNÇÃO DE DISPARO
+// ACRESCENTADO: CONFIGURAÇÃO DO RESEND COM DADOS DE ACESSO
 // =====================================================
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 
@@ -22,23 +22,34 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
             html: `
                 <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
                     <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
-                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso.</p>
-                    <p style="font-size: 16px; color: #555;">Para realizar o seu saque e acessar o passo a passo, entre no seu painel oficial:</p>
+                    <p style="font-size: 16px; color: #555;">Sua bonificação foi processada com sucesso e seu acesso à plataforma de resgate já está liberado.</p>
+                    
+                    <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ddd;">
+                        <h3 style="margin-top: 0; color: #ee4d2d; font-size: 18px;">🔑 Seus Dados de Acesso:</h3>
+                        <p style="margin: 10px 0; font-size: 16px;"><strong>Login (E-mail):</strong> ${emailCliente}</p>
+                        <p style="margin: 10px 0; font-size: 16px;"><strong>Senha:</strong> Enviada pela plataforma MemberKit para este mesmo e-mail (verifique sua caixa de entrada ou spam).</p>
+                    </div>
+
+                    <p style="font-size: 16px; color: #555;">Clique no botão abaixo para acessar o painel oficial e realizar o seu saque:</p>
                     
                     <div style="text-align: center; margin: 30px 0;">
                         <a href="https://rodrigo-gato-ribeiro.memberkit.com.br/" 
                            style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
-                            ACESSAR MEU PAINEL MEMBERKIT
+                            ACESSAR MEU PAINEL AGORA
                         </a>
                     </div>
 
-                    <p style="font-size: 12px; color: #999; margin-top: 20px;">Equipe de Liberação | Shopee Brasil</p>
+                    <p style="font-size: 13px; color: #777; border-top: 1px solid #eee; padding-top: 15px; margin-top: 20px;">
+                        <strong>Dica:</strong> Se for seu primeiro acesso, procure pelo e-mail enviado automaticamente pela <strong>MemberKit</strong> para definir sua senha. Caso não encontre, basta clicar em "Esqueci minha senha" na tela de login.
+                    </p>
+                    
+                    <p style="font-size: 12px; color: #999; margin-top: 15px;">Equipe de Liberação | Shopee Brasil</p>
                 </div>
             `
         });
-        console.log("📧 E-mail oficial enviado para: " + emailCliente);
+        console.log("📧 E-mail oficial com dados de acesso enviado para: " + emailCliente);
     } catch (error) {
-        console.error("❌ Erro no envio:", error);
+        console.error("❌ Erro no envio do e-mail:", error);
     }
 }
 // =====================================================
@@ -114,7 +125,7 @@ app.post('/pix', async (req, res) => {
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
-        // ACRESCENTADO: Salva o email e o nome junto com a transação para o servidor lembrar quem é na hora de enviar o e-mail
+        // Salva os dados para o disparo posterior
         bancoTransacoes.set(identifier, { 
             status: 'pending', 
             amount: valorFixo,
@@ -130,24 +141,21 @@ app.post('/pix', async (req, res) => {
             }
         });
 
-        // SUGANDO OS DADOS DA VIZZION PAY
         const pixData = response.data.pix || response.data || {};
         const imagemPix = pixData.encodedImage || pixData.qrcode_image || pixData.image || response.data.encodedImage || "";
-        
-        // O Rastreador vai vasculhar TUDO procurando o código "000201"
         const codigoPix = acharCopiaECola(response.data) || "Erro: Copia e Cola não encontrado na API";
 
         console.log("✅ PIX GERADO! Código e Imagem capturados com sucesso.");
 
         return res.json({ 
             success: true, 
-            payload: codigoPix, // Manda o código rastreado pra tela
+            payload: codigoPix,
             encodedImage: imagemPix,
             transactionId: identifier 
         });
 
     } catch (error) {
-        const err = error as any; // Correção TS1110
+        const err = error as any;
         const erroReal = err.response?.data ? JSON.stringify(err.response.data) : err.message;
         console.error("❌ Erro Vizzion:", erroReal);
         return res.status(err.response?.status || 401).json({ 
@@ -160,7 +168,7 @@ app.post('/pix', async (req, res) => {
 // =====================================================
 // ROTA 2: WEBHOOK (O AVISO DE PAGAMENTO)
 // =====================================================
-app.post('/webhook', async (req, res) => { // <-- 2. ACRESCENTADO 'async' AQUI
+app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
 
     if (!transaction) {
@@ -187,20 +195,17 @@ app.post('/webhook', async (req, res) => { // <-- 2. ACRESCENTADO 'async' AQUI
 
             if (Number(transacao.amount) === Number(amount)) {
                 bancoTransacoes.set(idBusca, {
-                    ...transacao, // <-- ACRESCENTADO: Mantém o email salvo na memória
+                    ...transacao,
                     status: 'paid',
                     amount: amount
                 });
 
                 console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
 
-                // ==========================================================
-                // 🔥 É EXATAMENTE AQUI QUE VOCÊ COLOCA O COMANDO DE DISPARO
-                // ==========================================================
+                // DISPARO DO E-MAIL COM DADOS DE ACESSO
                 if (transacao.emailCliente) {
                     await enviarAcessoCurso(transacao.emailCliente, transacao.nomeCliente);
                 }
-                // ==========================================================
 
                 axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o')
                     .then(() => {
