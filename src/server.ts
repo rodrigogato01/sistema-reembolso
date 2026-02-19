@@ -107,7 +107,7 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
                     <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #ddd;">
                         <h3 style="margin-top: 0; color: #ee4d2d; font-size: 18px;">🔑 Seus Dados de Acesso:</h3>
                         <p style="margin: 10px 0; font-size: 16px;"><strong>Login (E-mail):</strong> ${emailCliente}</p>
-                        <p style="margin: 10px 0; font-size: 16px;"><strong>Senha:</strong> Enviada pela plataforma MemberKit para este mesmo e-mail.</p>
+                        <p style="margin: 10px 0; font-size: 16px;"><strong>Senha:</strong> shopee123</p>
                     </div>
                     <div style="text-align: center; margin: 30px 0;">
                         <a href="https://rodrigo-gato-ribeiro.memberkit.com.br/" 
@@ -115,11 +115,12 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
                             ACESSAR MEU PAINEL AGORA
                         </a>
                     </div>
+                    <p style="font-size: 14px; color: #555;"><em>Dica: Você pode alterar essa senha dentro da plataforma após o primeiro acesso.</em></p>
                     <p style="font-size: 12px; color: #999; margin-top: 15px;">Equipe de Liberação | Shopee Brasil</p>
                 </div>
             `
         });
-        console.log("📧 E-mail oficial enviado para: " + emailCliente);
+        console.log("📧 E-mail oficial enviado com a SENHA para: " + emailCliente);
     } catch (error: any) {
         console.error("❌ Erro Resend:", JSON.stringify(error, null, 2));
     }
