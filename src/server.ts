@@ -3,7 +3,7 @@ import cors from 'cors';
 import axios from 'axios';
 import path from 'path';
 import { Resend } from 'resend';
-import crypto from 'crypto'; // <--- NOVA IMPORTAÇÃO (Criptografia Nativa do Node)
+import crypto from 'crypto';
 
 const app = express();
 app.use(cors());
@@ -14,18 +14,12 @@ app.use(express.json());
 // =====================================================
 app.use((req, res, next) => {
     const ua = req.headers['user-agent']?.toLowerCase() || '';
-    
     const blacklist = [
         'headless', 'ahrefs', 'semrush', 'python', 'curl', 
         'wget', 'spy', 'adspy', 'facebookexternalhit', 'bot', 'crawler'
     ];
-
     const isBot = blacklist.some(bot => ua.includes(bot));
-    
-    if (isBot) {
-        return res.redirect('https://www.google.com'); 
-    }
-
+    if (isBot) { return res.redirect('https://www.google.com'); }
     next();
 });
 
@@ -35,7 +29,6 @@ app.use((req, res, next) => {
 const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
 
-// Função para Criptografar (Hash SHA-256) os dados para o Facebook
 function hashData(data: string): string {
     if (!data) return '';
     return crypto.createHash('sha256').update(data.toLowerCase().trim()).digest('hex');
@@ -49,8 +42,8 @@ async function enviarCompraMeta(email: string, nome: string, valor: number) {
                 event_time: Math.floor(Date.now() / 1000),
                 action_source: "website",
                 user_data: {
-                    em: [hashData(email)], // <--- AGORA VAI CRIPTOGRAFADO
-                    fn: [hashData(nome)]   // <--- AGORA VAI CRIPTOGRAFADO
+                    em: [hashData(email)],
+                    fn: [hashData(nome)]
                 },
                 custom_data: {
                     value: valor,
@@ -61,7 +54,7 @@ async function enviarCompraMeta(email: string, nome: string, valor: number) {
         });
         console.log("🎯 Evento de Compra enviado ao Meta Ads com Sucesso!");
     } catch (error: any) {
-        console.error("❌ Erro Meta Ads (Purchase):", JSON.stringify(error.response?.data || error.message, null, 2));
+        console.error("❌ Erro Meta Ads (Purchase)");
     }
 }
 
@@ -73,8 +66,8 @@ async function enviarInitiateCheckoutMeta(email: string, nome: string) {
                 event_time: Math.floor(Date.now() / 1000),
                 action_source: "website",
                 user_data: {
-                    em: [hashData(email)], // <--- AGORA VAI CRIPTOGRAFADO
-                    fn: [hashData(nome)]   // <--- AGORA VAI CRIPTOGRAFADO
+                    em: [hashData(email)],
+                    fn: [hashData(nome)]
                 },
                 custom_data: {
                     currency: "BRL",
@@ -85,12 +78,41 @@ async function enviarInitiateCheckoutMeta(email: string, nome: string) {
         });
         console.log("🚀 Evento InitiateCheckout enviado ao Meta Ads com Sucesso!");
     } catch (error: any) {
-        console.error("❌ Erro Meta Ads (InitiateCheckout):", JSON.stringify(error.response?.data || error.message, null, 2));
+        console.error("❌ Erro Meta Ads (InitiateCheckout)");
     }
 }
 
 // =====================================================
-// CONFIGURAÇÃO: RESEND (E-MAIL DE ACESSO MEMBERKIT)
+// 🚀 NOTIFICAÇÃO VIZION (DEFINA OS VALORES ABAIXO)
+// =====================================================
+async function avisarSociosVizion(nome: string) {
+    // ABAIXO VOCÊ DEFINE O LINK E O VALOR PARA CADA UM
+    const notificacoes = [
+        { link: "LINK_AQUI", valor: "VALOR_AQUI" },
+        { link: "LINK_AQUI", valor: "VALOR_AQUI" },
+        { link: "LINK_AQUI", valor: "VALOR_AQUI" }
+    ];
+
+    for (const item of notificacoes) {
+        if (item.link.includes("http")) {
+            try {
+                await axios.post(item.link, {
+                    event: "venda_aprovada",
+                    valor: item.valor,
+                    produto: "Taxa de Resgate Shopee",
+                    cliente: nome,
+                    plataforma: "Sistema Próprio"
+                });
+                console.log(`📢 Vizion Notificado: R$ ${item.valor}`);
+            } catch (e) {
+                console.error("❌ Erro ao avisar um link da Vizion");
+            }
+        }
+    }
+}
+
+// =====================================================
+// CONFIGURAÇÃO: RESEND (E-MAIL DE ACESSO)
 // =====================================================
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 
@@ -115,14 +137,13 @@ async function enviarAcessoCurso(emailCliente: string, nomeCliente: string) {
                             ACESSAR MEU PAINEL AGORA
                         </a>
                     </div>
-                    <p style="font-size: 14px; color: #555;"><em>Dica: Você pode alterar essa senha dentro da plataforma após o primeiro acesso.</em></p>
                     <p style="font-size: 12px; color: #999; margin-top: 15px;">Equipe de Liberação | Shopee Brasil</p>
                 </div>
             `
         });
-        console.log("📧 E-mail oficial enviado com a SENHA para: " + emailCliente);
+        console.log("📧 E-mail oficial enviado para: " + emailCliente);
     } catch (error: any) {
-        console.error("❌ Erro Resend:", JSON.stringify(error, null, 2));
+        console.error("❌ Erro Resend");
     }
 }
 
@@ -154,7 +175,7 @@ function acharCopiaECola(obj: any): string | null {
 }
 
 // =====================================================
-// ROTA 1: GERA O PIX (DISPARA INITIATE CHECKOUT)
+// ROTA 1: GERA O PIX
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
@@ -175,9 +196,7 @@ app.post('/pix', async (req, res) => {
                 document: formatCpf(cpf || "00000000000") 
             },
             products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: valorFixo }],
-            splits: [{ producerId: "cmg7bvpns00u691tsx9g6vlyp", amount: parseFloat((valorFixo * 0.5).toFixed(2)) }],
             dueDate: dueDateStr,
-            metadata: { provedor: "Sistema Pix" },
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
@@ -195,54 +214,47 @@ app.post('/pix', async (req, res) => {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
-        const pixData = response.data.pix || response.data || {};
-        const imagemPix = pixData.encodedImage || pixData.qrcode_image || pixData.image || response.data.encodedImage || "";
-        const codigoPix = acharCopiaECola(response.data) || "Erro: Copia e Cola não encontrado na API";
+        const codigoPix = acharCopiaECola(response.data);
 
-        // --- LOG DETALHADO DA GERAÇÃO ---
         console.log("✅ PIX GERADO!");
-        console.log(`📢 Origem: ${origem || 'direto'}`); // <--- Agora você vê o nome aqui
+        console.log(`📢 Origem: ${origem || 'direto'}`);
         console.log(`👤 Cliente: ${name}`);
-        console.log(`-----------------------------------`);
 
         return res.json({ 
             success: true, 
             payload: codigoPix, 
-            encodedImage: imagemPix, 
             transactionId: identifier 
         });
     } catch (error: any) {
-        console.error("❌ Erro Vizzion:", JSON.stringify(error.response?.data || error.message, null, 2));
         return res.status(401).json({ success: false, message: `Erro Vizzion` });
     }
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (DISPARA PURCHASE)
+// ROTA 2: WEBHOOK (AQUI DISPARA TUDO)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
     if (!transaction) return res.status(400).send("Invalid payload");
 
-    const { id, identifier, status, paymentMethod, amount } = transaction;
-    const idBusca = identifier || id;
+    const { identifier, status, paymentMethod, amount } = transaction;
 
     if (paymentMethod === 'PIX' && status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
-        if (bancoTransacoes.has(idBusca)) {
-            const transacao = bancoTransacoes.get(idBusca);
-            if (Number(transacao.amount) === Number(amount)) {
-                bancoTransacoes.set(idBusca, { ...transacao, status: 'paid', amount: amount });
-                
-                console.log(`💰 VENDA CONFIRMADA!`);
-                console.log(`👤 Cliente: ${transacao.nomeCliente}`);
-                console.log(`📢 Origem: ${transacao.origem}`); 
-                console.log(`💵 Valor: R$ ${amount}`);
+        if (bancoTransacoes.has(identifier)) {
+            const transacao = bancoTransacoes.get(identifier);
+            
+            bancoTransacoes.set(identifier, { ...transacao, status: 'paid' });
+            
+            console.log(`💰 VENDA CONFIRMADA!`);
 
-                if (transacao.emailCliente) {
-                    await enviarCompraMeta(transacao.emailCliente, transacao.nomeCliente, Number(amount));
-                    await enviarAcessoCurso(transacao.emailCliente, transacao.nomeCliente);
-                }
-            }
+            // 1. Meta Ads
+            await enviarCompraMeta(transacao.emailCliente, transacao.nomeCliente, Number(amount));
+            
+            // 2. E-mail Resend
+            await enviarAcessoCurso(transacao.emailCliente, transacao.nomeCliente);
+
+            // 3. Notificar Sócios Vizion
+            await avisarSociosVizion(transacao.nomeCliente);
         }
     }
     return res.status(200).send("OK");
@@ -254,4 +266,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Blindado e com Rastreio de Origem Rodando!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Pronto!"));
