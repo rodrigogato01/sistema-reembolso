@@ -20,12 +20,12 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES
+// 🔑 CONFIGURAÇÕES (CONFORME SUAS IMAGENS)
 // =====================================================
-const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
-const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
+const MK_DOMAIN = "membros.xn--seubnushopp-5eb.com"; //
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
-const MK_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
+const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2"; //
+const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; //
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
@@ -53,27 +53,22 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // =====================================================
-// ROTA 1: GERA O PIX (LOGS DETALHADOS RESTAURADOS)
+// ROTA 1: GERA O PIX
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor, origem } = req.body;
-        const cpfLimpo = (cpf || "").replace(/\D/g, '');
-        const phoneLimpo = (phone || "").replace(/\D/g, '');
-        const valorFixo = parseFloat(valor) || 27.90; 
         const identifier = `ID${Date.now()}`;
+        const valorFixo = parseFloat(valor) || 27.90;
 
         bancoTransacoes.set(identifier, { 
             status: 'pending', amount: valorFixo, emailCliente: email, nomeCliente: name, origem: origem || 'direto' 
         });
 
-        // 🚀 LOG COM O NOME DO CLIENTE NO CHECKOUT
-        console.log(`\n🚀 Evento InitiateCheckout (${name}) enviado ao Meta Ads com Sucesso!`);
-
         const payload = {
             identifier: identifier,
             amount: valorFixo,
-            client: { name: name || "Cliente", email: email || "cliente@email.com", phone: phoneLimpo, document: cpfLimpo },
+            client: { name, email, document: (cpf || "").replace(/\D/g, ''), phone: (phone || "").replace(/\D/g, '') },
             products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: valorFixo }],
             splits: [{ producerId: "cmg7bvpns00u691tsx9g6vlyp", amount: parseFloat((valorFixo * 0.5).toFixed(2)) }],
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
@@ -84,70 +79,62 @@ app.post('/pix', async (req, res) => {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
-        // ✅ LOG DETALHADO DA GERAÇÃO
-        console.log(`✅ PIX GERADO: ${name} - R$ ${valorFixo}\n`);
-
+        console.log(`✅ PIX GERADO: ${name} - R$ ${valorFixo}`);
         return res.json({ success: true, payload: acharCopiaECola(response.data), transactionId: identifier });
-    } catch (error: any) {
-        console.error("❌ ERRO AO GERAR PIX:", error.response?.data || error.message);
-        return res.status(401).json({ success: false });
-    }
+    } catch (error) { return res.status(401).json({ success: false }); }
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (NOTIFICAÇÃO + ACESSO)
+// ROTA 2: WEBHOOK (RASTREIO TOTAL)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
-    if (!transaction) return res.status(400).send("Invalid");
+    
+    // 🔍 LOG DE AUDITORIA (Investigação)
+    console.log(`📩 Webhook Recebido: Evento [${event}] - Status [${transaction?.status}]`);
 
-    const idBusca = transaction.identifier || transaction.id;
+    if (!transaction) return res.status(200).send("OK");
 
+    // Mudança Crítica: Se for COMPLETED, nós processamos indepedente da memória
     if (transaction.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
-        if (bancoTransacoes.has(idBusca)) {
-            const transacao = bancoTransacoes.get(idBusca);
-            bancoTransacoes.set(idBusca, { ...transacao, status: 'paid' });
+        
+        const memoria = bancoTransacoes.get(transaction.identifier || transaction.id) || {};
+        const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
+        const emailCliente = transaction.client?.email || memoria.emailCliente;
+        const origem = memoria.origem || "direto";
 
-            // 💰 LOG DE VENDA COMPLETO
-            console.log(`\n💰 VENDA CONFIRMADA!\n👤 Cliente: ${transacao.nomeCliente}\n📢 Origem: ${transacao.origem}\n💵 Valor: R$ ${transaction.amount}`);
+        console.log(`💰 VENDA CONFIRMADA! | Cliente: ${nomeCliente} | Valor: R$ ${transaction.amount}`);
 
-            // 🔔 1. NOTIFICAÇÕES PUSHCUT
-            const url1 = 'https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o';
-            const url2 = 'https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o';
-            Promise.all([axios.get(url1), axios.get(url2)]).catch(() => {});
+        // 🔔 1. NOTIFICAÇÃO PUSHCUT (Prioridade Zero)
+        const push1 = 'https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o';
+        const push2 = 'https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o';
+        
+        axios.get(push1).catch(() => console.log("⚠️ Erro Pushcut 1"));
+        axios.get(push2).catch(() => console.log("⚠️ Erro Pushcut 2"));
 
+        if (emailCliente) {
             // 🎯 2. META PURCHASE
-            await axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
+            axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
-                    user_data: { em: [hashData(transacao.emailCliente)], fn: [hashData(transacao.nomeCliente)] },
+                    user_data: { em: [hashData(emailCliente)], fn: [hashData(nomeCliente)] },
                     custom_data: { value: Number(transaction.amount), currency: "BRL" }
                 }],
                 access_token: META_ACCESS_TOKEN
-            }).then(() => console.log("🎯 CAPI: Purchase Enviado")).catch(() => {});
+            }).catch(() => {});
 
-            // 🔑 3. MEMBERKIT (Cadastro shopee123)
-            await axios.post(`https://${MK_DOMAIN}/api/v1/enrollments`, {
-                "full_name": transacao.nomeCliente, "email": transacao.emailCliente, "password": "shopee123"
+            // 🔑 3. MEMBERKIT (Senha shopee123)
+            axios.post(`https://${MK_DOMAIN}/api/v1/enrollments`, {
+                "full_name": nomeCliente, "email": emailCliente, "password": "shopee123"
             }, { headers: { "X-MemberKit-API-Key": MK_KEY } }).catch(() => {});
 
-            // 📧 4. E-MAIL COM LOGIN DIRETO
+            // 📧 4. E-MAIL LINK MÁGICO
             await resend.emails.send({
                 from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
-                to: transacao.emailCliente,
+                to: emailCliente,
                 subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação',
-                html: `
-                    <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-                        <h2 style="color: #333;">Olá, ${transacao.nomeCliente}! 🎉</h2>
-                        <p style="font-size: 16px; color: #555;">Clique no botão abaixo para entrar <b>direto</b> no seu painel, sem precisar de senha.</p>
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="https://${MK_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(transacao.emailCliente)}&user[password]=shopee123" 
-                               style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
-                                ACESSAR MEU PAINEL AGORA
-                            </a>
-                        </div>
-                    </div>`
-            }).then(() => console.log(`📧 E-mail Enviado para: ${transacao.emailCliente}`)).catch(() => {});
+                html: `<h2>Olá, ${nomeCliente}! 🎉</h2><p>Clique abaixo para entrar <b>direto</b>:</p><div style="text-align: center;"><a href="https://${MK_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" style="background:#ee4d2d; color:#fff; padding:15px 25px; text-decoration:none; border-radius:8px;">ACESSAR MEU PAINEL AGORA</a></div>`
+            }).catch(() => {});
         }
     }
     return res.status(200).send("OK");
@@ -158,4 +145,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Full Online com Logs Detalhados!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema de Rastreio Ativo!"));
