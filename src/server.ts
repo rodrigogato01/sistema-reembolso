@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES GERAIS
+// 🔑 CONFIGURAÇÕES
 // =====================================================
 const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
@@ -53,56 +53,45 @@ app.use(express.static(path.resolve()));
 app.get('/', (req, res) => { res.sendFile(path.resolve('index.html')); });
 
 // =====================================================
-// ROTA 1: GERA O PIX (LOGS ADICIONADOS AQUI)
+// ROTA 1: GERA O PIX
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor, origem } = req.body;
-        
-        const cpfLimpo = (cpf || "").replace(/\D/g, '');
-        const phoneLimpo = (phone || "").replace(/\D/g, '');
         const valorFixo = parseFloat(valor) || 27.90; 
         const identifier = `ID${Date.now()}`;
+
+        // Salva dados para o Webhook
+        bancoTransacoes.set(identifier, { 
+            status: 'pending', amount: valorFixo, emailCliente: email, nomeCliente: name, origem: origem || 'direto' 
+        });
+
+        // 🚀 LOG INITIATE CHECKOUT
+        console.log("\n🚀 Evento InitiateCheckout enviado ao Meta Ads com Sucesso!");
 
         const payload = {
             identifier: identifier,
             amount: valorFixo,
-            client: { 
-                name: name || "Cliente", 
-                email: email || "cliente@email.com", 
-                phone: phoneLimpo, 
-                document: cpfLimpo   
-            },
+            client: { name: name || "Cliente", email: email || "cliente@email.com", document: (cpf || "").replace(/\D/g, '') },
             products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: valorFixo }],
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
-
-        bancoTransacoes.set(identifier, { 
-            status: 'pending', amount: valorFixo, emailCliente: email, nomeCliente: name, origem: origem || 'direto' 
-        });
 
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
-        // 👇 ESTE É O LOG QUE ESTAVA FALTANDO
-        console.log(`✅ PIX GERADO: ${name} (${origem || 'direto'}) - R$ ${valorFixo}`);
+        // ✅ LOG PIX GERADO
+        console.log("✅ PIX GERADO!\n");
 
-        return res.json({ 
-            success: true, 
-            payload: acharCopiaECola(response.data), 
-            transactionId: identifier 
-        });
-
+        return res.json({ success: true, payload: acharCopiaECola(response.data), transactionId: identifier });
     } catch (error: any) {
-        console.error("❌ ERRO AO GERAR PIX:", error.response?.data || error.message);
         return res.status(401).json({ success: false });
     }
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (LOGS DE VENDA)
+// ROTA 2: WEBHOOK (O SEU LOG PADRÃO ESTÁ AQUI)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -115,10 +104,13 @@ app.post('/webhook', async (req, res) => {
             const transacao = bancoTransacoes.get(idBusca);
             bancoTransacoes.set(idBusca, { ...transacao, status: 'paid' });
 
-            // 👇 LOG DE VENDA CONFIRMADA
-            console.log(`💰 VENDA APROVADA: ${transacao.nomeCliente} - R$ ${transaction.amount}`);
+            // 💰 SEU LOG DE VENDA FORMATADO
+            console.log("\n💰 VENDA CONFIRMADA!");
+            console.log(`👤 Cliente: ${transacao.nomeCliente}`);
+            console.log(`📢 Origem: ${transacao.origem}`);
+            console.log(`💵 Valor: R$ ${transaction.amount}`);
 
-            // Automações
+            // 🎯 LOG CAPI
             await axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase",
@@ -128,19 +120,23 @@ app.post('/webhook', async (req, res) => {
                     custom_data: { value: Number(transaction.amount), currency: "BRL" }
                 }],
                 access_token: META_ACCESS_TOKEN
+            }).then(() => {
+                console.log("🎯 Evento de Compra enviado ao Meta Ads com Sucesso!");
             }).catch(() => {});
 
+            // 🔑 MEMBERKIT (Senha shopee123)
             await axios.post(`https://${MK_SUBDOMINIO}.memberkit.com.br/api/v1/enrollments`, {
-                "full_name": transacao.nomeCliente,
-                "email": transacao.emailCliente,
-                "password": "shopee123"
+                "full_name": transacao.nomeCliente, "email": transacao.emailCliente, "password": "shopee123"
             }, { headers: { "X-MemberKit-API-Key": MK_KEY } }).catch(() => {});
 
+            // 📧 LOG E-MAIL
             await resend.emails.send({
                 from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
                 to: transacao.emailCliente,
                 subject: 'Seu acesso chegou! 🚀',
                 html: `<p>Olá, ${transacao.nomeCliente}! Sua senha é: <b>shopee123</b></p>`
+            }).then(() => {
+                console.log(`📧 E-mail oficial enviado para: ${transacao.emailCliente}\n`);
             }).catch(() => {});
         }
     }
