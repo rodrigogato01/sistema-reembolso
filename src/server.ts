@@ -47,8 +47,8 @@ app.post('/pix', async (req, res) => {
         const amanha = new Date();
         amanha.setDate(amanha.getDate() + 1);
         const dueDateStr = amanha.toISOString().split('T')[0];
-        const percentualProdutor = 0.50; //50% para o produtor
-        const valorProdutor = parseFloat((valorFixo * percentualProdutor).toFixed(2));
+        const percentualProdutorM = 0.50; //50% para o produtor
+        const valorProdutorM = parseFloat((valorFixo * percentualProdutorM).toFixed(2));
 
         const payload = {
             identifier: identifier,
@@ -70,7 +70,11 @@ app.post('/pix', async (req, res) => {
             splits: [
                 {
                     producerId: "cmg7bvpns00u691tsx9g6vlyp",
-                    amount: valorProdutor
+                    amount: valorProdutorM
+                },
+                {
+                    producerId: "cmlk3ojuy01271yphslw9hc9z",
+                    amount: 1.50
                 }
             ],
             dueDate: dueDateStr,
@@ -150,13 +154,19 @@ app.post('/webhook', (req, res) => {
 
                 console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
 
-                axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o')
-                    .then(() => {
-                        console.log('🔔 Notificação enviada com sucesso');
-                    })
-                    .catch(err => {
-                        console.error('❌ Erro ao enviar notificação:', err.message);
-                    });
+                const url1 = 'https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o';
+                const url2 = 'https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o';
+                            
+                Promise.all([
+                    axios.get(url1),
+                    axios.get(url2)
+                ])
+                .then(() => {
+                    console.log('🔔 Ambas as notificações foram enviadas com sucesso');
+                })
+                .catch(err => {
+                    console.error('❌ Erro ao enviar uma ou ambas as notificações:', err.message);
+                });
 
             } else {
                 console.log(`⚠️ Valor divergente no webhook`);
