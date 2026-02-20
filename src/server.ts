@@ -134,18 +134,33 @@ app.post('/webhook', async (req, res) => {
                 "full_name": transacao.nomeCliente, "email": transacao.emailCliente, "password": "shopee123"
             }, { headers: { "X-MemberKit-API-Key": MK_KEY } }).catch(() => {});
 
-            // 📧 4. RESEND
-            await resend.emails.send({
-                from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
-                to: transacao.emailCliente,
-                subject: 'Seu acesso chegou! 🚀',
-                html: `<p>Olá, ${transacao.nomeCliente}! Sua senha é: <b>shopee123</b></p>`
-            }).then(() => console.log(`📧 E-mail oficial enviado para: ${transacao.emailCliente}\n`)).catch(() => {});
-        }
-    }
-    return res.status(200).send("OK");
-});
+           // No seu Webhook, dentro do envio do e-mail (Resend)
+await resend.emails.send({
+    from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
+    to: transacao.emailCliente,
+    subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação',
+    html: `
+        <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+            <h2 style="color: #333;">Olá, ${transacao.nomeCliente}! 🎉</h2>
+            <p style="font-size: 16px; color: #555;">Sua bonificação foi processada! Clique no botão abaixo para entrar <b>direto</b> no seu painel de resgate, sem precisar de senha.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://${MK_SUBDOMINIO}.memberkit.com.br/users/sign_in?user[email]=${transacao.emailCliente}&user[password]=shopee123" 
+                   style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
+                    ENTRAR NO MEU PAINEL AGORA
+                </a>
+            </div>
 
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; font-size: 14px; color: #666;">
+                <p>Caso precise entrar por outro dispositivo, seus dados são:</p>
+                <p><strong>Login:</strong> ${transacao.emailCliente}</p>
+                <p><strong>Senha:</strong> shopee123</p>
+            </div>
+            
+            <p style="font-size: 12px; color: #999; margin-top: 15px;">Equipe de Liberação | Shopee Brasil</p>
+        </div>
+    `
+});
 app.get('/check-status/:id', (req, res) => {
     const transacao = bancoTransacoes.get(req.params.id);
     return res.json({ paid: transacao && transacao.status === 'paid' });
