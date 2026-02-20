@@ -20,12 +20,12 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (CONFORME SUAS IMAGENS)
+// 🔑 CONFIGURAÇÕES
 // =====================================================
-const MK_DOMAIN = "membros.xn--seubnushopp-5eb.com"; //
+const MK_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
+const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
+const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
-const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2"; //
-const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; //
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
@@ -79,38 +79,37 @@ app.post('/pix', async (req, res) => {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
+        console.log(`\n🚀 Evento InitiateCheckout (${name}) enviado ao Meta Ads!`);
         console.log(`✅ PIX GERADO: ${name} - R$ ${valorFixo}`);
+
         return res.json({ success: true, payload: acharCopiaECola(response.data), transactionId: identifier });
     } catch (error) { return res.status(401).json({ success: false }); }
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (RASTREIO TOTAL)
+// ROTA 2: WEBHOOK (NOTIFICAÇÃO + ENTREGA REAL)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
-    
-    // 🔍 LOG DE AUDITORIA (Investigação)
-    console.log(`📩 Webhook Recebido: Evento [${event}] - Status [${transaction?.status}]`);
-
     if (!transaction) return res.status(200).send("OK");
 
-    // Mudança Crítica: Se for COMPLETED, nós processamos indepedente da memória
+    const idBusca = transaction.identifier || transaction.id;
+
     if (transaction.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         
-        const memoria = bancoTransacoes.get(transaction.identifier || transaction.id) || {};
+        const memoria = bancoTransacoes.get(idBusca) || {};
         const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
         const emailCliente = transaction.client?.email || memoria.emailCliente;
         const origem = memoria.origem || "direto";
 
-        console.log(`💰 VENDA CONFIRMADA! | Cliente: ${nomeCliente} | Valor: R$ ${transaction.amount}`);
+        // ✅ ANOTA O PAGAMENTO PARA O SITE REDIRECIONAR
+        bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
 
-        // 🔔 1. NOTIFICAÇÃO PUSHCUT (Prioridade Zero)
-        const push1 = 'https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o';
-        const push2 = 'https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o';
-        
-        axios.get(push1).catch(() => console.log("⚠️ Erro Pushcut 1"));
-        axios.get(push2).catch(() => console.log("⚠️ Erro Pushcut 2"));
+        console.log(`\n💰 VENDA CONFIRMADA!\n👤 Cliente: ${nomeCliente}\n💵 Valor: R$ ${transaction.amount}`);
+
+        // 🔔 1. PUSHCUT (NOTIFICAÇÃO NO CELULAR)
+        axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
+        axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
 
         if (emailCliente) {
             // 🎯 2. META PURCHASE
@@ -123,18 +122,33 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 🔑 3. MEMBERKIT (Senha shopee123)
-            axios.post(`https://${MK_DOMAIN}/api/v1/enrollments`, {
+            // 🔑 3. MEMBERKIT (CADASTRO)
+            await axios.post(`https://${MK_DOMAIN}/api/v1/enrollments`, {
                 "full_name": nomeCliente, "email": emailCliente, "password": "shopee123"
-            }, { headers: { "X-MemberKit-API-Key": MK_KEY } }).catch(() => {});
+            }, { headers: { "X-MemberKit-API-Key": MK_KEY } })
+            .then(() => console.log(`🔑 Aluno cadastrado na MemberKit: ${emailCliente}`))
+            .catch((err) => console.error("❌ Erro MemberKit:", err.response?.data || err.message));
 
-            // 📧 4. E-MAIL LINK MÁGICO
+            // 📧 4. RESEND (ENVIO DO ACESSO COM LINK MÁGICO)
             await resend.emails.send({
                 from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
                 to: emailCliente,
                 subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação',
-                html: `<h2>Olá, ${nomeCliente}! 🎉</h2><p>Clique abaixo para entrar <b>direto</b>:</p><div style="text-align: center;"><a href="https://${MK_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" style="background:#ee4d2d; color:#fff; padding:15px 25px; text-decoration:none; border-radius:8px;">ACESSAR MEU PAINEL AGORA</a></div>`
-            }).catch(() => {});
+                html: `
+                    <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                        <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
+                        <p style="font-size: 16px;">Sua bonificação foi liberada! Clique no botão abaixo para entrar <b>direto</b>, sem precisar de senha.</p>
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="https://${MK_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" 
+                               style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
+                                ACESSAR MEU PAINEL AGORA
+                            </a>
+                        </div>
+                        <p style="font-size: 12px; color: #666;">Seu login: ${emailCliente}<br>Sua senha: shopee123</p>
+                    </div>`
+            })
+            .then(() => console.log(`📧 E-mail de suporte enviado com sucesso para: ${emailCliente}`))
+            .catch((err) => console.error("❌ ERRO NO RESEND (E-MAIL NÃO SAIU):", err));
         }
     }
     return res.status(200).send("OK");
@@ -145,4 +159,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema de Rastreio Ativo!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema de Suporte e Redirecionamento Ativo!"));
