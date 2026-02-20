@@ -37,7 +37,6 @@ function hashData(data: string): string {
     return crypto.createHash('sha256').update(data.toLowerCase().trim()).digest('hex');
 }
 
-// 👉 RASTREADOR DE COPIA E COLA
 function acharCopiaECola(obj: any): string | null {
     if (typeof obj === 'string' && obj.startsWith('000201')) return obj;
     if (typeof obj === 'object' && obj !== null) {
@@ -48,6 +47,12 @@ function acharCopiaECola(obj: any): string | null {
     }
     return null;
 }
+
+// =====================================================
+// 🌐 SERVIR ARQUIVOS ESTÁTICOS (A CORREÇÃO DO CANNOT GET /)
+// =====================================================
+app.use(express.static(path.resolve())); 
+app.get('/', (req, res) => { res.sendFile(path.resolve('index.html')); });
 
 // =====================================================
 // ROTA 1: GERA O PIX (COM LIMPEZA DE DADOS)
@@ -70,8 +75,8 @@ app.post('/pix', async (req, res) => {
             client: { 
                 name: name || "Cliente", 
                 email: email || "cliente@email.com", 
-                phone: phoneLimpo, // APENAS NÚMEROS
-                document: cpfLimpo   // APENAS NÚMEROS (11 dígitos)
+                phone: phoneLimpo, 
+                document: cpfLimpo   
             },
             products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: valorFixo }],
             splits: [{ producerId: "cmg7bvpns00u691tsx9g6vlyp", amount: parseFloat((valorFixo * 0.5).toFixed(2)) }],
@@ -94,7 +99,6 @@ app.post('/pix', async (req, res) => {
         });
 
     } catch (error: any) {
-        // 🔍 LOG DE ERRO PARA O RENDER
         console.error("❌ ERRO VIZZION PAY:", error.response?.data || error.message);
         return res.status(401).json({ success: false, details: error.response?.data });
     }
@@ -150,4 +154,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Rodando!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Rodando Perfeitamente!"));
