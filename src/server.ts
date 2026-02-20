@@ -2,28 +2,25 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import path from 'path';
+import { Resend } from 'resend'; // <-- Adicionado
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔴 SUAS CHAVES DA VIZZION PAY (AGORA ESTÁ 100% CORRETO)
+// 🔑 CONFIGURAÇÕES DE INTEGRAÇÃO (Preencha seus dados)
+// =====================================================
 const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
-// =====================================================
+const RESEND_KEY = "re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez"; // Sua chave Resend
+const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; // Sua chave MemberKit
+const MK_SUBDOMINIO = "rodrigo-gato-ribeiro"; // Seu subdomínio MK
 
+const resend = new Resend(RESEND_KEY);
 const bancoTransacoes = new Map();
 
-app.use(express.static(path.resolve())); 
-app.get('/', (req, res) => {
-    res.sendFile(path.resolve('index.html'));
-});
-
-const formatCpf = (v: string) => v.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-const formatPhone = (v: string) => v.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-
-// 👉 A MÁGICA: O RASTREADOR UNIVERSAL DE PIX COPIA E COLA
+// 👉 Rastreador de Pix Copia e Cola
 function acharCopiaECola(obj: any): string | null {
     if (typeof obj === 'string' && obj.startsWith('000201')) return obj;
     if (typeof obj === 'object' && obj !== null) {
@@ -36,19 +33,21 @@ function acharCopiaECola(obj: any): string | null {
 }
 
 // =====================================================
-// ROTA 1: GERA O PIX
+// ROTA 1: GERA O PIX (Agora salva Nome e E-mail)
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor } = req.body;
-
-        const valorFixo = parseFloat(valor) || 79.10; 
+        const valorFixo = parseFloat(valor) || 27.90; 
         const identifier = `ID${Date.now()}`;
-        const amanha = new Date();
-        amanha.setDate(amanha.getDate() + 1);
-        const dueDateStr = amanha.toISOString().split('T')[0];
-        const percentualProdutorM = 0.50; //50% para o produtor
-        const valorProdutorM = parseFloat((valorFixo * percentualProdutorM).toFixed(2));
+        
+        // SALVAMOS O NOME E E-MAIL NO MAPA (Importante!)
+        bancoTransacoes.set(identifier, { 
+            status: 'pending', 
+            amount: valorFixo,
+            email: email,
+            nome: name 
+        });
 
         const payload = {
             identifier: identifier,
@@ -56,141 +55,83 @@ app.post('/pix', async (req, res) => {
             client: { 
                 name: name || "Cliente", 
                 email: email || "cliente@email.com", 
-                phone: formatPhone(phone || "11999999999"), 
-                document: formatCpf(cpf || "00000000000") 
+                document: cpf || "000.000.000-00" 
             },
-            products: [
-                { 
-                    id: "TAXA_01", 
-                    name: "Taxa de Liberação", 
-                    quantity: 1, 
-                    price: valorFixo 
-                }
-            ],
-            splits: [
-                {
-                    producerId: "cmg7bvpns00u691tsx9g6vlyp",
-                    amount: valorProdutorM
-                },
-                {
-                    producerId: "cmlk3ojuy01271yphslw9hc9z",
-                    amount: 1.50
-                }
-            ],
-            dueDate: dueDateStr,
-            metadata: { provedor: "Sistema Pix" },
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
-        bancoTransacoes.set(identifier, { status: 'pending', amount: valorFixo });
-
         const response = await axios.post('https://app.vizzionpay.com/api/v1/gateway/pix/receive', payload, {
-            headers: { 
-                'x-public-key': PUBLIC_KEY,
-                'x-secret-key': SECRET_KEY,
-                'Content-Type': 'application/json'
-            }
+            headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY }
         });
-
-        // SUGANDO OS DADOS DA VIZZION PAY
-        const pixData = response.data.pix || response.data || {};
-        const imagemPix = pixData.encodedImage || pixData.qrcode_image || pixData.image || response.data.encodedImage || "";
-        
-        // O Rastreador vai vasculhar TUDO procurando o código "000201"
-        const codigoPix = acharCopiaECola(response.data) || "Erro: Copia e Cola não encontrado na API";
-
-        console.log("✅ PIX GERADO! Código e Imagem capturados com sucesso.");
 
         return res.json({ 
             success: true, 
-            payload: codigoPix, // Manda o código rastreado pra tela
-            encodedImage: imagemPix,
+            payload: acharCopiaECola(response.data),
             transactionId: identifier 
         });
 
     } catch (error: any) {
-        const erroReal = error.response?.data ? JSON.stringify(error.response.data) : error.message;
-        console.error("❌ Erro Vizzion:", erroReal);
-        return res.status(error.response?.status || 401).json({ 
-            success: false, 
-            message: `Erro Vizzion: ${erroReal}` 
-        });
+        return res.status(401).json({ success: false });
     }
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (O AVISO DE PAGAMENTO)
+// ROTA 2: WEBHOOK (Onde a mágica do acesso acontece)
 // =====================================================
-app.post('/webhook', (req, res) => {
+app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
+    if (!transaction) return res.status(400).send("Invalid");
 
-    if (!transaction) {
-        return res.status(400).send("Invalid payload");
-    }
+    const idBusca = transaction.identifier || transaction.id;
 
-    const {
-        id,
-        identifier,
-        status,
-        paymentMethod,
-        amount
-    } = transaction;
-
-    const idBusca = identifier || id;
-
-    if (
-        paymentMethod === 'PIX' &&
-        status === 'COMPLETED' &&
-        event === 'TRANSACTION_PAID'
-    ) {
+    if (transaction.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         if (bancoTransacoes.has(idBusca)) {
-            const transacao = bancoTransacoes.get(idBusca);
+            const dados = bancoTransacoes.get(idBusca);
+            
+            // 1. Atualiza status no banco temporário
+            bancoTransacoes.set(idBusca, { ...dados, status: 'paid' });
 
-            if (Number(transacao.amount) === Number(amount)) {
-                bancoTransacoes.set(idBusca, {
-                    status: 'paid',
-                    amount: amount
+            console.log(`💰 PAGAMENTO APROVADO: ${dados.nome}`);
+
+            try {
+                // 2. CADASTRO NA MEMBERKIT COM SENHA PADRÃO
+                await axios.post(`https://${MK_SUBDOMINIO}.memberkit.com.br/api/v1/enrollments`, {
+                    full_name: dados.nome,
+                    email: dados.email,
+                    password: "shopee123" // <-- Senha definida!
+                }, {
+                    headers: { "X-MemberKit-API-Key": MK_KEY }
                 });
 
-                console.log(`💰 PAGAMENTO CONFIRMADO! Transação: ${idBusca}`);
-
-                const url1 = 'https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o';
-                const url2 = 'https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o';
-                            
-                Promise.all([
-                    axios.get(url1),
-                    axios.get(url2)
-                ])
-                .then(() => {
-                    console.log('🔔 Ambas as notificações foram enviadas com sucesso');
-                })
-                .catch(err => {
-                    console.error('❌ Erro ao enviar uma ou ambas as notificações:', err.message);
+                // 3. ENVIO DO E-MAIL PELO RESEND
+                await resend.emails.send({
+                    from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
+                    to: dados.email,
+                    subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação',
+                    html: `
+                        <div style="font-family: sans-serif; max-width: 600px;">
+                            <h2>Olá, ${dados.nome}! 🎉</h2>
+                            <p>Seu acesso já está liberado. Use os dados abaixo:</p>
+                            <p><strong>Login:</strong> ${dados.email}</p>
+                            <p><strong>Senha:</strong> shopee123</p>
+                            <br>
+                            <a href="https://${MK_SUBDOMINIO}.memberkit.com.br/" style="background:#ee4d2d; color:#fff; padding:15px; text-decoration:none; border-radius:5px;">ACESSAR AGORA</a>
+                        </div>`
                 });
 
-            } else {
-                console.log(`⚠️ Valor divergente no webhook`);
+                console.log("✅ Acesso liberado e e-mail enviado!");
+
+            } catch (err) {
+                console.error("❌ Erro na liberação:", err);
             }
-        } else {
-            console.log(`⚠️ Transação não encontrada: ${idBusca}`);
         }
     }
-
     return res.status(200).send("OK");
 });
 
-// =====================================================
-// ROTA 3: POLLING (O REDIRECIONAMENTO AUTOMÁTICO)
-// =====================================================
 app.get('/check-status/:id', (req, res) => {
-    const id = req.params.id;
-    const transacao = bancoTransacoes.get(id);
-
-    if (transacao && transacao.status === 'paid') {
-        return res.json({ paid: true }); 
-    } else {
-        return res.json({ paid: false }); 
-    }
+    const transacao = bancoTransacoes.get(req.params.id);
+    return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor da Vizzion com Chave Dupla Rodando!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Full Integrado!"));
