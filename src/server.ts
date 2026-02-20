@@ -20,12 +20,12 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (ATUALIZADAS COM SEU DOMÍNIO)
+// 🔑 CONFIGURAÇÕES
 // =====================================================
 const SECRET_KEY = "e08f7qe1x8zjbnx4dkra9p8v7uj1wfacwidsnnf4lhpfq3v8oz628smahn8g6kus"; 
 const PUBLIC_KEY = "rodrigogato041_glxgrxj8x8yy8jo2";
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
-const MK_DOMAIN = "membros.xn--seubnushopp-5eb.com"; // Seu domínio personalizado (image_e11089.png)
+const MK_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
@@ -48,12 +48,12 @@ function acharCopiaECola(obj: any): string | null {
     return null;
 }
 
-// 🌐 MANTÉM O SITE NO AR (Caminho corrigido para GitHub/Render)
+// 🌐 MANTÉM O SITE NO AR
 app.use(express.static(path.join(__dirname, '..'))); 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // =====================================================
-// ROTA 1: GERA O PIX
+// ROTA 1: GERA O PIX (LOGS DETALHADOS RESTAURADOS)
 // =====================================================
 app.post('/pix', async (req, res) => {
     try {
@@ -67,7 +67,8 @@ app.post('/pix', async (req, res) => {
             status: 'pending', amount: valorFixo, emailCliente: email, nomeCliente: name, origem: origem || 'direto' 
         });
 
-        console.log("\n🚀 Evento InitiateCheckout enviado ao Meta Ads com Sucesso!");
+        // 🚀 LOG COM O NOME DO CLIENTE NO CHECKOUT
+        console.log(`\n🚀 Evento InitiateCheckout (${name}) enviado ao Meta Ads com Sucesso!`);
 
         const payload = {
             identifier: identifier,
@@ -83,7 +84,9 @@ app.post('/pix', async (req, res) => {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
-        console.log("✅ PIX GERADO!\n");
+        // ✅ LOG DETALHADO DA GERAÇÃO
+        console.log(`✅ PIX GERADO: ${name} - R$ ${valorFixo}\n`);
+
         return res.json({ success: true, payload: acharCopiaECola(response.data), transactionId: identifier });
     } catch (error: any) {
         console.error("❌ ERRO AO GERAR PIX:", error.response?.data || error.message);
@@ -92,7 +95,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (LOGIN DIRETO ATIVADO)
+// ROTA 2: WEBHOOK (NOTIFICAÇÃO + ACESSO)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -105,7 +108,7 @@ app.post('/webhook', async (req, res) => {
             const transacao = bancoTransacoes.get(idBusca);
             bancoTransacoes.set(idBusca, { ...transacao, status: 'paid' });
 
-            // 💰 LOG DE VENDA
+            // 💰 LOG DE VENDA COMPLETO
             console.log(`\n💰 VENDA CONFIRMADA!\n👤 Cliente: ${transacao.nomeCliente}\n📢 Origem: ${transacao.origem}\n💵 Valor: R$ ${transaction.amount}`);
 
             // 🔔 1. NOTIFICAÇÕES PUSHCUT
@@ -128,7 +131,7 @@ app.post('/webhook', async (req, res) => {
                 "full_name": transacao.nomeCliente, "email": transacao.emailCliente, "password": "shopee123"
             }, { headers: { "X-MemberKit-API-Key": MK_KEY } }).catch(() => {});
 
-            // 📧 4. E-MAIL COM LOGIN DIRETO (SEM SENHA)
+            // 📧 4. E-MAIL COM LOGIN DIRETO
             await resend.emails.send({
                 from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
                 to: transacao.emailCliente,
@@ -136,15 +139,12 @@ app.post('/webhook', async (req, res) => {
                 html: `
                     <div style="font-family: sans-serif; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
                         <h2 style="color: #333;">Olá, ${transacao.nomeCliente}! 🎉</h2>
-                        <p style="font-size: 16px; color: #555;">Clique no botão abaixo para entrar <b>direto</b> no seu painel, sem precisar digitar senha.</p>
+                        <p style="font-size: 16px; color: #555;">Clique no botão abaixo para entrar <b>direto</b> no seu painel, sem precisar de senha.</p>
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="https://${MK_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(transacao.emailCliente)}&user[password]=shopee123" 
                                style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
                                 ACESSAR MEU PAINEL AGORA
                             </a>
-                        </div>
-                        <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; font-size: 13px; color: #666;">
-                            <b>Dados para acesso manual:</b><br>Login: ${transacao.emailCliente}<br>Senha: shopee123
                         </div>
                     </div>`
             }).then(() => console.log(`📧 E-mail Enviado para: ${transacao.emailCliente}`)).catch(() => {});
@@ -158,4 +158,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Full Online!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Servidor Full Online com Logs Detalhados!"));
