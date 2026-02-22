@@ -20,11 +20,11 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (VIZZION + CURSO 275575)
+// 🔑 CONFIGURAÇÕES
 // =====================================================
-const MK_API_URL = "api.memberkit.com.br"; // <-- MUDANÇA PARA O DOMÍNIO GLOBAL DE API
-const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; //
-const MK_COURSE_ID = 275575; //
+const MK_API_URL = "api.memberkit.com.br"; 
+const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
+const MK_COURSE_ID = 275575; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
 
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
@@ -55,9 +55,6 @@ function acharCopiaECola(obj: any): string | null {
 app.use(express.static(path.join(__dirname, '..'))); 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
-// =====================================================
-// ROTA 1: GERA O PIX
-// =====================================================
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor, origem } = req.body;
@@ -87,7 +84,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (MATRÍCULA + AUTO-LOGIN)
+// ROTA 2: WEBHOOK (ENTREGA COM SEGURANÇA)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -102,8 +99,8 @@ app.post('/webhook', async (req, res) => {
 
         if (emailCliente) {
             try {
-                // 🎯 1. MATRÍCULA FORÇADA (Agora via API Central /v1/)
-                await axios.post(`https://${MK_API_URL}/v1/enrollments`, { 
+                // 🎯 O AJUSTE FINAL: A ROTA CORRETA É /api/v1/enrollments
+                await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, { 
                     "enrollment": {
                         "full_name": nomeCliente,
                         "email": emailCliente,
@@ -113,12 +110,12 @@ app.post('/webhook', async (req, res) => {
                     }
                 }, { headers: { "X-MemberKit-API-Key": MK_KEY } });
                 
-                console.log(`✅ MemberKit OK para: ${emailCliente}`);
+                console.log(`✅ MemberKit OK: ${emailCliente}`);
             } catch (err: any) {
                 console.error("❌ Erro MemberKit:", err.response?.data || err.message);
             }
 
-            // 🎯 2. META PURCHASE
+            // 🎯 META PURCHASE
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -128,7 +125,7 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 📧 3. E-MAIL COM LINK MÁGICO
+            // 📧 E-MAIL
             setTimeout(async () => {
                 await resend.emails.send({
                     from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
@@ -149,7 +146,7 @@ app.post('/webhook', async (req, res) => {
                 }).then(() => console.log(`📧 E-mail enviado: ${emailCliente}`));
             }, 2000);
 
-            // 🔔 4. NOTIFICAÇÕES SÓCIOS
+            // 🔔 NOTIFICAÇÕES SÓCIOS
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
