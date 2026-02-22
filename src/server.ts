@@ -20,13 +20,16 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (NOVA CONTA VIZZION + MEMBERKIT)
+// 🔑 CONFIGURAÇÕES (ATUALIZADAS COM SEU CURSO: 275575)
 // =====================================================
-const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; // Para o Servidor (Evita 404)
-const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; // Para o Cliente
+const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; 
+const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
+const MK_COURSE_ID = "275575"; // <--- ID extraído da sua URL
+const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
+
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
 const SECRET_KEY = "2z9x2whgofky0aneyx1pu0dkaj8y9j0m8981yitu81wdb75lrirj1u2b50xiqacf"; 
-const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
+
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 const META_PIXEL_ID = "847728461631550"; 
 const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwoBt1ijXLIsS19daREz2xzuLnMl0C1yZAE3HYkKK19Fmykttzdhs5qZCZC0TkCviGXSrS9NuGvb99ZBDYZB8dkEzjlp6sZBrnG8x79dvvpV55mDhVXTocILMBbuxZCASrUZCIdUr18mYTZB0fgZDZD";
@@ -80,44 +83,39 @@ app.post('/pix', async (req, res) => {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
-        console.log(`\n🚀 InitiateCheckout (${name}) - Meta Ads OK`);
         console.log(`✅ PIX GERADO: ${name} - R$ ${valorFixo}`);
-
         return res.json({ success: true, payload: acharCopiaECola(response.data), transactionId: identifier });
-    } catch (error: any) { // CORREÇÃO AQUI (TS18046)
-        console.error("❌ Erro ao gerar Pix:", error.response?.data || error.message);
+    } catch (error: any) { 
         return res.status(401).json({ success: false }); 
     }
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (ENTREGA + NOTIFICAÇÕES SÓCIOS)
+// ROTA 2: WEBHOOK (NOTIFICAÇÃO + ACESSO IMEDIATO)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
-    if (!transaction) return res.status(200).send("OK");
-
-    const idBusca = transaction.identifier || transaction.id;
-
-    if (transaction.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
+    if (transaction?.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         
+        const idBusca = transaction.identifier || transaction.id;
         const memoria = bancoTransacoes.get(idBusca) || {};
         const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
         const emailCliente = transaction.client?.email || memoria.emailCliente;
-        const origem = memoria.origem || "direto";
 
-        // ✅ LIBERA REDIRECIONAMENTO NO SITE
         bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
 
-        console.log(`\n💰 VENDA CONFIRMADA!`);
-        console.log(`👤 Cliente: ${nomeCliente} | 💵 Valor: R$ ${transaction.amount}`);
-
-        // 🔔 NOTIFICAÇÕES SÓCIOS (PUSH NO CELULAR)
-        axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
-        axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
-
         if (emailCliente) {
-            // 🎯 META PURCHASE
+            // 🎯 1. MATRÍCULA REAL (Vicula o aluno ao curso 275575)
+            await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, {
+                "full_name": nomeCliente,
+                "email": emailCliente,
+                "course_id": MK_COURSE_ID, // Vincula ao curso específico
+                "password": "shopee123"
+            }, { headers: { "X-MemberKit-API-Key": MK_KEY } })
+            .then(() => console.log(`🔑 Aluno matriculado no curso ${MK_COURSE_ID}: ${emailCliente}`))
+            .catch((err: any) => console.log("⚠️ Aluno já matriculado ou erro na API."));
+
+            // 🎯 2. META PURCHASE
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -127,31 +125,28 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 🔑 3. MEMBERKIT (Cadastro API Oficial)
-            await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, {
-                "full_name": nomeCliente, "email": emailCliente, "password": "shopee123"
-            }, { headers: { "X-MemberKit-API-Key": MK_KEY } })
-            .then(() => console.log(`🔑 Aluno cadastrado: ${emailCliente}`))
-            .catch((err: any) => console.error("❌ Erro MemberKit API:", err.response?.data || err.message));
-
-            // 📧 4. RESEND (Link Mágico)
+            // 📧 3. E-MAIL LINK MÁGICO (O "Clicou, Entrou")
             await resend.emails.send({
                 from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
                 to: emailCliente,
-                subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação',
+                subject: 'Seu acesso chegou! 🚀 Liberação Imediata',
                 html: `
-                    <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                        <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
-                        <p style="font-size: 16px;">Sua bonificação foi liberada! Clique no botão abaixo para entrar <b>direto</b>:</p>
+                    <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #ee4d2d; border-radius: 10px;">
+                        <h2 style="color: #ee4d2d;">Olá, ${nomeCliente}! 🎉</h2>
+                        <p style="font-size: 16px;">Sua bonificação foi liberada! Clique no botão abaixo para entrar <b>direto</b> no seu painel:</p>
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="https://${MK_CLIENT_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" 
-                               style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
+                               style="background: #ee4d2d; color: white; padding: 20px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
                                 ACESSAR MEU PAINEL AGORA
                             </a>
                         </div>
                         <p style="font-size: 12px; color: #666;">Login: ${emailCliente}<br>Senha: shopee123</p>
                     </div>`
-            }).then(() => console.log(`📧 E-mail enviado: ${emailCliente}`)).catch(() => {});
+            }).then(() => console.log(`📧 E-mail enviado com Link Mágico: ${emailCliente}`)).catch(() => {});
+
+            // 🔔 4. NOTIFICAÇÕES SÓCIOS
+            axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
+            axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
     }
     return res.status(200).send("OK");
@@ -162,4 +157,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Ativo e Corrigido!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema de Entrega 2.0 Online!"));
