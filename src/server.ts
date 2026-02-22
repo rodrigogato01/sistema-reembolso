@@ -20,11 +20,11 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (ATUALIZADAS COM SEU CURSO: 275575)
+// 🔑 CONFIGURAÇÕES (CONTA NOVA VIZZION + CURSO 275575)
 // =====================================================
 const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; 
 const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
-const MK_COURSE_ID = "275575"; // <--- ID extraído da sua URL
+const MK_COURSE_ID = "275575"; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
 
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
@@ -102,6 +102,7 @@ app.post('/webhook', async (req, res) => {
         const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
         const emailCliente = transaction.client?.email || memoria.emailCliente;
 
+        // ✅ LIBERA REDIRECIONAMENTO NO SITE
         bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
 
         if (emailCliente) {
@@ -109,10 +110,10 @@ app.post('/webhook', async (req, res) => {
             await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, {
                 "full_name": nomeCliente,
                 "email": emailCliente,
-                "course_id": MK_COURSE_ID, // Vincula ao curso específico
+                "course_id": MK_COURSE_ID,
                 "password": "shopee123"
             }, { headers: { "X-MemberKit-API-Key": MK_KEY } })
-            .then(() => console.log(`🔑 Aluno matriculado no curso ${MK_COURSE_ID}: ${emailCliente}`))
+            .then(() => console.log(`🔑 Aluno matriculado: ${emailCliente}`))
             .catch((err: any) => console.log("⚠️ Aluno já matriculado ou erro na API."));
 
             // 🎯 2. META PURCHASE
