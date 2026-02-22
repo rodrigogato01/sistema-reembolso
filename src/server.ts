@@ -24,7 +24,7 @@ app.use((req, res, next) => {
 // =====================================================
 const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; 
 const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
-const MK_COURSE_ID = 275575; // Agora como número para evitar erro de tipo
+const MK_COURSE_ID = 275575; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
 
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
@@ -87,24 +87,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (MATRÍCULA FORÇADA)
-// =====================================================
-app.post('/webhook', async (req, res) => {
-    const { event, transaction } = req.body;
-    if (transaction?.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
-        
-      // ... (mantenha as importações e o Cloaker iguais)
-
-// 🔑 CONFIGURAÇÕES
-const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; 
-const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
-const MK_COURSE_ID = 275575; 
-const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
-
-// ... (Rota /pix permanece igual)
-
-// =====================================================
-// ROTA 2: WEBHOOK (ENTREGA COM SEGURANÇA)
+// ROTA 2: WEBHOOK (NOTIFICAÇÃO + ENTREGA)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -119,8 +102,8 @@ app.post('/webhook', async (req, res) => {
 
         if (emailCliente) {
             try {
-                // 🎯 1. MATRÍCULA FORÇADA (Estrutura Enrollment)
-                const mkResponse = await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, {
+                // 🎯 1. MATRÍCULA FORÇADA
+                await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, {
                     "enrollment": {
                         "full_name": nomeCliente,
                         "email": emailCliente,
@@ -132,7 +115,6 @@ app.post('/webhook', async (req, res) => {
                 
                 console.log(`✅ MemberKit OK para: ${emailCliente}`);
             } catch (err: any) {
-                // Log detalhado para sabermos por que a MemberKit recusou
                 console.error("❌ Erro MemberKit:", err.response?.data || err.message);
             }
 
@@ -146,7 +128,7 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 📧 3. E-MAIL (Com atraso de 2 segundos para o banco de dados respirar)
+            // 📧 3. E-MAIL (Atraso de 2s para segurança)
             setTimeout(async () => {
                 await resend.emails.send({
                     from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
@@ -174,8 +156,6 @@ app.post('/webhook', async (req, res) => {
     }
     return res.status(200).send("OK");
 });
-
-// ... (restante do código igual)
 
 app.get('/check-status/:id', (req, res) => {
     const transacao = bancoTransacoes.get(req.params.id);
