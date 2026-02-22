@@ -20,9 +20,9 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES
+// 🔑 CONFIGURAÇÕES (CORRIGIDAS PARA O ENDEREÇO GLOBAL)
 // =====================================================
-const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; 
+const MK_API_URL = "api.memberkit.com.br"; // <-- MUDANÇA PARA O DOMÍNIO GLOBAL DE API
 const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
 const MK_COURSE_ID = 275575; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
@@ -87,7 +87,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (NOTIFICAÇÃO + ENTREGA)
+// ROTA 2: WEBHOOK (ENTREGA COM SEGURANÇA)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -102,8 +102,8 @@ app.post('/webhook', async (req, res) => {
 
         if (emailCliente) {
             try {
-                // 🎯 1. MATRÍCULA FORÇADA
-                await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, {
+                // 🎯 1. MATRÍCULA FORÇADA (Agora via API Global)
+                await axios.post(`https://${MK_API_URL}/v1/enrollments`, { // <-- ROTA GLOBAL
                     "enrollment": {
                         "full_name": nomeCliente,
                         "email": emailCliente,
@@ -113,7 +113,7 @@ app.post('/webhook', async (req, res) => {
                     }
                 }, { headers: { "X-MemberKit-API-Key": MK_KEY } });
                 
-                console.log(`✅ MemberKit OK para: ${emailCliente}`);
+                console.log(`✅ MemberKit (API Global) OK para: ${emailCliente}`);
             } catch (err: any) {
                 console.error("❌ Erro MemberKit:", err.response?.data || err.message);
             }
@@ -128,7 +128,7 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 📧 3. E-MAIL (Atraso de 2s para segurança)
+            // 📧 3. E-MAIL (Link Mágico)
             setTimeout(async () => {
                 await resend.emails.send({
                     from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
