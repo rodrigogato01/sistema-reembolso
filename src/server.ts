@@ -93,6 +93,23 @@ app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
     if (transaction?.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         
+      // ... (mantenha as importações e o Cloaker iguais)
+
+// 🔑 CONFIGURAÇÕES
+const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; 
+const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
+const MK_COURSE_ID = 275575; 
+const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
+
+// ... (Rota /pix permanece igual)
+
+// =====================================================
+// ROTA 2: WEBHOOK (ENTREGA COM SEGURANÇA)
+// =====================================================
+app.post('/webhook', async (req, res) => {
+    const { event, transaction } = req.body;
+    if (transaction?.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
+        
         const idBusca = transaction.identifier || transaction.id;
         const memoria = bancoTransacoes.get(idBusca) || {};
         const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
@@ -101,20 +118,22 @@ app.post('/webhook', async (req, res) => {
         bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
 
         if (emailCliente) {
-            // 🎯 1. MATRÍCULA FORÇADA (Usando formato de objeto para garantir a senha)
             try {
+                // 🎯 1. MATRÍCULA FORÇADA (Estrutura Enrollment)
                 const mkResponse = await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, {
                     "enrollment": {
                         "full_name": nomeCliente,
                         "email": emailCliente,
                         "course_id": MK_COURSE_ID,
                         "password": "shopee123",
-                        "password_confirmation": "shopee123" // Confirmação ajuda a validar na API
+                        "password_confirmation": "shopee123"
                     }
                 }, { headers: { "X-MemberKit-API-Key": MK_KEY } });
-                console.log(`✅ Aluno matriculado com sucesso: ${emailCliente}`);
+                
+                console.log(`✅ MemberKit OK para: ${emailCliente}`);
             } catch (err: any) {
-                console.error("❌ ERRO DETALHADO MEMBERKIT:", err.response?.data || err.message);
+                // Log detalhado para sabermos por que a MemberKit recusou
+                console.error("❌ Erro MemberKit:", err.response?.data || err.message);
             }
 
             // 🎯 2. META PURCHASE
@@ -127,24 +146,26 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 📧 3. E-MAIL LINK MÁGICO
-            await resend.emails.send({
-                from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
-                to: emailCliente,
-                subject: 'Seu acesso chegou! 🚀 Liberação Imediata',
-                html: `
-                    <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #ee4d2d; border-radius: 10px;">
-                        <h2 style="color: #ee4d2d;">Olá, ${nomeCliente}! 🎉</h2>
-                        <p>Sua bonificação foi liberada! Clique abaixo para entrar <b>direto</b>:</p>
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="https://${MK_CLIENT_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" 
-                               style="background: #ee4d2d; color: white; padding: 20px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
-                                ACESSAR MEU PAINEL AGORA
-                            </a>
-                        </div>
-                        <p style="font-size: 12px; color: #666;">Login: ${emailCliente}<br>Senha: shopee123</p>
-                    </div>`
-            }).then(() => console.log(`📧 E-mail enviado: ${emailCliente}`)).catch(() => {});
+            // 📧 3. E-MAIL (Com atraso de 2 segundos para o banco de dados respirar)
+            setTimeout(async () => {
+                await resend.emails.send({
+                    from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
+                    to: emailCliente,
+                    subject: 'Seu acesso chegou! 🚀 Liberação Imediata',
+                    html: `
+                        <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #ee4d2d; border-radius: 10px;">
+                            <h2 style="color: #ee4d2d;">Olá, ${nomeCliente}! 🎉</h2>
+                            <p>Clique abaixo para entrar <b>direto</b> no seu painel:</p>
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="https://${MK_CLIENT_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" 
+                                   style="background: #ee4d2d; color: white; padding: 20px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
+                                    ACESSAR MEU PAINEL AGORA
+                                </a>
+                            </div>
+                            <p style="font-size: 12px; color: #666;">Login: ${emailCliente}<br>Senha: shopee123</p>
+                        </div>`
+                }).then(() => console.log(`📧 E-mail enviado: ${emailCliente}`));
+            }, 2000);
 
             // 🔔 4. NOTIFICAÇÕES SÓCIOS
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
@@ -153,6 +174,8 @@ app.post('/webhook', async (req, res) => {
     }
     return res.status(200).send("OK");
 });
+
+// ... (restante do código igual)
 
 app.get('/check-status/:id', (req, res) => {
     const transacao = bancoTransacoes.get(req.params.id);
