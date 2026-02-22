@@ -20,12 +20,12 @@ app.use((req, res, next) => {
 });
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (ATUALIZADAS COM SUA NOVA CONTA)
+// 🔑 CONFIGURAÇÕES (NOVA CONTA VIZZION + MEMBERKIT)
 // =====================================================
-const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; // Endereço técnico para API (Evita Erro 404)
-const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; // Endereço que o cliente vê
-const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; // Sua nova chave
-const SECRET_KEY = "2z9x2whgofky0aneyx1pu0dkaj8y9j0m8981yitu81wdb75lrirj1u2b50xiqacf"; // Sua nova chave
+const MK_API_URL = "rodrigo-gato-ribeiro.memberkit.com.br"; // Para o Servidor (Evita 404)
+const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; // Para o Cliente
+const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
+const SECRET_KEY = "2z9x2whgofky0aneyx1pu0dkaj8y9j0m8981yitu81wdb75lrirj1u2b50xiqacf"; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
 const resend = new Resend('re_3HT5Wehq_EDfH6jDM5f5JMznsQsAu9cez');
 const META_PIXEL_ID = "847728461631550"; 
@@ -71,7 +71,6 @@ app.post('/pix', async (req, res) => {
             amount: valorFixo,
             client: { name, email, document: (cpf || "").replace(/\D/g, ''), phone: (phone || "").replace(/\D/g, '') },
             products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: valorFixo }],
-            // ⚠️ ATENÇÃO: Verifique se esse producerId ainda é o mesmo na conta nova!
             splits: [{ producerId: "cmg7bvpns00u691tsx9g6vlyp", amount: parseFloat((valorFixo * 0.5).toFixed(2)) }],
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
@@ -85,14 +84,14 @@ app.post('/pix', async (req, res) => {
         console.log(`✅ PIX GERADO: ${name} - R$ ${valorFixo}`);
 
         return res.json({ success: true, payload: acharCopiaECola(response.data), transactionId: identifier });
-    } catch (error) { 
+    } catch (error: any) { // CORREÇÃO AQUI (TS18046)
         console.error("❌ Erro ao gerar Pix:", error.response?.data || error.message);
         return res.status(401).json({ success: false }); 
     }
 });
 
 // =====================================================
-// ROTA 2: WEBHOOK (NOTIFICAÇÃO + ENTREGA REAL)
+// ROTA 2: WEBHOOK (ENTREGA + NOTIFICAÇÕES SÓCIOS)
 // =====================================================
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -113,7 +112,7 @@ app.post('/webhook', async (req, res) => {
         console.log(`\n💰 VENDA CONFIRMADA!`);
         console.log(`👤 Cliente: ${nomeCliente} | 💵 Valor: R$ ${transaction.amount}`);
 
-        // 🔔 NOTIFICAÇÕES PUSHCUT
+        // 🔔 NOTIFICAÇÕES SÓCIOS (PUSH NO CELULAR)
         axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
         axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
 
@@ -128,14 +127,14 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 🔑 3. MEMBERKIT (Cadastro via endereço original para não dar 404)
+            // 🔑 3. MEMBERKIT (Cadastro API Oficial)
             await axios.post(`https://${MK_API_URL}/api/v1/enrollments`, {
                 "full_name": nomeCliente, "email": emailCliente, "password": "shopee123"
             }, { headers: { "X-MemberKit-API-Key": MK_KEY } })
             .then(() => console.log(`🔑 Aluno cadastrado: ${emailCliente}`))
-            .catch((err) => console.error("❌ Erro MemberKit API:", err.response?.data || err.message));
+            .catch((err: any) => console.error("❌ Erro MemberKit API:", err.response?.data || err.message));
 
-            // 📧 4. RESEND (Link Mágico usando o domínio punycode)
+            // 📧 4. RESEND (Link Mágico)
             await resend.emails.send({
                 from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
                 to: emailCliente,
@@ -163,4 +162,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Ativo com Nova Conta Vizzion!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Ativo e Corrigido!"));
