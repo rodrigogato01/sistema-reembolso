@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES GERAIS
+// 🔑 CONFIGURAÇÕES
 // =====================================================
 const MK_API_URL = "memberkit.com.br/api/v1/users"; 
 const MK_CLASSROOM_ID = 275575; 
@@ -23,7 +23,18 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
-// 🛡️ Função para mascarar logs (Protege sua privacidade no Render)
+// 🔎 FUNÇÃO MESTRA: Encontra o código Pix em qualquer lugar da resposta
+function acharCopiaECola(obj: any): string | null {
+    if (typeof obj === 'string' && obj.includes('000201')) return obj;
+    if (typeof obj === 'object' && obj !== null) {
+        for (const key in obj) {
+            const result = acharCopiaECola(obj[key]);
+            if (result) return result;
+        }
+    }
+    return null;
+}
+
 function maskLog(data: string): string {
     if (!data) return '';
     if (data.includes('@')) return data.split('@')[0].slice(0, 3) + '***@' + data.split('@')[1];
@@ -39,7 +50,7 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// ROTA PIX (GERAÇÃO)
+// 🚀 ROTA PIX: CORREÇÃO DO "UNDEFINED"
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
@@ -60,13 +71,23 @@ app.post('/pix', async (req, res) => {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
-        console.log(`✅ PIX: Cliente ${maskLog(name)} gerou transação.`);
-        return res.json({ success: true, payload: response.data.pix?.qrcode_base64 || response.data.pix?.qrcode, transactionId: identifier });
-    } catch (error: any) { return res.status(401).json({ success: false }); }
+        // 🎯 Busca o código "Copia e Cola" real para evitar o erro "undefined"
+        const pixCopiaECola = acharCopiaECola(response.data);
+
+        console.log(`✅ PIX GERADO: Cliente ${maskLog(name)}. Código encontrado: ${pixCopiaECola ? 'SIM' : 'NÃO'}`);
+        
+        return res.json({ 
+            success: true, 
+            payload: pixCopiaECola, // Envia o texto correto para a caixa de cópia
+            transactionId: identifier 
+        });
+    } catch (error: any) { 
+        return res.status(401).json({ success: false }); 
+    }
 });
 
 // -----------------------------------------------------
-// WEBHOOK (A ATIVAÇÃO AUTOMÁTICA ACONTECE AQUI)
+// 💰 WEBHOOK: MATRÍCULA ATIVA AUTOMÁTICA
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -78,13 +99,13 @@ app.post('/webhook', async (req, res) => {
         const emailCliente = transaction.client?.email || memoria.emailCliente;
 
         if (emailCliente) {
-            
-            // 🎯 O COMANDO QUE DEIXA ATIVO PARA TODOS:
+            bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
+
             const mkPayload = {
                 "api_key": MK_KEY,
                 "full_name": nomeCliente,
                 "email": emailCliente,
-                "status": "active", // 🚨 LIBERAÇÃO IMEDIATA
+                "status": "active", // Garante que o login funcione na hora
                 "classroom_ids": [MK_CLASSROOM_ID]
             };
 
@@ -92,12 +113,12 @@ app.post('/webhook', async (req, res) => {
                 await axios.post(`https://${MK_API_URL}`, mkPayload, {
                     headers: { "Content-Type": "application/json", "Accept": "application/json" }
                 });
-                console.log(`✅ MK: Matrícula ATIVA Concluída para ${maskLog(emailCliente)}`);
+                console.log(`✅ MK: Matrícula ATIVA para ${maskLog(emailCliente)}`);
             } catch (err: any) {
-                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}.`);
+                console.log(`❌ MK ERRO.`);
             }
 
-            // META ADS (PURCHASE)
+            // META ADS (Purchase)
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -107,7 +128,7 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
             
-            // Notificações Pushcuts
+            // Pushcuts (Notificações Sócios)
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
@@ -120,4 +141,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Ativo e Automatizado!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema QR Code + MK Ativo!"));
