@@ -17,7 +17,7 @@ const MK_API_URL = "memberkit.com.br/api/v1/users";
 const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
 const MK_CLASSROOM_ID = 275575; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
-const DEFAULT_PASS = "@Projetoshopee123"; // 👈 Nova senha padrão definida
+const DEFAULT_PASS = "@Projetoshopee123"; // 👈 Sua nova senha padrão
 
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
 const SECRET_KEY = "2z9x2whgofky0aneyx1pu0dkaj8y9j0m8981yitu81wdb75lrirj1u2b50xiqacf"; 
@@ -71,7 +71,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // -----------------------------------------------------
-// WEBHOOK (ENTREGA COM NOVA SENHA @Projetoshopee123)
+// WEBHOOK (ENTREGA COM DADOS SOLTOS E NOVA SENHA)
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -84,25 +84,23 @@ app.post('/webhook', async (req, res) => {
 
         if (emailCliente) {
             
-            // 🎯 MATRÍCULA (Dentro da "caixa" user para forçar a nova senha)
+            // 🎯 MATRÍCULA (O Formato Certo: Sem caixinha "user", dados soltos)
             const mkPayload = {
-                "user": {
-                    "full_name": nomeCliente,
-                    "email": emailCliente,
-                    "password": DEFAULT_PASS,
-                    "password_confirmation": DEFAULT_PASS
-                },
+                "full_name": nomeCliente,
+                "email": emailCliente,
+                "password": DEFAULT_PASS,
+                "password_confirmation": DEFAULT_PASS,
                 "classroom_ids": [MK_CLASSROOM_ID],
-                "send_email": false // Bloqueia e-mail padrão da plataforma
+                "send_email": false
             };
 
             try {
                 await axios.post(`https://${MK_API_URL}?api_key=${MK_KEY}`, mkPayload, {
                     headers: { "Content-Type": "application/json", "Accept": "application/json" }
                 });
-                console.log(`✅ MK: Matrícula Concluída com senha ${DEFAULT_PASS}`);
+                console.log(`✅ MK: Matrícula VIP Concluída para ${maskLog(emailCliente)}`);
             } catch (err: any) {
-                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}.`);
+                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}. (Dados Protegidos)`);
             }
 
             // META ADS
@@ -120,7 +118,7 @@ app.post('/webhook', async (req, res) => {
                 await resend.emails.send({
                     from: `${BRAND_NAME} <contato@xn--seubnushopp-5eb.com>`,
                     to: emailCliente,
-                    subject: 'Seu acesso chegou! 🚀 Liberação Confirmada',
+                    subject: 'Seu acesso VIP chegou! 🚀 Liberação Confirmada',
                     html: `
                         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 12px; background-color: #ffffff;">
                             <div style="text-align: center; margin-bottom: 30px;">
