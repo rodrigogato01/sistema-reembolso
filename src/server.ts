@@ -14,7 +14,6 @@ app.use(express.json());
 const MK_API_URL = "memberkit.com.br/api/v1/users"; 
 const MK_CLASSROOM_ID = 275575; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
-const DEFAULT_PASS = "@Projetoshopee123"; 
 
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
 const SECRET_KEY = "2z9x2whgofky0aneyx1pu0dkaj8y9j0m8981yitu81wdb75lrirj1u2b50xiqacf"; 
@@ -80,22 +79,23 @@ app.post('/webhook', async (req, res) => {
 
         if (emailCliente) {
             
-            // 🎯 MATRÍCULA (Sem o bloqueio de e-mail, para a MemberKit fazer o disparo)
+            // 🎯 MATRÍCULA (Com Status Ativo OBRIGATÓRIO)
             const mkPayload = {
+                "api_key": MK_KEY,
                 "full_name": nomeCliente,
                 "email": emailCliente,
-                "password": DEFAULT_PASS,
-                "password_confirmation": DEFAULT_PASS,
+                "status": "active", // 🚨 O SEGREDO ESTÁ AQUI: Libera o login na hora
                 "classroom_ids": [MK_CLASSROOM_ID]
             };
 
             try {
-                await axios.post(`https://${MK_API_URL}?api_key=${MK_KEY}`, mkPayload, {
+                // Rota limpa, a chave vai dentro do payload como a MemberKit prefere
+                await axios.post(`https://${MK_API_URL}`, mkPayload, {
                     headers: { "Content-Type": "application/json", "Accept": "application/json" }
                 });
-                console.log(`✅ MK: Matrícula Concluída. E-mail nativo será enviado para ${maskLog(emailCliente)}`);
+                console.log(`✅ MK: Matrícula ATIVA Concluída. E-mail nativo enviado para ${maskLog(emailCliente)}`);
             } catch (err: any) {
-                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}.`);
+                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}. Dados Protegidos.`);
             }
 
             // META ADS
