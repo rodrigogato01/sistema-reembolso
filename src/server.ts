@@ -27,7 +27,7 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
-// 🛡️ Função para mascarar logs
+// 🛡️ Função para mascarar logs (Protege sua privacidade no Render)
 function maskLog(data: string): string {
     if (!data) return '';
     if (data.includes('@')) return data.split('@')[0].slice(0, 3) + '***@' + data.split('@')[1];
@@ -84,14 +84,12 @@ app.post('/webhook', async (req, res) => {
 
         if (emailCliente) {
             
-            // 🎯 MATRÍCULA (Apenas o comando de silenciamento oficial)
+            // 🎯 MATRÍCULA (Apenas o comando de silenciamento oficial e sem envio de senha)
             const mkPayload = {
                 "full_name": nomeCliente,
                 "email": emailCliente,
-                "password": "shopee123",
-                "password_confirmation": "shopee123",
                 "classroom_ids": [MK_CLASSROOM_ID],
-                "send_email": false // O único comando aceito pela MemberKit para bloquear e-mails
+                "send_email": false
             };
 
             try {
