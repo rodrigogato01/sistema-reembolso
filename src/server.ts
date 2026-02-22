@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES
+// 🔑 CONFIGURAÇÕES GERAIS
 // =====================================================
 const MK_API_URL = "memberkit.com.br/api/v1/users"; 
 const MK_CLASSROOM_ID = 275575; 
@@ -23,7 +23,7 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
-// 🛡️ Função para mascarar logs (Privacidade no Render)
+// 🛡️ Função para mascarar logs (Protege sua privacidade no Render)
 function maskLog(data: string): string {
     if (!data) return '';
     if (data.includes('@')) return data.split('@')[0].slice(0, 3) + '***@' + data.split('@')[1];
@@ -66,7 +66,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // -----------------------------------------------------
-// WEBHOOK (CRIAÇÃO NA MEMBERKIT E PIXEL)
+// WEBHOOK (A ATIVAÇÃO AUTOMÁTICA ACONTECE AQUI)
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -79,26 +79,25 @@ app.post('/webhook', async (req, res) => {
 
         if (emailCliente) {
             
-            // 🎯 MATRÍCULA (Com Status Ativo OBRIGATÓRIO)
+            // 🎯 O COMANDO QUE DEIXA ATIVO PARA TODOS:
             const mkPayload = {
                 "api_key": MK_KEY,
                 "full_name": nomeCliente,
                 "email": emailCliente,
-                "status": "active", // 🚨 O SEGREDO ESTÁ AQUI: Libera o login na hora
+                "status": "active", // 🚨 LIBERAÇÃO IMEDIATA
                 "classroom_ids": [MK_CLASSROOM_ID]
             };
 
             try {
-                // Rota limpa, a chave vai dentro do payload como a MemberKit prefere
                 await axios.post(`https://${MK_API_URL}`, mkPayload, {
                     headers: { "Content-Type": "application/json", "Accept": "application/json" }
                 });
-                console.log(`✅ MK: Matrícula ATIVA Concluída. E-mail nativo enviado para ${maskLog(emailCliente)}`);
+                console.log(`✅ MK: Matrícula ATIVA Concluída para ${maskLog(emailCliente)}`);
             } catch (err: any) {
-                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}. Dados Protegidos.`);
+                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}.`);
             }
 
-            // META ADS
+            // META ADS (PURCHASE)
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -108,7 +107,7 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
             
-            // Pushcuts (Notificações Sócios)
+            // Notificações Pushcuts
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
@@ -121,4 +120,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Nativo Online!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Ativo e Automatizado!"));
