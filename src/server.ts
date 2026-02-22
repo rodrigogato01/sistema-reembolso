@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (IDENTIDADE 100% PROTEGIDA)
+// 🔑 CONFIGURAÇÕES (IDENTIDADE PROFISSIONAL E PROTEGIDA)
 // =====================================================
 const BRAND_NAME = "Suporte Shopee"; 
 const MK_API_URL = "memberkit.com.br/api/v1/users"; 
@@ -27,6 +27,7 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
+// 🛡️ Função para mascarar logs (Protege sua privacidade no Render)
 function maskLog(data: string): string {
     if (!data) return '';
     if (data.includes('@')) return data.split('@')[0].slice(0, 3) + '***@' + data.split('@')[1];
@@ -38,11 +39,12 @@ function hashData(data: string): string {
     return crypto.createHash('sha256').update(data.toLowerCase().trim()).digest('hex');
 }
 
+// 🌐 Mantém o site no ar
 app.use(express.static(path.join(__dirname, '..'))); 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// ROTA PIX 
+// ROTA PIX (GERAÇÃO)
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
@@ -69,7 +71,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // -----------------------------------------------------
-// WEBHOOK (A ENTREGA REAL E PROTEGIDA)
+// WEBHOOK (ENTREGA BLINDADA E SILENCIOSA)
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -77,28 +79,31 @@ app.post('/webhook', async (req, res) => {
         
         const idBusca = transaction.identifier || transaction.id;
         const memoria = bancoTransacoes.get(idBusca) || {};
-        const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente VIP";
+        const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
         const emailCliente = transaction.client?.email || memoria.emailCliente;
 
         if (emailCliente) {
             
+            // 🎯 MATRÍCULA (Flat Format + Comando "send_email: false")
             const mkPayload = {
                 "full_name": nomeCliente,
                 "email": emailCliente,
                 "password": "shopee123",
                 "password_confirmation": "shopee123",
-                "classroom_ids": [MK_CLASSROOM_ID] 
+                "classroom_ids": [MK_CLASSROOM_ID],
+                "send_email": false // 🚨 MATA O E-MAIL COM SEU NOME DA PLATAFORMA
             };
 
             try {
                 await axios.post(`https://${MK_API_URL}?api_key=${MK_KEY}`, mkPayload, {
                     headers: { "Content-Type": "application/json", "Accept": "application/json" }
                 });
-                console.log(`✅ MK: Matrícula VIP processada.`);
+                console.log(`✅ MK: Matrícula VIP Concluída para ${maskLog(emailCliente)}`);
             } catch (err: any) {
-                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}.`);
+                console.log(`❌ MK FALHA TÉCNICA PROTEGIDA (Status ${err.response?.status}).`);
             }
 
+            // META ADS (PURCHASE)
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -108,44 +113,44 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 📧 E-MAIL PREMIUM (Design Profissional e Neutro)
+            // 📧 E-MAIL PREMIUM (IDENTIDADE TOTAL DE MARCA)
             setTimeout(async () => {
                 await resend.emails.send({
                     from: `${BRAND_NAME} <contato@xn--seubnushopp-5eb.com>`,
                     to: emailCliente,
                     subject: 'Seu acesso VIP chegou! 🚀 Liberação Confirmada',
                     html: `
-                        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eaeaec; border-radius: 10px; background-color: #ffffff;">
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; border: 1px solid #f0f0f0; border-radius: 12px; background-color: #ffffff;">
                             <div style="text-align: center; margin-bottom: 30px;">
-                                <h1 style="color: #ee4d2d; font-size: 24px; margin: 0;">Bem-vindo(a) ao seu acesso! 🚀</h1>
+                                <h1 style="color: #ee4d2d; margin: 0; font-size: 26px;">Bonificação Liberada! 🎉</h1>
                             </div>
-                            <p style="font-size: 16px; color: #333333; line-height: 1.6;">Olá, <strong>${nomeCliente}</strong>!</p>
-                            <p style="font-size: 16px; color: #333333; line-height: 1.6;">O seu pagamento foi confirmado e a sua bonificação exclusiva já está liberada e pronta para uso.</p>
-                            <p style="font-size: 16px; color: #333333; line-height: 1.6;">Para acessar o seu painel imediatamente, sem precisar digitar senha, basta clicar no botão abaixo:</p>
+                            <p style="font-size: 16px; color: #333; line-height: 1.6;">Olá, <strong>${nomeCliente}</strong>!</p>
+                            <p style="font-size: 16px; color: #333; line-height: 1.6;">O seu acesso exclusivo já está ativo. Preparamos tudo para que você possa entrar imediatamente no seu painel.</p>
+                            <p style="font-size: 16px; color: #333; line-height: 1.6;">Clique no botão abaixo para realizar o <b>acesso direto</b> (sem necessidade de digitar sua senha agora):</p>
                             
                             <div style="text-align: center; margin: 40px 0;">
                                 <a href="https://${MK_CLIENT_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" 
-                                   style="background-color: #ee4d2d; color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px rgba(238, 77, 45, 0.2);">
+                                   style="background-color: #ee4d2d; color: #ffffff; padding: 20px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
                                     ACESSAR MEU PAINEL AGORA
                                 </a>
                             </div>
                             
-                            <div style="background-color: #f9f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                                <p style="font-size: 14px; color: #555555; margin: 0 0 10px 0;"><strong>Seus dados de acesso manual:</strong></p>
-                                <p style="font-size: 14px; color: #555555; margin: 0;">Login: <span style="color: #ee4d2d;">${emailCliente}</span></p>
-                                <p style="font-size: 14px; color: #555555; margin: 0;">Senha: <strong>shopee123</strong></p>
+                            <div style="background-color: #fcfcfc; padding: 20px; border: 1px dashed #ddd; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="font-size: 14px; color: #555; margin: 0;"><strong>Suas credenciais de acesso manual:</strong></p>
+                                <p style="font-size: 14px; color: #555; margin: 8px 0 0 0;">Login: <span style="color: #ee4d2d;">${emailCliente}</span></p>
+                                <p style="font-size: 14px; color: #555; margin: 4px 0 0 0;">Senha: <strong>shopee123</strong></p>
                             </div>
                             
-                            <hr style="border: none; border-top: 1px solid #eaeaec; margin: 30px 0;">
-                            <p style="font-size: 12px; color: #999999; text-align: center; margin: 0;">
-                                Este é um e-mail automático. Em caso de dúvidas, responda a esta mensagem.<br>
-                                Equipe ${BRAND_NAME}
+                            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                            <p style="font-size: 12px; color: #999; text-align: center; margin: 0;">
+                                Esta é uma notificação automática de liberação.<br>
+                                Equipe de Atendimento <strong>${BRAND_NAME}</strong>
                             </p>
-                        </div>
-                    `
+                        </div>`
                 });
             }, 2000);
             
+            // Pushcuts (Notificações Sócios)
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
@@ -153,4 +158,9 @@ app.post('/webhook', async (req, res) => {
     return res.status(200).send("OK");
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema VIP Blindado!"));
+app.get('/check-status/:id', (req, res) => {
+    const transacao = bancoTransacoes.get(req.params.id);
+    return res.json({ paid: transacao && transacao.status === 'paid' });
+});
+
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Blindado Online!"));
