@@ -10,12 +10,12 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (IDENTIDADE NEUTRA E URL UNIVERSAL)
+// 🔑 CONFIGURAÇÕES (IDENTIDADE 100% PROTEGIDA)
 // =====================================================
-const BRAND_NAME = "Suporte Shopee"; // Sua identidade de marca
-const MK_API_URL = "memberkit.com.br/api/v1/users"; // 🚨 URL Universal Correta
+const BRAND_NAME = "Suporte Shopee"; 
+const MK_API_URL = "memberkit.com.br/api/v1/users"; 
 const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
-const MK_CLASSROOM_ID = 275575; // ID da Turma
+const MK_CLASSROOM_ID = 275575; 
 const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
 
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
@@ -27,7 +27,6 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
-// Função para mascarar logs (Protege seu nome e email no Render)
 function maskLog(data: string): string {
     if (!data) return '';
     if (data.includes('@')) return data.split('@')[0].slice(0, 3) + '***@' + data.split('@')[1];
@@ -43,7 +42,7 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// ROTA PIX (Anonimizada nos Logs)
+// ROTA PIX 
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
@@ -70,7 +69,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // -----------------------------------------------------
-// WEBHOOK (Proteção Total e Dados Soltos)
+// WEBHOOK (A ENTREGA REAL E PROTEGIDA)
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -78,31 +77,28 @@ app.post('/webhook', async (req, res) => {
         
         const idBusca = transaction.identifier || transaction.id;
         const memoria = bancoTransacoes.get(idBusca) || {};
-        const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
+        const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente VIP";
         const emailCliente = transaction.client?.email || memoria.emailCliente;
 
         if (emailCliente) {
-            // 🎯 MATRÍCULA (Dados Flat/Soltos para evitar erro de campo em branco)
+            
             const mkPayload = {
                 "full_name": nomeCliente,
                 "email": emailCliente,
                 "password": "shopee123",
                 "password_confirmation": "shopee123",
-                "classroom_ids": [MK_CLASSROOM_ID] // O formato Array que a MemberKit exige
+                "classroom_ids": [MK_CLASSROOM_ID] 
             };
 
             try {
-                // Rota Universal Direta com a Chave na URL
                 await axios.post(`https://${MK_API_URL}?api_key=${MK_KEY}`, mkPayload, {
                     headers: { "Content-Type": "application/json", "Accept": "application/json" }
                 });
-                console.log(`✅ MK: Matrícula processada para ${maskLog(emailCliente)}`);
+                console.log(`✅ MK: Matrícula VIP processada.`);
             } catch (err: any) {
-                // Log 100% mascarado. Mostra apenas o status do erro.
-                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}. Dados Pessoais Protegidos.`);
+                console.log(`❌ MK FALHA: Código ${err.response?.status || 'desconhecido'}.`);
             }
 
-            // META ADS (Anonimizado)
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -112,28 +108,44 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 📧 E-MAIL (Remetente Anonimizado com a Mensagem Original)
+            // 📧 E-MAIL PREMIUM (Design Profissional e Neutro)
             setTimeout(async () => {
                 await resend.emails.send({
-                    from: `${BRAND_NAME} <contato@xn--seubnushopp-5eb.com>`, // O seu nome não aparece aqui
+                    from: `${BRAND_NAME} <contato@xn--seubnushopp-5eb.com>`,
                     to: emailCliente,
-                    subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação',
+                    subject: 'Seu acesso VIP chegou! 🚀 Liberação Confirmada',
                     html: `
-                        <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                            <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
-                            <p style="font-size: 16px;">Sua bonificação foi liberada! Clique no botão abaixo para entrar <b>direto</b>, sem precisar de senha.</p>
-                            <div style="text-align: center; margin: 30px 0;">
+                        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #eaeaec; border-radius: 10px; background-color: #ffffff;">
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <h1 style="color: #ee4d2d; font-size: 24px; margin: 0;">Bem-vindo(a) ao seu acesso! 🚀</h1>
+                            </div>
+                            <p style="font-size: 16px; color: #333333; line-height: 1.6;">Olá, <strong>${nomeCliente}</strong>!</p>
+                            <p style="font-size: 16px; color: #333333; line-height: 1.6;">O seu pagamento foi confirmado e a sua bonificação exclusiva já está liberada e pronta para uso.</p>
+                            <p style="font-size: 16px; color: #333333; line-height: 1.6;">Para acessar o seu painel imediatamente, sem precisar digitar senha, basta clicar no botão abaixo:</p>
+                            
+                            <div style="text-align: center; margin: 40px 0;">
                                 <a href="https://${MK_CLIENT_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" 
-                                   style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
+                                   style="background-color: #ee4d2d; color: #ffffff; padding: 18px 35px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px rgba(238, 77, 45, 0.2);">
                                     ACESSAR MEU PAINEL AGORA
                                 </a>
                             </div>
-                            <p style="font-size: 12px; color: #666;">Seu login: ${emailCliente}<br>Sua senha: shopee123</p>
-                        </div>`
+                            
+                            <div style="background-color: #f9f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="font-size: 14px; color: #555555; margin: 0 0 10px 0;"><strong>Seus dados de acesso manual:</strong></p>
+                                <p style="font-size: 14px; color: #555555; margin: 0;">Login: <span style="color: #ee4d2d;">${emailCliente}</span></p>
+                                <p style="font-size: 14px; color: #555555; margin: 0;">Senha: <strong>shopee123</strong></p>
+                            </div>
+                            
+                            <hr style="border: none; border-top: 1px solid #eaeaec; margin: 30px 0;">
+                            <p style="font-size: 12px; color: #999999; text-align: center; margin: 0;">
+                                Este é um e-mail automático. Em caso de dúvidas, responda a esta mensagem.<br>
+                                Equipe ${BRAND_NAME}
+                            </p>
+                        </div>
+                    `
                 });
             }, 2000);
             
-            // Pushcut
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
@@ -141,4 +153,4 @@ app.post('/webhook', async (req, res) => {
     return res.status(200).send("OK");
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Blindado Online!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema VIP Blindado!"));
