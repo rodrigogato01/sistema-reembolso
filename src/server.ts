@@ -85,13 +85,18 @@ app.post('/webhook', async (req, res) => {
         if (emailCliente) {
             
             // 🎯 MATRÍCULA (Flat Format + Comando "send_email: false")
+           // 🎯 MATRÍCULA (Combo de Silenciamento Máximo)
             const mkPayload = {
                 "full_name": nomeCliente,
                 "email": emailCliente,
                 "password": "shopee123",
                 "password_confirmation": "shopee123",
                 "classroom_ids": [MK_CLASSROOM_ID],
-                "send_email": false // 🚨 MATA O E-MAIL COM SEU NOME DA PLATAFORMA
+                "send_email": false,           // Tenta bloquear o envio padrão
+                "send_welcome_email": false,   // Tenta bloquear o e-mail de boas vindas
+                "skip_welcome_email": true,    // Pula o e-mail de boas vindas
+                "notify": false,               // Desativa notificações do sistema
+                "silent": true                 // Modo silencioso de criação
             };
 
             try {
