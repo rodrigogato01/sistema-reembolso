@@ -10,12 +10,12 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (CHAVES OFICIAIS)
+// 🔑 CONFIGURAÇÕES (O ENDEREÇO UNIVERSAL DA MEMBERKIT)
 // =====================================================
-const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; // Sua chave secreta oficial
-const MK_SUBDOMAIN = "rodrigo-gato-ribeiro"; 
+const MK_API_URL = "memberkit.com.br/api/v1"; // 🚨 O DOMÍNIO OFICIAL E CORRETO
 const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
 const MK_COURSE_ID = 275575; 
+const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
 
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
 const SECRET_KEY = "2z9x2whgofky0aneyx1pu0dkaj8y9j0m8981yitu81wdb75lrirj1u2b50xiqacf"; 
@@ -35,7 +35,7 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// ROTA PIX (GERAÇÃO)
+// ROTA PIX (GERAÇÃO MANTIDA IGUAL)
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
@@ -62,7 +62,7 @@ app.post('/pix', async (req, res) => {
 });
 
 // -----------------------------------------------------
-// WEBHOOK (A ENTREGA REAL)
+// WEBHOOK (A ENTREGA COM TENTATIVA DUPLA)
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -76,25 +76,47 @@ app.post('/webhook', async (req, res) => {
         bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
 
         if (emailCliente) {
-            // 🎯 MATRÍCULA NA MEMBERKIT
+            
+            // 🎯 MATRÍCULA NA MEMBERKIT (SISTEMA DE SEGURANÇA)
+            const mkHeaders = { 
+                "X-MemberKit-API-Key": MK_KEY,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            };
+
             try {
-                await axios.post(`https://${MK_SUBDOMAIN}.memberkit.com.br/api/v1/enrollments`, { 
+                // TENTATIVA 1: Rota Padrão
+                await axios.post(`https://${MK_API_URL}/enrollments?api_key=${MK_KEY}`, { 
                     "enrollment": {
                         "full_name": nomeCliente,
                         "email": emailCliente,
                         "course_id": MK_COURSE_ID,
-                        "password": "shopee123"
+                        "password": "shopee123",
+                        "password_confirmation": "shopee123"
                     }
-                }, { 
-                    headers: { 
-                        "X-MemberKit-API-Key": MK_KEY,
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    } 
-                });
-                console.log(`✅ SUCESSO MK: ${emailCliente}`);
+                }, { headers: mkHeaders });
+                console.log(`✅ SUCESSO MK (Enrollments): ${emailCliente}`);
+                
             } catch (err: any) {
-                console.log("❌ FALHA MK:", err.response?.status, err.response?.data || err.message);
+                if (err.response?.status === 404) {
+                    // TENTATIVA 2: Rota Alternativa de Usuários
+                    try {
+                        await axios.post(`https://${MK_API_URL}/users?api_key=${MK_KEY}`, {
+                            "user": {
+                                "full_name": nomeCliente,
+                                "email": emailCliente,
+                                "course_id": MK_COURSE_ID,
+                                "password": "shopee123",
+                                "password_confirmation": "shopee123"
+                            }
+                        }, { headers: mkHeaders });
+                        console.log(`✅ SUCESSO MK (Users): ${emailCliente}`);
+                    } catch (errFallback: any) {
+                        console.log("❌ FALHA MK (Users):", errFallback.response?.status, errFallback.response?.data || errFallback.message);
+                    }
+                } else {
+                    console.log("❌ FALHA MK (Enrollments):", err.response?.status, err.response?.data || err.message);
+                }
             }
 
             // 🎯 META ADS
@@ -107,7 +129,7 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
-            // 📧 E-MAIL PROFISSIONAL COM LINK MÁGICO
+            // 📧 E-MAIL PROFISSIONAL (COM MENSAGEM RESTAURADA)
             setTimeout(async () => {
                 await resend.emails.send({
                     from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
