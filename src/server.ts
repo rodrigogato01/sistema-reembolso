@@ -10,12 +10,12 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES
+// 🔑 CONFIGURAÇÕES (CHAVES OFICIAIS)
 // =====================================================
-const MK_API_URL = "api.memberkit.com.br"; 
+const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; // Sua chave secreta oficial
+const MK_SUBDOMAIN = "rodrigo-gato-ribeiro"; 
 const MK_CLIENT_DOMAIN = "membros.xn--seubnushopp-5eb.com"; 
 const MK_COURSE_ID = 275575; 
-const MK_KEY = "G3gAuabnX5b3X9cs7oQ8aidn"; 
 
 const PUBLIC_KEY = "rodrigo-igp_9mdb0v11ivwyoqtt"; 
 const SECRET_KEY = "2z9x2whgofky0aneyx1pu0dkaj8y9j0m8981yitu81wdb75lrirj1u2b50xiqacf"; 
@@ -34,13 +34,15 @@ function hashData(data: string): string {
 app.use(express.static(path.join(__dirname, '..'))); 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
-// ROTA PIX (MANTIDA IGUAL)
+// -----------------------------------------------------
+// ROTA PIX (GERAÇÃO)
+// -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
-        const { name, email, cpf, phone, valor, origem } = req.body;
+        const { name, email, cpf, phone, valor } = req.body;
         const identifier = `ID${Date.now()}`;
         const valorFixo = parseFloat(valor) || 27.90;
-        bancoTransacoes.set(identifier, { status: 'pending', emailCliente: email, nomeCliente: name, origem: origem || 'direto' });
+        bancoTransacoes.set(identifier, { status: 'pending', emailCliente: email, nomeCliente: name });
 
         const payload = {
             identifier: identifier,
@@ -59,9 +61,9 @@ app.post('/pix', async (req, res) => {
     } catch (error: any) { return res.status(401).json({ success: false }); }
 });
 
-// =====================================================
-// 💰 WEBHOOK (CORREÇÃO DO 404)
-// =====================================================
+// -----------------------------------------------------
+// WEBHOOK (A ENTREGA REAL)
+// -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
     if (transaction?.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
@@ -74,33 +76,28 @@ app.post('/webhook', async (req, res) => {
         bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
 
         if (emailCliente) {
-            const enrollmentData = {
-                "enrollment": {
-                    "full_name": nomeCliente,
-                    "email": emailCliente,
-                    "course_id": MK_COURSE_ID,
-                    "password": "shopee123",
-                    "password_confirmation": "shopee123"
-                }
-            };
-
+            // 🎯 MATRÍCULA NA MEMBERKIT
             try {
-                // 🎯 O AJUSTE MATADOR: Adicionado o header "Accept" e endpoint direto
-                const mkResponse = await axios.post(`https://${MK_API_URL}/v1/enrollments`, enrollmentData, {
-                    headers: { 
-                        "X-MemberKit-API-Key": MK_KEY, 
-                        "Content-Type": "application/json",
-                        "Accept": "application/json" // <--- OBRIGATÓRIO PARA NÃO DAR 404 HTML
+                await axios.post(`https://${MK_SUBDOMAIN}.memberkit.com.br/api/v1/enrollments`, { 
+                    "enrollment": {
+                        "full_name": nomeCliente,
+                        "email": emailCliente,
+                        "course_id": MK_COURSE_ID,
+                        "password": "shopee123"
                     }
+                }, { 
+                    headers: { 
+                        "X-MemberKit-API-Key": MK_KEY,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    } 
                 });
-                console.log(`✅ SUCESSO MK: Aluno ${emailCliente} matriculado!`);
+                console.log(`✅ SUCESSO MK: ${emailCliente}`);
             } catch (err: any) {
-                console.log("❌ FALHA MEMBERKIT DETALHADA:");
-                console.log("🔹 Status:", err.response?.status);
-                console.log("🔹 Resposta:", JSON.stringify(err.response?.data || err.message, null, 2));
+                console.log("❌ FALHA MK:", err.response?.status, err.response?.data || err.message);
             }
 
-            // META PURCHASE E RESEND (MANTIDOS)
+            // 🎯 META ADS
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -110,16 +107,30 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
 
+            // 📧 E-MAIL PROFISSIONAL COM LINK MÁGICO
             setTimeout(async () => {
                 await resend.emails.send({
                     from: 'Suporte Shopee <contato@xn--seubnushopp-5eb.com>',
                     to: emailCliente,
-                    subject: 'Seu acesso chegou! 🚀 Liberação Imediata',
-                    html: `<div style="text-align: center;"><h2>Olá, ${nomeCliente}! 🎉</h2><p>Clique abaixo para entrar <b>direto</b>:</p><a href="https://${MK_CLIENT_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" style="background: #ee4d2d; color: white; padding: 20px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">ACESSAR MEU PAINEL AGORA</a></div>`
+                    subject: 'Seu acesso chegou! 🚀 Resgate de Bonificação',
+                    html: `
+                        <div style="font-family: sans-serif; max-width: 600px; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                            <h2 style="color: #333;">Olá, ${nomeCliente}! 🎉</h2>
+                            <p style="font-size: 16px;">Sua bonificação foi liberada! Clique no botão abaixo para entrar <b>direto</b>, sem precisar de senha.</p>
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="https://${MK_CLIENT_DOMAIN}/users/sign_in?user[email]=${encodeURIComponent(emailCliente)}&user[password]=shopee123" 
+                                   style="background: #ee4d2d; color: white; padding: 18px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 18px; display: inline-block;">
+                                    ACESSAR MEU PAINEL AGORA
+                                </a>
+                            </div>
+                            <p style="font-size: 12px; color: #666;">Seu login: ${emailCliente}<br>Sua senha: shopee123</p>
+                        </div>`
                 });
             }, 2000);
             
+            // Pushcuts (Sócios)
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
+            axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
     }
     return res.status(200).send("OK");
@@ -130,4 +141,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Ativo e Blindado!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Ativo!"));
