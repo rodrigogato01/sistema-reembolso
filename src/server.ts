@@ -23,7 +23,6 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
-// 🔎 FUNÇÃO MESTRA: Encontra o código Pix em qualquer lugar da resposta
 function acharCopiaECola(obj: any): string | null {
     if (typeof obj === 'string' && obj.includes('000201')) return obj;
     if (typeof obj === 'object' && obj !== null) {
@@ -50,20 +49,36 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// 🚀 ROTA PIX: CORREÇÃO DO "UNDEFINED"
+// 🚀 ROTA PIX: SPLIT 50% (PUBLI) / 25% (SÓCIO) / 25% (VOCÊ)
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor } = req.body;
+        const total = parseFloat(valor) || 27.90;
         const identifier = `ID${Date.now()}`;
         bancoTransacoes.set(identifier, { status: 'pending', emailCliente: email, nomeCliente: name });
 
         const payload = {
             identifier: identifier,
-            amount: parseFloat(valor) || 27.90,
+            amount: total,
             client: { name, email, document: (cpf || "").replace(/\D/g, ''), phone: (phone || "").replace(/\D/g, '') },
-            products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: parseFloat(valor) || 27.90 }],
-            splits: [{ producerId: "cmg7bvpns00u691tsx9g6vlyp", amount: parseFloat(((parseFloat(valor) || 27.90) * 0.5).toFixed(2)) }],
+            products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: total }],
+            
+            // 💰 CONFIGURAÇÃO DE DIVISÃO ATUALIZADA
+            splits: [
+                { 
+                    // SÓCIO FIXO (Recebe 25%)
+                    producerId: "cmg7bvpns00u691tsx9g6vlyp", 
+                    amount: parseFloat((total * 0.25).toFixed(2)) 
+                },
+                { 
+                    // PARCEIRO DA PUBLI (Recebe 50%)
+                    producerId: "cmlpor0xz061z1rpd1tkhqqip", 
+                    amount: parseFloat((total * 0.50).toFixed(2)) 
+                }
+                // O restante (25%) fica automaticamente com você na conta principal.
+            ],
+            
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
@@ -71,16 +86,10 @@ app.post('/pix', async (req, res) => {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
-        // 🎯 Busca o código "Copia e Cola" real para evitar o erro "undefined"
         const pixCopiaECola = acharCopiaECola(response.data);
-
-        console.log(`✅ PIX GERADO: Cliente ${maskLog(name)}. Código encontrado: ${pixCopiaECola ? 'SIM' : 'NÃO'}`);
+        console.log(`✅ PIX: Split 50% (Publi) e 25% (Sócio) configurados.`);
         
-        return res.json({ 
-            success: true, 
-            payload: pixCopiaECola, // Envia o texto correto para a caixa de cópia
-            transactionId: identifier 
-        });
+        return res.json({ success: true, payload: pixCopiaECola, transactionId: identifier });
     } catch (error: any) { 
         return res.status(401).json({ success: false }); 
     }
@@ -105,7 +114,7 @@ app.post('/webhook', async (req, res) => {
                 "api_key": MK_KEY,
                 "full_name": nomeCliente,
                 "email": emailCliente,
-                "status": "active", // Garante que o login funcione na hora
+                "status": "active", 
                 "classroom_ids": [MK_CLASSROOM_ID]
             };
 
@@ -141,4 +150,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema QR Code + MK Ativo!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema com Splits Corrigidos Ativo!"));
