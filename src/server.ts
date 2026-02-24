@@ -23,7 +23,7 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
-// 🔎 FUNÇÃO MESTRA: Encontra o código Pix
+// 🔎 FUNÇÃO MESTRA: Encontra o código Pix em qualquer lugar da resposta
 function acharCopiaECola(obj: any): string | null {
     if (typeof obj === 'string' && obj.includes('000201')) return obj;
     if (typeof obj === 'object' && obj !== null) {
@@ -56,7 +56,7 @@ app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor, origem } = req.body;
         
-        // "Carimbo" da influenciadora no ID da VizzionPay
+        // "Carimbo" da influenciadora no ID da VizzionPay (máximo 10 caracteres)
         const influNome = (origem || "DIRETO").toUpperCase().slice(0, 10);
         const identifier = `${influNome}_ID${Date.now()}`;
         
@@ -68,7 +68,7 @@ app.post('/pix', async (req, res) => {
         });
 
         const payload = {
-            identifier: identifier, // 👈 Isso aparece na sua notificação do celular
+            identifier: identifier, 
             amount: parseFloat(valor) || 27.90,
             client: { name, email, document: (cpf || "").replace(/\D/g, ''), phone: (phone || "").replace(/\D/g, '') },
             products: [{ 
@@ -77,7 +77,7 @@ app.post('/pix', async (req, res) => {
                 quantity: 1, 
                 price: parseFloat(valor) || 27.90 
             }],
-            // 💰 DIVISÃO ORIGINAL: 50% para o sócio fixo
+            // 💰 DIVISÃO: 50% para o sócio fixo
             splits: [{ 
                 producerId: "cmg7bvpns00u691tsx9g6vlyp", 
                 amount: parseFloat(((parseFloat(valor) || 27.90) * 0.5).toFixed(2)) 
@@ -99,15 +99,11 @@ app.post('/pix', async (req, res) => {
 });
 
 // -----------------------------------------------------
-// 💰 WEBHOOK: NOTIFICAÇÃO E ATIVAÇÃO
-// -----------------------------------------------------
-// -----------------------------------------------------
-// 💰 WEBHOOK ATUALIZADO (RASTREIO À PROVA DE FALHAS)
+// 💰 WEBHOOK: ATIVAÇÃO E RASTREIO À PROVA DE FALHAS
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
 
-    // Validamos se o evento é de pagamento aprovado
     if (transaction?.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         
         const idBusca = transaction.identifier || transaction.id || "";
@@ -116,14 +112,12 @@ app.post('/webhook', async (req, res) => {
         const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
         const emailCliente = transaction.client?.email || memoria.emailCliente;
 
-        // 🎯 LÓGICA DE RESGATE: Se não estiver na memória, tenta ler do próprio ID
-        // Isso evita que apareça "DIRETO" se a rota /pix falhou antes.
+        // 🎯 LÓGICA DE RESGATE: Se não estiver na memória, lê do próprio ID
         const influ = memoria.origem || idBusca.split('_ID')[0] || "DIRETO";
 
         if (emailCliente) {
             bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
 
-            // Esse log agora sempre mostrará a influenciadora enviada no ID
             console.log(`💰 VENDA APROVADA! | ORIGEM: ${influ.toUpperCase()} | CLIENTE: ${maskLog(emailCliente)}`);
 
             const mkPayload = {
@@ -138,8 +132,12 @@ app.post('/webhook', async (req, res) => {
                 await axios.post(`https://${MK_API_URL}`, mkPayload, {
                     headers: { "Content-Type": "application/json", "Accept": "application/json" }
                 });
-            } catch (err: any) {}
+                console.log(`✅ MK: Matrícula Ativa.`);
+            } catch (err: any) {
+                console.log(`❌ MK ERRO.`);
+            }
 
+            // Meta Pixel (Purchase)
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -149,9 +147,17 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
             
+            // Notificações Pushcut
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
     }
     return res.status(200).send("OK");
 });
+
+app.get('/check-status/:id', (req, res) => {
+    const transacao = bancoTransacoes.get(req.params.id);
+    return res.json({ paid: transacao && transacao.status === 'paid' });
+});
+
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Monitoramento Ativo (50/50)!"));
