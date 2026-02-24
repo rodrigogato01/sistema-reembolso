@@ -23,7 +23,7 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
-// 🔎 FUNÇÃO MESTRA: Encontra o código Pix em qualquer lugar da resposta
+// 🔎 FUNÇÃO MESTRA: Encontra o código Pix
 function acharCopiaECola(obj: any): string | null {
     if (typeof obj === 'string' && obj.includes('000201')) return obj;
     if (typeof obj === 'object' && obj !== null) {
@@ -50,20 +50,38 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// 🚀 ROTA PIX: CORREÇÃO DO "UNDEFINED"
+// 🚀 ROTA PIX: RASTREIO NATIVO NO IDENTIFIER
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
-        const { name, email, cpf, phone, valor } = req.body;
-        const identifier = `ID${Date.now()}`;
-        bancoTransacoes.set(identifier, { status: 'pending', emailCliente: email, nomeCliente: name });
+        const { name, email, cpf, phone, valor, origem } = req.body;
+        
+        // "Carimbo" da influenciadora no ID da VizzionPay
+        const influNome = (origem || "DIRETO").toUpperCase().slice(0, 10);
+        const identifier = `${influNome}_ID${Date.now()}`;
+        
+        bancoTransacoes.set(identifier, { 
+            status: 'pending', 
+            emailCliente: email, 
+            nomeCliente: name,
+            origem: influNome 
+        });
 
         const payload = {
-            identifier: identifier,
+            identifier: identifier, // 👈 Isso aparece na sua notificação do celular
             amount: parseFloat(valor) || 27.90,
             client: { name, email, document: (cpf || "").replace(/\D/g, ''), phone: (phone || "").replace(/\D/g, '') },
-            products: [{ id: "TAXA_01", name: "Taxa de Liberação", quantity: 1, price: parseFloat(valor) || 27.90 }],
-            splits: [{ producerId: "cmg7bvpns00u691tsx9g6vlyp", amount: parseFloat(((parseFloat(valor) || 27.90) * 0.5).toFixed(2)) }],
+            products: [{ 
+                id: "TAXA_01", 
+                name: `Liberação [${influNome}]`, 
+                quantity: 1, 
+                price: parseFloat(valor) || 27.90 
+            }],
+            // 💰 DIVISÃO ORIGINAL: 50% para o sócio fixo
+            splits: [{ 
+                producerId: "cmg7bvpns00u691tsx9g6vlyp", 
+                amount: parseFloat(((parseFloat(valor) || 27.90) * 0.5).toFixed(2)) 
+            }],
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
@@ -71,23 +89,17 @@ app.post('/pix', async (req, res) => {
             headers: { 'x-public-key': PUBLIC_KEY, 'x-secret-key': SECRET_KEY, 'Content-Type': 'application/json' }
         });
 
-        // 🎯 Busca o código "Copia e Cola" real para evitar o erro "undefined"
         const pixCopiaECola = acharCopiaECola(response.data);
-
-        console.log(`✅ PIX GERADO: Cliente ${maskLog(name)}. Código encontrado: ${pixCopiaECola ? 'SIM' : 'NÃO'}`);
+        console.log(`✅ PIX GERADO: ${identifier}`);
         
-        return res.json({ 
-            success: true, 
-            payload: pixCopiaECola, // Envia o texto correto para a caixa de cópia
-            transactionId: identifier 
-        });
+        return res.json({ success: true, payload: pixCopiaECola, transactionId: identifier });
     } catch (error: any) { 
         return res.status(401).json({ success: false }); 
     }
 });
 
 // -----------------------------------------------------
-// 💰 WEBHOOK: MATRÍCULA ATIVA AUTOMÁTICA
+// 💰 WEBHOOK: NOTIFICAÇÃO E ATIVAÇÃO
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
@@ -95,17 +107,21 @@ app.post('/webhook', async (req, res) => {
         
         const idBusca = transaction.identifier || transaction.id;
         const memoria = bancoTransacoes.get(idBusca) || {};
+        
         const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
         const emailCliente = transaction.client?.email || memoria.emailCliente;
+        const influ = memoria.origem || "DIRETO";
 
         if (emailCliente) {
             bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
+
+            console.log(`💰 VENDA APROVADA! | ORIGEM: ${influ} | CLIENTE: ${maskLog(emailCliente)}`);
 
             const mkPayload = {
                 "api_key": MK_KEY,
                 "full_name": nomeCliente,
                 "email": emailCliente,
-                "status": "active", // Garante que o login funcione na hora
+                "status": "active",
                 "classroom_ids": [MK_CLASSROOM_ID]
             };
 
@@ -113,12 +129,9 @@ app.post('/webhook', async (req, res) => {
                 await axios.post(`https://${MK_API_URL}`, mkPayload, {
                     headers: { "Content-Type": "application/json", "Accept": "application/json" }
                 });
-                console.log(`✅ MK: Matrícula ATIVA para ${maskLog(emailCliente)}`);
-            } catch (err: any) {
-                console.log(`❌ MK ERRO.`);
-            }
+            } catch (err: any) {}
 
-            // META ADS (Purchase)
+            // Pixel do Meta
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{
                     event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
@@ -128,7 +141,7 @@ app.post('/webhook', async (req, res) => {
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
             
-            // Pushcuts (Notificações Sócios)
+            // Pushcuts (Notificações)
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
@@ -141,4 +154,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema QR Code + MK Ativo!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Monitoramento Ativo (50/50)!"));
