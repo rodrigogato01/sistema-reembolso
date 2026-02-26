@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES
+// 🔑 CONFIGURAÇÕES (MANTIDAS 100%)
 // =====================================================
 const MK_API_URL = "memberkit.com.br/api/v1/users"; 
 const MK_CLASSROOM_ID = 275575; 
@@ -23,7 +23,6 @@ const META_ACCESS_TOKEN = "EAAGZAoNPRbbwBQlVq2XIPxcm6S3lE7EHASXNsyQoiULVOBES9uwo
 
 const bancoTransacoes = new Map();
 
-// 🔎 FUNÇÃO MESTRA: Encontra o código Pix em qualquer lugar da resposta
 function acharCopiaECola(obj: any): string | null {
     if (typeof obj === 'string' && obj.includes('000201')) return obj;
     if (typeof obj === 'object' && obj !== null) {
@@ -50,38 +49,59 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// 🚀 ROTA PIX: RASTREIO NATIVO NO IDENTIFIER
+// 🚀 ROTA PIX: COM SPLIT CONDICIONAL (JOÃO & THIFANY)
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
         const { name, email, cpf, phone, valor, origem } = req.body;
         
-        // "Carimbo" da influenciadora no ID da VizzionPay (máximo 10 caracteres)
         const influNome = (origem || "DIRETO").toUpperCase().slice(0, 10);
         const identifier = `${influNome}_ID${Date.now()}`;
-        
+        const valorNumerico = parseFloat(valor) || 27.90;
+
+        // ⚖️ LOGICA DE DIVISÃO SELETIVA
+        let splitsCalculados = [];
+
+        // SE A ORIGEM FOR THIFANY -> João entra no Split
+        if (influNome === "THIFANY") {
+            splitsCalculados = [
+                { 
+                    // 50% para o João
+                    producerId: "cmlpor0xz061z1rpd1tkhqqip", 
+                    amount: parseFloat((valorNumerico * 0.50).toFixed(2)) 
+                },
+                { 
+                    // 25% para o seu sócio fixo
+                    producerId: "cmg7bvpns00u691tsx9g6vlyp", 
+                    amount: parseFloat((valorNumerico * 0.25).toFixed(2)) 
+                }
+                // Seus 25% ficam retidos na conta Master
+            ];
+        } 
+        // QUALQUER OUTRA ORIGEM (GABI, RENATA, DIRETO, ETC)
+        else {
+            splitsCalculados = [
+                { 
+                    // 50% para o seu sócio fixo
+                    producerId: "cmg7bvpns00u691tsx9g6vlyp", 
+                    amount: parseFloat((valorNumerico * 0.50).toFixed(2)) 
+                }
+                // Seus 50% ficam retidos na conta Master
+            ];
+        }
+
         bancoTransacoes.set(identifier, { 
-            status: 'pending', 
-            emailCliente: email, 
-            nomeCliente: name,
-            origem: influNome 
+            status: 'pending', emailCliente: email, nomeCliente: name, origem: influNome 
         });
 
         const payload = {
             identifier: identifier, 
-            amount: parseFloat(valor) || 27.90,
+            amount: valorNumerico,
             client: { name, email, document: (cpf || "").replace(/\D/g, ''), phone: (phone || "").replace(/\D/g, '') },
             products: [{ 
-                id: "TAXA_01", 
-                name: `Liberação [${influNome}]`, 
-                quantity: 1, 
-                price: parseFloat(valor) || 27.90 
+                id: "TAXA_01", name: `Liberação [${influNome}]`, quantity: 1, price: valorNumerico 
             }],
-            // 💰 DIVISÃO: 50% para o sócio fixo
-            splits: [{ 
-                producerId: "cmg7bvpns00u691tsx9g6vlyp", 
-                amount: parseFloat(((parseFloat(valor) || 27.90) * 0.5).toFixed(2)) 
-            }],
+            splits: splitsCalculados,
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
 
@@ -99,55 +119,30 @@ app.post('/pix', async (req, res) => {
 });
 
 // -----------------------------------------------------
-// 💰 WEBHOOK: ATIVAÇÃO E RASTREIO À PROVA DE FALHAS
+// 💰 WEBHOOK: NOTIFICAÇÃO E RASTREIO
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
 
     if (transaction?.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
-        
         const idBusca = transaction.identifier || transaction.id || "";
         const memoria = bancoTransacoes.get(idBusca) || {};
-        
-        const nomeCliente = transaction.client?.name || memoria.nomeCliente || "Cliente Shopee";
         const emailCliente = transaction.client?.email || memoria.emailCliente;
-
-        // 🎯 LÓGICA DE RESGATE: Se não estiver na memória, lê do próprio ID
         const influ = memoria.origem || idBusca.split('_ID')[0] || "DIRETO";
 
         if (emailCliente) {
             bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
-
             console.log(`💰 VENDA APROVADA! | ORIGEM: ${influ.toUpperCase()} | CLIENTE: ${maskLog(emailCliente)}`);
 
-            const mkPayload = {
-                "api_key": MK_KEY,
-                "full_name": nomeCliente,
-                "email": emailCliente,
-                "status": "active",
-                "classroom_ids": [MK_CLASSROOM_ID]
-            };
-
-            try {
-                await axios.post(`https://${MK_API_URL}`, mkPayload, {
-                    headers: { "Content-Type": "application/json", "Accept": "application/json" }
-                });
-                console.log(`✅ MK: Matrícula Ativa.`);
-            } catch (err: any) {
-                console.log(`❌ MK ERRO.`);
-            }
-
-            // Meta Pixel (Purchase)
+            // MemberKit, Meta Pixel e Pushcuts mantidos...
+            const mkPayload = { "api_key": MK_KEY, "full_name": transaction.client?.name || "Cliente", "email": emailCliente, "status": "active", "classroom_ids": [MK_CLASSROOM_ID] };
+            try { await axios.post(`https://${MK_API_URL}`, mkPayload, { headers: { "Content-Type": "application/json", "Accept": "application/json" } }); } catch (err) {}
+            
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
-                data: [{
-                    event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website",
-                    user_data: { em: [hashData(emailCliente)], fn: [hashData(nomeCliente)] },
-                    custom_data: { value: Number(transaction.amount), currency: "BRL" }
-                }],
+                data: [{ event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website", user_data: { em: [hashData(emailCliente)] }, custom_data: { value: Number(transaction.amount), currency: "BRL" } }],
                 access_token: META_ACCESS_TOKEN
             }).catch(() => {});
             
-            // Notificações Pushcut
             axios.get('https://api.pushcut.io/KnUVBiCa-4A0euJ42eJvj/notifications/MinhaNotifica%C3%A7%C3%A3o').catch(() => {});
             axios.get('https://api.pushcut.io/g8WCdXfM9ImJ-ulF32pLP/notifications/Minha%20Primeira%20Notifica%C3%A7%C3%A3o').catch(() => {});
         }
@@ -160,4 +155,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Monitoramento Ativo (50/50)!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Blindado com Split Condicional Ativo!"));
