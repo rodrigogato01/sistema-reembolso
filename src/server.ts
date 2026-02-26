@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (INTOCADAS)
+// 🔑 CONFIGURAÇÕES (MANTIDAS 100%)
 // =====================================================
 const MK_API_URL = "memberkit.com.br/api/v1/users"; 
 const MK_CLASSROOM_ID = 275575; 
@@ -49,7 +49,7 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// 🚀 ROTA PIX: AJUSTE DE MARGEM E SPLIT
+// 🚀 ROTA PIX: MATEMÁTICA LÍQUIDA (RODRIGO = SÓCIO)
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
@@ -57,49 +57,56 @@ app.post('/pix', async (req, res) => {
         
         const influNome = (origem || "DIRETO").toUpperCase().slice(0, 10);
         const identifier = `${influNome}_ID${Date.now()}`;
-        const valorNumerico = parseFloat(valor) || 27.90;
+        const valorBruto = parseFloat(valor) || 27.90;
+
+        // 🛡️ CALCULO DE TAXA PARA NÃO TER PREJUÍZO (8% + R$ 0,10)
+        const taxaPlataforma = (valorBruto * 0.08) + 0.10;
+        const valorLiquidoTotal = valorBruto - taxaPlataforma;
 
         let splitsCalculados = [];
 
-        // ⚖️ CASO 1: THIFANY (MANTIDO EXATAMENTE COMO ESTAVA)
-        // João 50% | Sócio Fixo 25% | Você (Master) 25%
-        if (influNome === "THIFANY") {
+        // ⚖️ CASO 1: PUBLI JOÃO OU THIFANY (João 50% Bruto | Rodrigo e Sócio 50/50 do que sobrar)
+        if (influNome === "THIFANY" || influNome === "JOAO") {
+            const joaoParte = valorBruto * 0.50;
+            const sobraParaOsSocios = valorLiquidoTotal - joaoParte;
+            const parteIgualSocio = sobraParaOsSocios / 2;
+
             splitsCalculados = [
                 { 
-                    producerId: "cmlpor0xz061z1rpd1tkhqqip", // João
-                    amount: parseFloat((valorNumerico * 0.50).toFixed(2)) 
+                    producerId: "cmlpor0xz061z1rpd1tkhqqip", // João (50%)
+                    amount: parseFloat(joaoParte.toFixed(2)) 
                 },
                 { 
-                    producerId: "cmg7bvpns00u691tsx9g6vlyp", // Sócio Fixo
-                    amount: parseFloat((valorNumerico * 0.25).toFixed(2)) 
+                    producerId: "cmg7bvpns00u691tsx9g6vlyp", // Sócio Fixo (Metade do Líquido)
+                    amount: parseFloat(parteIgualSocio.toFixed(2)) 
                 }
             ];
         } 
-        // ⚖️ CASO 2: DEMAIS VENDAS (Sócio 49% | João R$ 1,50 | Você Master)
+        // ⚖️ CASO 2: DEMAIS VENDAS (Gabriel R$ 1,50 | Rodrigo e Sócio 50/50 do que sobrar)
         else {
+            const gabrielFixo = 1.50;
+            const sobraParaOsSocios = valorLiquidoTotal - gabrielFixo;
+            const parteIgualSocio = sobraParaOsSocios / 2;
+
             splitsCalculados = [
                 { 
-                    producerId: "cmg7bvpns00u691tsx9g6vlyp", // Sócio Fixo (49%)
-                    amount: parseFloat((valorNumerico * 0.49).toFixed(2)) 
+                    producerId: "cmm0oxulc05b91yt491oo6yml", // Gabriel (R$ 1,50)
+                    amount: gabrielFixo 
                 },
-                {
-                    producerId: "cmm0oxulc05b91yt491oo6yml", // João/Novo Rapaz (R$ 1,50)
-                    amount: 1.50
+                { 
+                    producerId: "cmg7bvpns00u691tsx9g6vlyp", // Sócio Fixo (Metade do Líquido)
+                    amount: parseFloat(parteIgualSocio.toFixed(2)) 
                 }
             ];
         }
 
-        bancoTransacoes.set(identifier, { 
-            status: 'pending', emailCliente: email, nomeCliente: name, origem: influNome 
-        });
+        bancoTransacoes.set(identifier, { status: 'pending', emailCliente: email, nomeCliente: name, origem: influNome });
 
         const payload = {
             identifier: identifier, 
-            amount: valorNumerico,
+            amount: valorBruto,
             client: { name, email, document: (cpf || "").replace(/\D/g, ''), phone: (phone || "").replace(/\D/g, '') },
-            products: [{ 
-                id: "TAXA_01", name: `Liberação [${influNome}]`, quantity: 1, price: valorNumerico 
-            }],
+            products: [{ id: "TAXA_01", name: `Liberação [${influNome}]`, quantity: 1, price: valorBruto }],
             splits: splitsCalculados,
             callbackUrl: "https://checkoutfinal.onrender.com/webhook"
         };
@@ -109,37 +116,30 @@ app.post('/pix', async (req, res) => {
         });
 
         const pixCopiaECola = acharCopiaECola(response.data);
-        console.log(`✅ PIX GERADO: ${identifier} | VALOR: R$ ${valorNumerico.toFixed(2)}`);
+        console.log(`✅ PIX GERADO: ${identifier} | VALOR: R$ ${valorBruto.toFixed(2)}`);
         
         return res.json({ success: true, payload: pixCopiaECola, transactionId: identifier });
-    } catch (error: any) { 
-        return res.status(401).json({ success: false }); 
-    }
+    } catch (error: any) { return res.status(401).json({ success: false }); }
 });
 
 // -----------------------------------------------------
-// 💰 WEBHOOK: NOTIFICAÇÃO E RASTREIO
+// 💰 WEBHOOK: NOTIFICAÇÃO E ATIVAÇÃO (MANTIDO)
 // -----------------------------------------------------
 app.post('/webhook', async (req, res) => {
     const { event, transaction } = req.body;
-
     if (transaction?.status === 'COMPLETED' && event === 'TRANSACTION_PAID') {
         const idBusca = transaction.identifier || transaction.id || "";
         const memoria = bancoTransacoes.get(idBusca) || {};
         const emailCliente = transaction.client?.email || memoria.emailCliente;
         const influ = memoria.origem || idBusca.split('_ID')[0] || "DIRETO";
-
-        const valorPago = transaction.amount 
-            ? Number(transaction.amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
-            : "R$ 0,00";
+        const valorPago = transaction.amount ? Number(transaction.amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : "R$ 0,00";
 
         if (emailCliente) {
             bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
-
             console.log(`💰 VENDA APROVADA! | ${valorPago} | ORIGEM: ${influ.toUpperCase()} | CLIENTE: ${maskLog(emailCliente)}`);
-
+            
             const mkPayload = { "api_key": MK_KEY, "full_name": transaction.client?.name || "Cliente", "email": emailCliente, "status": "active", "classroom_ids": [MK_CLASSROOM_ID] };
-            try { await axios.post(`https://${MK_API_URL}`, mkPayload, { headers: { "Content-Type": "application/json", "Accept": "application/json" } }); console.log(`✅ MK: Matrícula Ativa.`); } catch (err) {}
+            try { await axios.post(`https://${MK_API_URL}`, mkPayload, { headers: { "Content-Type": "application/json", "Accept": "application/json" } }); } catch (err) {}
             
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{ event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website", user_data: { em: [hashData(emailCliente)] }, custom_data: { value: Number(transaction.amount), currency: "BRL" } }],
@@ -158,4 +158,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Monitoramento Ativo (Fixo 49% | Thifany 25%)"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Pronto: Rodrigo = Sócio (Líquido)"));
