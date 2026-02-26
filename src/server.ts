@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // =====================================================
-// 🔑 CONFIGURAÇÕES (MANTIDAS 100%)
+// 🔑 CONFIGURAÇÕES (INTOCADAS)
 // =====================================================
 const MK_API_URL = "memberkit.com.br/api/v1/users"; 
 const MK_CLASSROOM_ID = 275575; 
@@ -49,7 +49,7 @@ app.use(express.static(path.join(__dirname, '..')));
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, '..', 'index.html')); });
 
 // -----------------------------------------------------
-// 🚀 ROTA PIX: COM SPLIT CONDICIONAL (JOÃO & THIFANY)
+// 🚀 ROTA PIX: AJUSTE DE MARGEM E SPLIT
 // -----------------------------------------------------
 app.post('/pix', async (req, res) => {
     try {
@@ -59,34 +59,33 @@ app.post('/pix', async (req, res) => {
         const identifier = `${influNome}_ID${Date.now()}`;
         const valorNumerico = parseFloat(valor) || 27.90;
 
-        // ⚖️ LOGICA DE DIVISÃO SELETIVA
         let splitsCalculados = [];
 
-        // SE A ORIGEM FOR THIFANY -> João entra no Split
+        // ⚖️ CASO 1: THIFANY (MANTIDO EXATAMENTE COMO ESTAVA)
+        // João 50% | Sócio Fixo 25% | Você (Master) 25%
         if (influNome === "THIFANY") {
             splitsCalculados = [
                 { 
-                    // 50% para o João
-                    producerId: "cmlpor0xz061z1rpd1tkhqqip", 
+                    producerId: "cmlpor0xz061z1rpd1tkhqqip", // João
                     amount: parseFloat((valorNumerico * 0.50).toFixed(2)) 
                 },
                 { 
-                    // 25% para o seu sócio fixo
-                    producerId: "cmg7bvpns00u691tsx9g6vlyp", 
+                    producerId: "cmg7bvpns00u691tsx9g6vlyp", // Sócio Fixo
                     amount: parseFloat((valorNumerico * 0.25).toFixed(2)) 
                 }
-                // Seus 25% ficam retidos na conta Master
             ];
         } 
-        // QUALQUER OUTRA ORIGEM (GABI, RENATA, DIRETO, ETC)
+        // ⚖️ CASO 2: DEMAIS VENDAS (Sócio 49% | João R$ 1,50 | Você Master)
         else {
             splitsCalculados = [
                 { 
-                    // 50% para o seu sócio fixo
-                    producerId: "cmg7bvpns00u691tsx9g6vlyp", 
-                    amount: parseFloat((valorNumerico * 0.50).toFixed(2)) 
+                    producerId: "cmg7bvpns00u691tsx9g6vlyp", // Sócio Fixo (49%)
+                    amount: parseFloat((valorNumerico * 0.49).toFixed(2)) 
+                },
+                {
+                    producerId: "cmm0oxulc05b91yt491oo6yml", // João/Novo Rapaz (R$ 1,50)
+                    amount: 1.50
                 }
-                // Seus 50% ficam retidos na conta Master
             ];
         }
 
@@ -110,7 +109,7 @@ app.post('/pix', async (req, res) => {
         });
 
         const pixCopiaECola = acharCopiaECola(response.data);
-        console.log(`✅ PIX GERADO: ${identifier}`);
+        console.log(`✅ PIX GERADO: ${identifier} | VALOR: R$ ${valorNumerico.toFixed(2)}`);
         
         return res.json({ success: true, payload: pixCopiaECola, transactionId: identifier });
     } catch (error: any) { 
@@ -130,13 +129,17 @@ app.post('/webhook', async (req, res) => {
         const emailCliente = transaction.client?.email || memoria.emailCliente;
         const influ = memoria.origem || idBusca.split('_ID')[0] || "DIRETO";
 
+        const valorPago = transaction.amount 
+            ? Number(transaction.amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) 
+            : "R$ 0,00";
+
         if (emailCliente) {
             bancoTransacoes.set(idBusca, { ...memoria, status: 'paid' });
-            console.log(`💰 VENDA APROVADA! | ORIGEM: ${influ.toUpperCase()} | CLIENTE: ${maskLog(emailCliente)}`);
 
-            // MemberKit, Meta Pixel e Pushcuts mantidos...
+            console.log(`💰 VENDA APROVADA! | ${valorPago} | ORIGEM: ${influ.toUpperCase()} | CLIENTE: ${maskLog(emailCliente)}`);
+
             const mkPayload = { "api_key": MK_KEY, "full_name": transaction.client?.name || "Cliente", "email": emailCliente, "status": "active", "classroom_ids": [MK_CLASSROOM_ID] };
-            try { await axios.post(`https://${MK_API_URL}`, mkPayload, { headers: { "Content-Type": "application/json", "Accept": "application/json" } }); } catch (err) {}
+            try { await axios.post(`https://${MK_API_URL}`, mkPayload, { headers: { "Content-Type": "application/json", "Accept": "application/json" } }); console.log(`✅ MK: Matrícula Ativa.`); } catch (err) {}
             
             axios.post(`https://graph.facebook.com/v18.0/${META_PIXEL_ID}/events`, {
                 data: [{ event_name: "Purchase", event_time: Math.floor(Date.now() / 1000), action_source: "website", user_data: { em: [hashData(emailCliente)] }, custom_data: { value: Number(transaction.amount), currency: "BRL" } }],
@@ -155,4 +158,4 @@ app.get('/check-status/:id', (req, res) => {
     return res.json({ paid: transacao && transacao.status === 'paid' });
 });
 
-app.listen(process.env.PORT || 3000, () => console.log("🚀 Sistema Blindado com Split Condicional Ativo!"));
+app.listen(process.env.PORT || 3000, () => console.log("🚀 Monitoramento Ativo (Fixo 49% | Thifany 25%)"));
